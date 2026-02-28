@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   FileText, Shield, Users, Briefcase, Building2, ArrowLeftRight,
-  Heart, Scale, ChevronRight, Home
+  Heart, Scale, ChevronRight
 } from "lucide-react";
 
 const practices = [
@@ -81,15 +81,6 @@ const practices = [
     description:
       "From asset purchase agreements to full business acquisitions, we provide experienced legal counsel for buyers and sellers navigating complex commercial transactions in Virginia and Maryland.",
     items: ["Asset Purchase Agreements", "Stock Purchase Agreements", "Business Acquisitions", "Due Diligence", "Closing Documentation"],
-  },
-  {
-    id: "real-estate",
-    icon: Home,
-    title: "Real Estate Transactions",
-    subtitle: "6,000+ Closings — Commercial & Residential",
-    description:
-      "With over 6,000 commercial and residential real estate transactions personally overseen, Kelly Satterwhite brings unparalleled transactional depth to buyers, sellers, agents, and lenders throughout Virginia and Maryland.",
-    items: ["Purchase & Sale Agreements", "Residential Closings", "Commercial Closings", "Title & Lien Resolution", "Deed Preparation & Recordation"],
   },
 ];
 

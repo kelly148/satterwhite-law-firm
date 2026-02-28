@@ -12,7 +12,6 @@ import ValueBanner from "@/components/ValueBanner";
 import AboutSection from "@/components/AboutSection";
 import PracticeAreasSection from "@/components/PracticeAreasSection";
 import WhyUsSection from "@/components/WhyUsSection";
-import RealEstateSection from "@/components/RealEstateSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import ResourcesSection from "@/components/ResourcesSection";
 import ContactSection from "@/components/ContactSection";
@@ -62,10 +61,7 @@ const schemaMarkup = {
     "Business Entity Formation",
     "1031 Exchange Qualified Intermediary",
     "Asset Protection",
-    "Mergers and Acquisitions",
-    "Real Estate Transactions",
-    "Commercial Real Estate Closings",
-    "Residential Real Estate Closings"
+    "Mergers and Acquisitions"
   ],
   "openingHoursSpecification": [
     {
@@ -136,7 +132,6 @@ export default function Home() {
         <ValueBanner />
         <AboutSection />
         <PracticeAreasSection />
-        <RealEstateSection />
         <WhyUsSection />
         <TestimonialsSection />
         <ResourcesSection />

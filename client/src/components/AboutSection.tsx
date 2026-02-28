@@ -1,10 +1,10 @@
 /*
  * AboutSection — The Satterwhite Law Firm, PLLC
  * Design: Asymmetric split — large image left, rich bio text right
- * Highlights military service, LSU, bar admissions, title company + 6,000+ real estate transactions
+ * Highlights military service, LSU, bar admissions, title company experience
  */
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle, Award, Scale, Music, Home, Briefcase } from "lucide-react";
+import { CheckCircle, Award, Scale, Music, Briefcase } from "lucide-react";
 
 const CONSULTATION_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/hero_main-LbNqbwr7wmQp2yqwZ8wV7f.webp";
 
@@ -12,9 +12,8 @@ const credentials = [
   { icon: Scale, text: "Licensed in Virginia (2016) & Maryland" },
   { icon: Award, text: "20 Years, United States Army Band — Principal Horn" },
   { icon: Music, text: "B.A. French Horn Performance, Louisiana State University (2003)" },
-  { icon: Home, text: "6,000+ Real Estate Transactions — Commercial & Residential" },
   { icon: Briefcase, text: "Managed Three Highly Successful Title Company Offices" },
-  { icon: CheckCircle, text: "Extensive Experience with Agents, Buyers, Sellers & Lenders" },
+  { icon: CheckCircle, text: "Extensive Business & Transactional Experience in the DMV" },
 ];
 
 export default function AboutSection() {
@@ -50,10 +49,10 @@ export default function AboutSection() {
                 className="absolute -bottom-5 -right-5 w-full h-full border-2 border-[#C9A84C] -z-10"
                 style={{ maxWidth: "calc(100% - 20px)", maxHeight: "calc(100% - 20px)" }}
               />
-              {/* Stat badges */}
+              {/* Stat badge */}
               <div className="absolute -bottom-6 left-8 bg-[#1D2B5F] text-white px-6 py-4 shadow-xl">
-                <p className="text-3xl font-bold text-[#C9A84C]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>6,000+</p>
-                <p className="text-xs tracking-widest uppercase text-white/70 mt-0.5">Real Estate Transactions</p>
+                <p className="text-3xl font-bold text-[#C9A84C]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>9+</p>
+                <p className="text-xs tracking-widest uppercase text-white/70 mt-0.5">Years in Practice</p>
               </div>
             </div>
           </div>
@@ -67,41 +66,37 @@ export default function AboutSection() {
               className="text-[#1D2B5F] mb-6"
               style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem, 3.5vw, 3rem)", fontWeight: 600 }}
             >
-              A Unique Path to the Law — Built on Service, Precision, and Real-World Experience
+              A Unique Path to the Law — Built on Service, Precision, and Trust
             </h2>
             <div className="gold-divider mb-8" />
 
             <div className="space-y-5 text-[#3a3a3a] leading-relaxed" style={{ fontFamily: "'Lato', sans-serif", fontSize: "1rem" }}>
               <p>
                 Kelly Satterwhite founded The Satterwhite Law Firm, PLLC after a remarkable career spanning
-                the concert stage, the military, and the real estate industry. A native of Baytown, Texas,
+                the concert stage, the military, and the business world. A native of Baytown, Texas,
                 Kelly earned a degree in French Horn Performance from Louisiana State University in 2003
                 before dedicating twenty years to the United States Army Band — eight of them as its
                 Principal Horn.
               </p>
               <p>
-                After being admitted to the Virginia Bar in 2016, Kelly brought to his legal practice
-                something few attorneys possess: deep, hands-on expertise in real estate transactions.
-                Having personally overseen <strong>more than 6,000 commercial and residential real estate
-                closings</strong> while managing three highly successful title company offices, Kelly
-                understands the full lifecycle of a real estate transaction from every angle — as counsel
-                to buyers, sellers, agents, and lenders alike.
+                That career instilled a discipline, precision, and commitment to excellence that now defines
+                every client engagement at this firm. After being admitted to the Virginia Bar in 2016, Kelly
+                has spent nearly a decade helping families and individuals throughout the DMV protect what
+                matters most: their assets, their businesses, and their legacies.
               </p>
               <p>
-                That experience translates directly into superior legal service for clients navigating
-                estate planning with real property, business succession involving real assets, 1031
-                like-kind exchanges, and complex commercial transactions. When your estate or business
-                involves real estate — and in the DMV, it almost always does — Kelly brings a depth of
-                practical knowledge that sets this firm apart.
+                Kelly also brings rare real-world business acumen to the practice, having successfully managed
+                three offices for a major regional title company — experience that directly informs the firm's
+                business succession, entity formation, and transactional practice areas.
               </p>
             </div>
 
             {/* Credentials */}
-            <div className="mt-8 grid sm:grid-cols-2 gap-3">
+            <div className="mt-8 space-y-3">
               {credentials.map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-start gap-3">
-                  <Icon size={16} className="text-[#C9A84C] mt-0.5 flex-shrink-0" />
-                  <span className="text-[#3a3a3a] text-sm leading-snug" style={{ fontFamily: "'Lato', sans-serif" }}>{text}</span>
+                  <Icon size={18} className="text-[#C9A84C] mt-0.5 flex-shrink-0" />
+                  <span className="text-[#3a3a3a] text-sm" style={{ fontFamily: "'Lato', sans-serif" }}>{text}</span>
                 </div>
               ))}
             </div>

@@ -20,7 +20,6 @@ const navLinks = [
       { label: "Business Succession", href: "#business-succession" },
       { label: "Business Formation", href: "#business-formation" },
       { label: "1031 Exchanges", href: "#1031-exchanges" },
-      { label: "Real Estate Transactions", href: "#real-estate" },
     ],
   },
   { label: "About", href: "#about" },

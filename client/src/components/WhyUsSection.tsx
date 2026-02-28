@@ -93,7 +93,7 @@ export default function WhyUsSection() {
             alt="Family legacy planning with The Satterwhite Law Firm"
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-[#1D2B5F]/80" />
+          <div className="absolute inset-0 bg-[#2c5282]/80" />
           <div className="relative z-10 p-12 lg:p-16 flex flex-col justify-center h-full">
             <p className="section-eyebrow mb-4">Why Choose Us</p>
             <h2
@@ -118,7 +118,7 @@ export default function WhyUsSection() {
                 { val: "20", label: "Years Military Service" },
               ].map(({ val, label }) => (
                 <div key={label} className="text-center">
-                  <p className="text-[#C9A84C] font-bold" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2rem" }}>{val}</p>
+                  <p className="text-[#90cdf4] font-bold" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2rem" }}>{val}</p>
                   <p className="text-white/60 text-xs tracking-wide mt-1" style={{ fontFamily: "'Lato', sans-serif" }}>{label}</p>
                 </div>
               ))}
@@ -127,7 +127,7 @@ export default function WhyUsSection() {
         </div>
 
         {/* Right: Differentiators grid */}
-        <div className="bg-[#FAFAF8] p-12 lg:p-16">
+        <div className="bg-[#ebf4ff] p-12 lg:p-16">
           <div className="grid sm:grid-cols-2 gap-8">
             {differentiators.map(({ icon: Icon, title, desc }, i) => (
               <div
@@ -136,9 +136,9 @@ export default function WhyUsSection() {
                 style={{ transitionDelay: `${i * 80}ms` }}
               >
                 <div className="flex items-start gap-3 mb-2">
-                  <Icon size={18} className="text-[#C9A84C] mt-0.5 flex-shrink-0" />
+                  <Icon size={18} className="text-[#90cdf4] mt-0.5 flex-shrink-0" />
                   <h3
-                    className="text-[#1D2B5F]"
+                    className="text-[#2c5282]"
                     style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.15rem", fontWeight: 600 }}
                   >
                     {title}
@@ -159,7 +159,7 @@ export default function WhyUsSection() {
           <div className="text-center mb-16">
             <p className="section-eyebrow mb-4">How We Work</p>
             <h2
-              className="text-[#1D2B5F]"
+              className="text-[#2c5282]"
               style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem, 3.5vw, 3rem)", fontWeight: 600 }}
             >
               Our Process
@@ -169,7 +169,7 @@ export default function WhyUsSection() {
 
           <div className="grid md:grid-cols-5 gap-0 relative">
             {/* Connector line */}
-            <div className="hidden md:block absolute top-10 left-[10%] right-[10%] h-px bg-[#e8e4dc]" />
+            <div className="hidden md:block absolute top-10 left-[10%] right-[10%] h-px bg-[#bee3f8]" />
 
             {processSteps.map((step, i) => (
               <div
@@ -178,21 +178,21 @@ export default function WhyUsSection() {
                 style={{ transitionDelay: `${i * 100}ms` }}
               >
                 {/* Number circle */}
-                <div className="w-20 h-20 rounded-full bg-[#1D2B5F] flex items-center justify-center mx-auto mb-6 relative z-10 shadow-lg">
+                <div className="w-20 h-20 rounded-full bg-[#2c5282] flex items-center justify-center mx-auto mb-6 relative z-10 shadow-lg">
                   <span
-                    className="text-[#C9A84C] font-bold"
+                    className="text-[#90cdf4] font-bold"
                     style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.5rem" }}
                   >
                     {step.num}
                   </span>
                 </div>
                 <h3
-                  className="text-[#1D2B5F] mb-3"
+                  className="text-[#2c5282] mb-3"
                   style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", fontWeight: 600 }}
                 >
                   {step.title}
                 </h3>
-                <p className="text-[#666] text-sm leading-relaxed" style={{ fontFamily: "'Lato', sans-serif" }}>
+                <p className="text-[#4a6fa5] text-sm leading-relaxed" style={{ fontFamily: "'Lato', sans-serif" }}>
                   {step.desc}
                 </p>
               </div>

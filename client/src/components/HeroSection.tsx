@@ -36,7 +36,7 @@ export default function HeroSection() {
         style={{ backgroundImage: `url(${HERO_BG})` }}
       />
       {/* Dark overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0d1833]/85 via-[#1D2B5F]/80 to-[#0d1833]/90" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#14284a]/85 via-[#2c5282]/80 to-[#14284a]/90" />
 
       {/* Subtle texture overlay */}
       <div
@@ -53,9 +53,9 @@ export default function HeroSection() {
         >
           {/* Eyebrow */}
           <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="h-px w-12 bg-[#C9A84C]" />
+            <div className="h-px w-12 bg-[#90cdf4]" />
             <p className="section-eyebrow">Alexandria, Virginia · Serving VA & MD</p>
-            <div className="h-px w-12 bg-[#C9A84C]" />
+            <div className="h-px w-12 bg-[#90cdf4]" />
           </div>
 
           {/* Main headline */}
@@ -71,7 +71,7 @@ export default function HeroSection() {
           >
             Protecting Your Legacy.
             <br />
-            <span className="text-[#C9A84C] italic">Securing Your Family's Future.</span>
+            <span className="text-[#90cdf4] italic">Securing Your Family's Future.</span>
           </h1>
 
           {/* Subheadline */}
@@ -93,7 +93,7 @@ export default function HeroSection() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
               onClick={() => scrollTo("#contact")}
-              className="btn-gold text-sm px-8 py-4 shadow-lg shadow-[#C9A84C]/20"
+              className="btn-gold text-sm px-8 py-4 shadow-lg shadow-[#90cdf4]/20"
             >
               Schedule a Free Consultation
               <ArrowRight size={16} />
@@ -115,7 +115,7 @@ export default function HeroSection() {
               "Free Initial Consultation",
             ].map((item) => (
               <div key={item} className="flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-[#C9A84C]" />
+                <div className="w-1 h-1 rounded-full bg-[#90cdf4]" />
                 {item}
               </div>
             ))}
@@ -125,7 +125,7 @@ export default function HeroSection() {
 
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/40 text-xs tracking-widest uppercase">
-        <div className="w-px h-10 bg-gradient-to-b from-transparent to-[#C9A84C] animate-pulse" />
+        <div className="w-px h-10 bg-gradient-to-b from-transparent to-[#90cdf4] animate-pulse" />
         <span>Scroll</span>
       </div>
     </section>

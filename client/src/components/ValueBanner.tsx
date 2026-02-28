@@ -30,21 +30,21 @@ const values = [
 
 export default function ValueBanner() {
   return (
-    <section className="bg-white border-y border-[#e8e4dc] py-0">
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#e8e4dc]">
+    <section className="bg-white border-y border-[#bee3f8] py-0">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#bee3f8]">
         {values.map(({ icon: Icon, title, desc }) => (
-          <div key={title} className="flex items-start gap-4 p-8 lg:p-10 hover:bg-[#FAFAF8] transition-colors">
-            <div className="w-10 h-10 bg-[#1D2B5F] flex items-center justify-center flex-shrink-0">
-              <Icon size={18} className="text-[#C9A84C]" />
+          <div key={title} className="flex items-start gap-4 p-8 lg:p-10 hover:bg-[#ebf4ff] transition-colors">
+            <div className="w-10 h-10 bg-[#2c5282] flex items-center justify-center flex-shrink-0">
+              <Icon size={18} className="text-white" />
             </div>
             <div>
               <h3
-                className="text-[#1D2B5F] mb-1"
+                className="text-[#2c5282] mb-1"
                 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", fontWeight: 600 }}
               >
                 {title}
               </h3>
-              <p className="text-[#666] text-sm leading-relaxed" style={{ fontFamily: "'Lato', sans-serif" }}>
+              <p className="text-[#4a6fa5] text-sm leading-relaxed" style={{ fontFamily: "'Lato', sans-serif" }}>
                 {desc}
               </p>
             </div>

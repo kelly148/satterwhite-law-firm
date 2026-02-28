@@ -55,8 +55,8 @@ export default function Navigation() {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-400 ${
           scrolled
-            ? "bg-[#1D2B5F] shadow-lg shadow-navy/20"
-            : "bg-[#1D2B5F]/95 backdrop-blur-sm"
+            ? "bg-[#2c5282] shadow-lg shadow-blue-700/20"
+            : "bg-[#2c5282]/95 backdrop-blur-sm"
         }`}
         style={{ fontFamily: "'Lato', sans-serif" }}
       >
@@ -68,7 +68,7 @@ export default function Navigation() {
             </p>
             <a
               href="tel:7038557380"
-              className="flex items-center gap-1.5 text-[#C9A84C] text-xs font-bold tracking-wide hover:text-white transition-colors"
+              className="flex items-center gap-1.5 text-[#90cdf4] text-xs font-bold tracking-wide hover:text-white transition-colors"
             >
               <Phone size={11} />
               (703) 855-7380
@@ -101,17 +101,17 @@ export default function Navigation() {
                   onMouseEnter={() => setOpenDropdown(link.label)}
                   onMouseLeave={() => setOpenDropdown(null)}
                 >
-                  <button className="flex items-center gap-1 px-3 py-2 text-white/85 hover:text-[#C9A84C] text-sm font-medium tracking-wide transition-colors">
+                  <button className="flex items-center gap-1 px-3 py-2 text-white/85 hover:text-[#90cdf4] text-sm font-medium tracking-wide transition-colors">
                     {link.label}
                     <ChevronDown size={13} className={`transition-transform ${openDropdown === link.label ? "rotate-180" : ""}`} />
                   </button>
                   {openDropdown === link.label && (
-                    <div className="absolute top-full left-0 bg-white shadow-xl border-t-2 border-[#C9A84C] min-w-[220px] py-2 z-50">
+                    <div className="absolute top-full left-0 bg-white shadow-xl border-t-2 border-[#2c5282] min-w-[220px] py-2 z-50">
                       {link.children.map((child) => (
                         <button
                           key={child.label}
                           onClick={() => handleNavClick(child.href)}
-                          className="block w-full text-left px-5 py-2.5 text-sm text-[#1D2B5F] hover:bg-[#f5f3ef] hover:text-[#C9A84C] transition-colors font-medium"
+                          className="block w-full text-left px-5 py-2.5 text-sm text-[#2c5282] hover:bg-[#ebf4ff] hover:text-[#1a365d] transition-colors font-medium"
                         >
                           {child.label}
                         </button>
@@ -123,7 +123,7 @@ export default function Navigation() {
                 <button
                   key={link.label}
                   onClick={() => handleNavClick(link.href)}
-                  className="px-3 py-2 text-white/85 hover:text-[#C9A84C] text-sm font-medium tracking-wide transition-colors"
+                  className="px-3 py-2 text-white/85 hover:text-[#90cdf4] text-sm font-medium tracking-wide transition-colors"
                 >
                   {link.label}
                 </button>
@@ -154,7 +154,7 @@ export default function Navigation() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 bg-[#1D2B5F] pt-[110px] overflow-y-auto">
+        <div className="fixed inset-0 z-40 bg-[#2c5282] pt-[110px] overflow-y-auto">
           <div className="container py-6 flex flex-col gap-1">
             {navLinks.map((link) => (
               <div key={link.label}>

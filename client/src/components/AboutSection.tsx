@@ -30,7 +30,7 @@ export default function AboutSection() {
   }, []);
 
   return (
-    <section id="about" className="py-24 bg-[#FAFAF8]" ref={ref}>
+    <section id="about" className="py-24 bg-[#ebf4ff]" ref={ref}>
       <div className="container">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Image column */}
@@ -46,12 +46,12 @@ export default function AboutSection() {
               />
               {/* Gold accent frame */}
               <div
-                className="absolute -bottom-5 -right-5 w-full h-full border-2 border-[#C9A84C] -z-10"
+                className="absolute -bottom-5 -right-5 w-full h-full border-2 border-[#2c5282] -z-10"
                 style={{ maxWidth: "calc(100% - 20px)", maxHeight: "calc(100% - 20px)" }}
               />
               {/* Stat badge */}
-              <div className="absolute -bottom-6 left-8 bg-[#1D2B5F] text-white px-6 py-4 shadow-xl">
-                <p className="text-3xl font-bold text-[#C9A84C]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>9+</p>
+              <div className="absolute -bottom-6 left-8 bg-[#2c5282] text-white px-6 py-4 shadow-xl">
+                <p className="text-3xl font-bold text-white" style={{ fontFamily: "'Cormorant Garamond', serif" }}>9+</p>
                 <p className="text-xs tracking-widest uppercase text-white/70 mt-0.5">Years in Practice</p>
               </div>
             </div>
@@ -63,14 +63,14 @@ export default function AboutSection() {
           >
             <p className="section-eyebrow mb-4">About Kelly Satterwhite</p>
             <h2
-              className="text-[#1D2B5F] mb-6"
+              className="text-[#2c5282] mb-6"
               style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem, 3.5vw, 3rem)", fontWeight: 600 }}
             >
               A Unique Path to the Law — Built on Service, Precision, and Trust
             </h2>
             <div className="gold-divider mb-8" />
 
-            <div className="space-y-5 text-[#3a3a3a] leading-relaxed" style={{ fontFamily: "'Lato', sans-serif", fontSize: "1rem" }}>
+            <div className="space-y-5 text-[#1a365d] leading-relaxed" style={{ fontFamily: "'Lato', sans-serif", fontSize: "1rem" }}>
               <p>
                 Kelly Satterwhite founded The Satterwhite Law Firm, PLLC after a remarkable career spanning
                 the concert stage, the military, and the business world. A native of Baytown, Texas,
@@ -95,8 +95,8 @@ export default function AboutSection() {
             <div className="mt-8 space-y-3">
               {credentials.map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-start gap-3">
-                  <Icon size={18} className="text-[#C9A84C] mt-0.5 flex-shrink-0" />
-                  <span className="text-[#3a3a3a] text-sm" style={{ fontFamily: "'Lato', sans-serif" }}>{text}</span>
+                  <Icon size={18} className="text-[#2c5282] mt-0.5 flex-shrink-0" />
+                  <span className="text-[#1a365d] text-sm" style={{ fontFamily: "'Lato', sans-serif" }}>{text}</span>
                 </div>
               ))}
             </div>
@@ -117,7 +117,7 @@ export default function AboutSection() {
                   if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: "smooth" });
                 }}
                 className="btn-outline-white text-xs"
-                style={{ borderColor: "#1D2B5F", color: "#1D2B5F" }}
+                style={{ borderColor: "#2c5282", color: "#2c5282" }}
               >
                 Our Practice Areas
               </button>

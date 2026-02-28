@@ -89,20 +89,20 @@ export default function RealEstateSection() {
   return (
     <section id="real-estate" ref={ref}>
       {/* Hero banner */}
-      <div className="relative bg-[#1D2B5F] overflow-hidden">
+      <div className="relative bg-[#2c5282] overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-15"
           style={{ backgroundImage: `url(${REAL_ESTATE_IMG})` }}
         />
         <div className="relative container py-20">
           <div className="max-w-3xl">
-            <p className="section-eyebrow mb-4" style={{ color: "#C9A84C" }}>Real Estate Legal Services</p>
+            <p className="section-eyebrow mb-4" style={{ color: "#90cdf4" }}>Real Estate Legal Services</p>
             <h2
               className="text-white mb-6"
               style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem, 4vw, 3.2rem)", fontWeight: 600, lineHeight: 1.2 }}
             >
               Over 6,000 Transactions.<br />
-              <span style={{ color: "#C9A84C" }}>Unmatched Real Estate Expertise.</span>
+              <span style={{ color: "#90cdf4" }}>Unmatched Real Estate Expertise.</span>
             </h2>
             <div className="gold-divider mb-8" />
             <p className="text-white/75 leading-relaxed max-w-2xl" style={{ fontFamily: "'Lato', sans-serif", fontSize: "1.05rem" }}>
@@ -123,7 +123,7 @@ export default function RealEstateSection() {
                 style={{ transitionDelay: `${i * 100}ms`, background: "rgba(255,255,255,0.05)" }}
               >
                 <p
-                  className="text-[#C9A84C] font-bold mb-1"
+                  className="text-[#90cdf4] font-bold mb-1"
                   style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2rem" }}
                 >
                   {number}
@@ -138,12 +138,12 @@ export default function RealEstateSection() {
       </div>
 
       {/* Services tabs */}
-      <div className="bg-[#FAFAF8] py-20">
+      <div className="bg-[#ebf4ff] py-20">
         <div className="container">
           <div className="text-center mb-12">
             <p className="section-eyebrow mb-3">What We Handle</p>
             <h3
-              className="text-[#1D2B5F]"
+              className="text-[#2c5282]"
               style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(1.8rem, 3vw, 2.5rem)", fontWeight: 600 }}
             >
               Comprehensive Real Estate Legal Services
@@ -158,8 +158,8 @@ export default function RealEstateSection() {
                 onClick={() => setActiveService(i)}
                 className={`flex items-center gap-2 px-5 py-3 text-sm font-bold tracking-wide transition-all ${
                   activeService === i
-                    ? "bg-[#1D2B5F] text-white"
-                    : "bg-white border border-[#e8e4dc] text-[#1D2B5F] hover:border-[#C9A84C]"
+                    ? "bg-[#2c5282] text-white"
+                    : "bg-white border border-[#bee3f8] text-[#2c5282] hover:border-[#90cdf4]"
                 }`}
                 style={{ fontFamily: "'Lato', sans-serif" }}
               >
@@ -180,11 +180,11 @@ export default function RealEstateSection() {
                 return (
                   <>
                     <div className="flex items-center gap-4 mb-6">
-                      <div className="w-12 h-12 bg-[#1D2B5F] flex items-center justify-center flex-shrink-0">
-                        <Icon size={22} className="text-[#C9A84C]" />
+                      <div className="w-12 h-12 bg-[#2c5282] flex items-center justify-center flex-shrink-0">
+                        <Icon size={22} className="text-[#90cdf4]" />
                       </div>
                       <h4
-                        className="text-[#1D2B5F]"
+                        className="text-[#2c5282]"
                         style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.5rem", fontWeight: 600 }}
                       >
                         {title}
@@ -193,7 +193,7 @@ export default function RealEstateSection() {
                     <div className="space-y-3">
                       {items.map((item) => (
                         <div key={item} className="flex items-start gap-3">
-                          <CheckCircle size={16} className="text-[#C9A84C] mt-0.5 flex-shrink-0" />
+                          <CheckCircle size={16} className="text-[#90cdf4] mt-0.5 flex-shrink-0" />
                           <span className="text-[#555] text-sm leading-relaxed" style={{ fontFamily: "'Lato', sans-serif" }}>
                             {item}
                           </span>
@@ -213,9 +213,9 @@ export default function RealEstateSection() {
             </div>
 
             {/* Right: differentiator callout */}
-            <div className="bg-[#1D2B5F] p-10">
+            <div className="bg-[#2c5282] p-10">
               <p
-                className="text-[#C9A84C] font-bold mb-4 text-xs tracking-widest uppercase"
+                className="text-[#90cdf4] font-bold mb-4 text-xs tracking-widest uppercase"
                 style={{ fontFamily: "'Lato', sans-serif" }}
               >
                 Why This Matters to You
@@ -245,7 +245,7 @@ export default function RealEstateSection() {
                   "In the DMV, real estate and estate planning are inseparable. I help clients protect
                   both their property and their legacy — with the experience to back it up."
                 </p>
-                <p className="text-[#C9A84C] text-xs font-bold tracking-widest uppercase mt-3" style={{ fontFamily: "'Lato', sans-serif" }}>
+                <p className="text-[#90cdf4] text-xs font-bold tracking-widest uppercase mt-3" style={{ fontFamily: "'Lato', sans-serif" }}>
                   — Kelly Satterwhite, Attorney at Law
                 </p>
               </div>

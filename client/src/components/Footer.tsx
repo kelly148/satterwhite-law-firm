@@ -36,9 +36,9 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-[#0d1833] text-white">
+    <footer className="bg-[#14284a] text-white">
       {/* CTA band */}
-      <div className="bg-[#C9A84C] py-8">
+      <div className="bg-[#2c5282] py-8">
         <div className="container flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <p
@@ -54,7 +54,7 @@ export default function Footer() {
           <div className="flex gap-3">
             <a
               href="tel:7038557380"
-              className="bg-white text-[#C9A84C] px-6 py-3 font-bold text-sm tracking-widest uppercase hover:bg-[#1D2B5F] hover:text-white transition-colors flex items-center gap-2"
+              className="bg-white text-[#2c5282] px-6 py-3 font-bold text-sm tracking-widest uppercase hover:bg-[#ebf4ff] transition-colors flex items-center gap-2"
               style={{ fontFamily: "'Lato', sans-serif" }}
             >
               <Phone size={15} />
@@ -62,7 +62,7 @@ export default function Footer() {
             </a>
             <button
               onClick={() => scrollTo("#contact")}
-              className="bg-[#1D2B5F] text-white px-6 py-3 font-bold text-sm tracking-widest uppercase hover:bg-[#0d1833] transition-colors"
+              className="bg-[#2c5282] text-white px-6 py-3 font-bold text-sm tracking-widest uppercase hover:bg-[#14284a] transition-colors"
               style={{ fontFamily: "'Lato', sans-serif" }}
             >
               Contact Us
@@ -87,22 +87,22 @@ export default function Footer() {
               for families and individuals throughout Virginia and Maryland.
             </p>
             <div className="space-y-3">
-              <a href="tel:7038557380" className="flex items-center gap-2 text-white/60 hover:text-[#C9A84C] transition-colors text-sm" style={{ fontFamily: "'Lato', sans-serif" }}>
-                <Phone size={14} className="text-[#C9A84C]" />
+              <a href="tel:7038557380" className="flex items-center gap-2 text-white/60 hover:text-[#90cdf4] transition-colors text-sm" style={{ fontFamily: "'Lato', sans-serif" }}>
+                <Phone size={14} className="text-[#90cdf4]" />
                 (703) 855-7380
               </a>
-              <a href="mailto:kelly@thesatterwhitelawfirm.com" className="flex items-center gap-2 text-white/60 hover:text-[#C9A84C] transition-colors text-sm break-all" style={{ fontFamily: "'Lato', sans-serif" }}>
-                <Mail size={14} className="text-[#C9A84C] flex-shrink-0" />
+              <a href="mailto:kelly@thesatterwhitelawfirm.com" className="flex items-center gap-2 text-white/60 hover:text-[#90cdf4] transition-colors text-sm break-all" style={{ fontFamily: "'Lato', sans-serif" }}>
+                <Mail size={14} className="text-[#90cdf4] flex-shrink-0" />
                 kelly@thesatterwhitelawfirm.com
               </a>
               <a
                 href="https://maps.google.com/?q=1605+Fort+Hunt+Court+Alexandria+Virginia+22307"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-start gap-2 text-white/60 hover:text-[#C9A84C] transition-colors text-sm"
+                className="flex items-start gap-2 text-white/60 hover:text-[#90cdf4] transition-colors text-sm"
                 style={{ fontFamily: "'Lato', sans-serif" }}
               >
-                <MapPin size={14} className="text-[#C9A84C] flex-shrink-0 mt-0.5" />
+                <MapPin size={14} className="text-[#90cdf4] flex-shrink-0 mt-0.5" />
                 1605 Fort Hunt Court<br />Alexandria, VA 22307
               </a>
             </div>
@@ -121,7 +121,7 @@ export default function Footer() {
                 <li key={label}>
                   <button
                     onClick={() => scrollTo(href)}
-                    className="text-white/60 hover:text-[#C9A84C] transition-colors text-sm text-left"
+                    className="text-white/60 hover:text-[#90cdf4] transition-colors text-sm text-left"
                     style={{ fontFamily: "'Lato', sans-serif" }}
                   >
                     {label}
@@ -144,7 +144,7 @@ export default function Footer() {
                 <li key={label}>
                   <button
                     onClick={() => scrollTo(href)}
-                    className="text-white/60 hover:text-[#C9A84C] transition-colors text-sm text-left"
+                    className="text-white/60 hover:text-[#90cdf4] transition-colors text-sm text-left"
                     style={{ fontFamily: "'Lato', sans-serif" }}
                   >
                     {label}

@@ -87,7 +87,7 @@ export default function TestimonialsSection() {
         <div className="text-center mb-16">
           <p className="section-eyebrow mb-4">Client Stories</p>
           <h2
-            className="text-[#1D2B5F]"
+            className="text-[#2c5282]"
             style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem, 3.5vw, 3rem)", fontWeight: 600 }}
           >
             What Our Clients Say
@@ -100,12 +100,12 @@ export default function TestimonialsSection() {
           <div
             className={`testimonial-card transition-opacity duration-300 ${animating ? "opacity-0" : "opacity-100"}`}
           >
-            <Quote size={40} className="text-[#C9A84C]/30 mb-4" />
+            <Quote size={40} className="text-[#2c5282]/20 mb-4" />
 
             {/* Stars */}
             <div className="flex gap-1 mb-6">
               {Array.from({ length: t.stars }).map((_, i) => (
-                <Star key={i} size={16} className="text-[#C9A84C] fill-[#C9A84C]" />
+                <Star key={i} size={16} className="text-[#2c5282] fill-[#2c5282]" />
               ))}
             </div>
 
@@ -118,7 +118,7 @@ export default function TestimonialsSection() {
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-bold text-[#1D2B5F]" style={{ fontFamily: "'Lato', sans-serif" }}>{t.author}</p>
+                <p className="font-bold text-[#2c5282]" style={{ fontFamily: "'Lato', sans-serif" }}>{t.author}</p>
                 <p className="text-[#888] text-sm" style={{ fontFamily: "'Lato', sans-serif" }}>{t.location}</p>
               </div>
 
@@ -126,7 +126,7 @@ export default function TestimonialsSection() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => advance(-1)}
-                  className="w-10 h-10 border border-[#1D2B5F]/20 flex items-center justify-center hover:bg-[#1D2B5F] hover:text-white transition-colors text-[#1D2B5F]"
+                  className="w-10 h-10 border border-[#2c5282]/20 flex items-center justify-center hover:bg-[#2c5282] hover:text-white transition-colors text-[#2c5282]"
                   aria-label="Previous testimonial"
                 >
                   <ChevronLeft size={18} />
@@ -136,7 +136,7 @@ export default function TestimonialsSection() {
                 </span>
                 <button
                   onClick={() => advance(1)}
-                  className="w-10 h-10 border border-[#1D2B5F]/20 flex items-center justify-center hover:bg-[#1D2B5F] hover:text-white transition-colors text-[#1D2B5F]"
+                  className="w-10 h-10 border border-[#2c5282]/20 flex items-center justify-center hover:bg-[#2c5282] hover:text-white transition-colors text-[#2c5282]"
                   aria-label="Next testimonial"
                 >
                   <ChevronRight size={18} />
@@ -151,7 +151,7 @@ export default function TestimonialsSection() {
               <button
                 key={i}
                 onClick={() => setCurrent(i)}
-                className={`h-1.5 transition-all duration-300 ${i === current ? "w-8 bg-[#C9A84C]" : "w-2 bg-[#C9A84C]/30"}`}
+                className={`h-1.5 transition-all duration-300 ${i === current ? "w-8 bg-[#2c5282]" : "w-2 bg-[#2c5282]/20"}`}
                 aria-label={`Go to testimonial ${i + 1}`}
               />
             ))}
@@ -160,14 +160,14 @@ export default function TestimonialsSection() {
 
         {/* Trust badges */}
         <div
-          className={`mt-20 pt-12 border-t border-[#e8e4dc] grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+          className={`mt-20 pt-12 border-t border-[#bee3f8] grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         >
           {trustBadges.map(({ label, sub }) => (
             <div key={label} className="text-center">
-              <div className="w-12 h-12 rounded-full bg-[#1D2B5F] mx-auto mb-3 flex items-center justify-center">
-                <Star size={18} className="text-[#C9A84C] fill-[#C9A84C]" />
+              <div className="w-12 h-12 rounded-full bg-[#2c5282] mx-auto mb-3 flex items-center justify-center">
+                <Star size={18} className="text-[#2c5282] fill-[#2c5282]" />
               </div>
-              <p className="text-[#1D2B5F] font-bold text-sm" style={{ fontFamily: "'Lato', sans-serif" }}>{label}</p>
+              <p className="text-[#2c5282] font-bold text-sm" style={{ fontFamily: "'Lato', sans-serif" }}>{label}</p>
               <p className="text-[#888] text-xs mt-0.5" style={{ fontFamily: "'Lato', sans-serif" }}>{sub}</p>
             </div>
           ))}

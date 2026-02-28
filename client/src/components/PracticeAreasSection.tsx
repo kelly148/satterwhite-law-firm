@@ -101,7 +101,7 @@ export default function PracticeAreasSection() {
   return (
     <section id="practice-areas" className="py-0" ref={ref}>
       {/* Navy intro band */}
-      <div className="bg-[#1D2B5F] py-20 px-4">
+      <div className="bg-[#2c5282] py-20 px-4">
         <div className="max-w-3xl mx-auto text-center">
           <p className="section-eyebrow mb-4">What We Do</p>
           <h2
@@ -138,16 +138,16 @@ export default function PracticeAreasSection() {
                   onClick={() => setExpanded(isExpanded ? null : practice.id)}
                 >
                   {/* Icon */}
-                  <div className="w-12 h-12 bg-[#1D2B5F]/8 flex items-center justify-center mb-4 rounded-sm">
-                    <Icon size={22} className="text-[#1D2B5F]" />
+                  <div className="w-12 h-12 bg-[#2c5282]/8 flex items-center justify-center mb-4 rounded-sm">
+                    <Icon size={22} className="text-[#2c5282]" />
                   </div>
 
                   {/* Title */}
-                  <p className="text-[#C9A84C] text-xs font-bold tracking-widest uppercase mb-1" style={{ fontFamily: "'Lato', sans-serif" }}>
+                  <p className="text-[#4a6fa5] text-xs font-bold tracking-widest uppercase mb-1" style={{ fontFamily: "'Lato', sans-serif" }}>
                     {practice.subtitle}
                   </p>
                   <h3
-                    className="text-[#1D2B5F] mb-3"
+                    className="text-[#2c5282] mb-3"
                     style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.3rem", fontWeight: 600 }}
                   >
                     {practice.title}
@@ -160,10 +160,10 @@ export default function PracticeAreasSection() {
 
                   {/* Expandable items */}
                   {isExpanded && (
-                    <ul className="space-y-1.5 mb-4 border-t border-[#e8e4dc] pt-4">
+                    <ul className="space-y-1.5 mb-4 border-t border-[#bee3f8] pt-4">
                       {practice.items.map((item) => (
-                        <li key={item} className="flex items-center gap-2 text-sm text-[#1D2B5F]" style={{ fontFamily: "'Lato', sans-serif" }}>
-                          <ChevronRight size={13} className="text-[#C9A84C] flex-shrink-0" />
+                        <li key={item} className="flex items-center gap-2 text-sm text-[#2c5282]" style={{ fontFamily: "'Lato', sans-serif" }}>
+                          <ChevronRight size={13} className="text-[#2c5282] flex-shrink-0" />
                           {item}
                         </li>
                       ))}
@@ -171,7 +171,7 @@ export default function PracticeAreasSection() {
                   )}
 
                   <button
-                    className="text-[#C9A84C] text-xs font-bold tracking-widest uppercase flex items-center gap-1 hover:gap-2 transition-all"
+                    className="text-[#2c5282] text-xs font-bold tracking-widest uppercase flex items-center gap-1 hover:gap-2 transition-all"
                     style={{ fontFamily: "'Lato', sans-serif" }}
                   >
                     {isExpanded ? "Show Less" : "Learn More"}

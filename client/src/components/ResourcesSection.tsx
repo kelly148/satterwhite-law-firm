@@ -74,20 +74,20 @@ const resources = [
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border-b border-[#e8e4dc]">
+    <div className="border-b border-[#bee3f8]">
       <button
         className="w-full text-left py-5 flex items-start justify-between gap-4 group"
         onClick={() => setOpen(!open)}
       >
         <span
-          className="text-[#1D2B5F] font-medium group-hover:text-[#C9A84C] transition-colors"
+          className="text-[#2c5282] font-medium group-hover:text-[#90cdf4] transition-colors"
           style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", fontWeight: 600 }}
         >
           {q}
         </span>
         <ChevronDown
           size={18}
-          className={`text-[#C9A84C] flex-shrink-0 mt-0.5 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+          className={`text-[#90cdf4] flex-shrink-0 mt-0.5 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (
@@ -117,12 +117,12 @@ export default function ResourcesSection() {
   return (
     <section id="resources" ref={ref}>
       {/* FAQ + Checklist Section */}
-      <div className="bg-[#FAFAF8] py-24">
+      <div className="bg-[#ebf4ff] py-24">
         <div className="container">
           <div className="text-center mb-16">
             <p className="section-eyebrow mb-4">Client Resources</p>
             <h2
-              className="text-[#1D2B5F]"
+              className="text-[#2c5282]"
               style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem, 3.5vw, 3rem)", fontWeight: 600 }}
             >
               Frequently Asked Questions & Planning Tools
@@ -154,7 +154,7 @@ export default function ResourcesSection() {
                   className="w-full object-cover shadow-xl"
                   style={{ aspectRatio: "16/7" }}
                 />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#1D2B5F]/90 to-transparent p-6">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#2c5282]/90 to-transparent p-6">
                   <p
                     className="text-white italic"
                     style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.2rem" }}
@@ -176,7 +176,7 @@ export default function ResourcesSection() {
       </div>
 
       {/* Resource Cards */}
-      <div className="bg-[#1D2B5F] py-20">
+      <div className="bg-[#2c5282] py-20">
         <div className="container">
           <div className="text-center mb-12">
             <p className="section-eyebrow mb-4">Educational Resources</p>
@@ -201,13 +201,13 @@ export default function ResourcesSection() {
                 }}
               >
                 <div className="flex items-center justify-between mb-4">
-                  <Icon size={20} className="text-[#C9A84C]" />
-                  <span className="text-xs text-[#C9A84C] font-bold tracking-widest uppercase" style={{ fontFamily: "'Lato', sans-serif" }}>
+                  <Icon size={20} className="text-[#90cdf4]" />
+                  <span className="text-xs text-[#90cdf4] font-bold tracking-widest uppercase" style={{ fontFamily: "'Lato', sans-serif" }}>
                     {tag}
                   </span>
                 </div>
                 <h3
-                  className="text-white mb-2 group-hover:text-[#C9A84C] transition-colors"
+                  className="text-white mb-2 group-hover:text-[#90cdf4] transition-colors"
                   style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", fontWeight: 600 }}
                 >
                   {title}
@@ -215,7 +215,7 @@ export default function ResourcesSection() {
                 <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: "'Lato', sans-serif" }}>
                   {desc}
                 </p>
-                <p className="text-[#C9A84C] text-xs font-bold tracking-widest uppercase mt-4" style={{ fontFamily: "'Lato', sans-serif" }}>
+                <p className="text-[#90cdf4] text-xs font-bold tracking-widest uppercase mt-4" style={{ fontFamily: "'Lato', sans-serif" }}>
                   Request This Guide →
                 </p>
               </div>

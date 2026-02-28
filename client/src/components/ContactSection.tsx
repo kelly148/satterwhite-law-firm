@@ -92,7 +92,7 @@ export default function ContactSection() {
         className="relative h-48 bg-cover bg-center"
         style={{ backgroundImage: `url(${VA_LANDSCAPE})` }}
       >
-        <div className="absolute inset-0 bg-[#1D2B5F]/70" />
+        <div className="absolute inset-0 bg-[#2c5282]/70" />
         <div className="relative z-10 h-full flex items-center justify-center text-center">
           <div>
             <p className="section-eyebrow mb-2">Get in Touch</p>
@@ -109,7 +109,7 @@ export default function ContactSection() {
       {/* Main contact grid */}
       <div className="grid lg:grid-cols-2">
         {/* Left: Navy contact info */}
-        <div className="bg-[#1D2B5F] p-12 lg:p-16">
+        <div className="bg-[#2c5282] p-12 lg:p-16">
           <h3
             className="text-white mb-2"
             style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.8rem", fontWeight: 600 }}
@@ -121,8 +121,8 @@ export default function ContactSection() {
           <div className="space-y-8">
             {contactInfo.map(({ icon: Icon, label, value, href }) => (
               <div key={label} className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-[#C9A84C]/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Icon size={18} className="text-[#C9A84C]" />
+                <div className="w-10 h-10 bg-white/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Icon size={18} className="text-[#90cdf4]" />
                 </div>
                 <div>
                   <p className="text-white/50 text-xs tracking-widest uppercase mb-1" style={{ fontFamily: "'Lato', sans-serif" }}>
@@ -133,7 +133,7 @@ export default function ContactSection() {
                       href={href}
                       target={href.startsWith("http") ? "_blank" : undefined}
                       rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-                      className="text-white hover:text-[#C9A84C] transition-colors whitespace-pre-line"
+                      className="text-white hover:text-[#90cdf4] transition-colors whitespace-pre-line"
                       style={{ fontFamily: "'Lato', sans-serif", fontSize: "0.95rem" }}
                     >
                       {value}
@@ -166,7 +166,7 @@ export default function ContactSection() {
               href="https://maps.google.com/?q=1605+Fort+Hunt+Court+Alexandria+Virginia+22307"
               target="_blank"
               rel="noopener noreferrer"
-              className="block text-center text-[#C9A84C] text-xs tracking-widest uppercase mt-3 hover:text-white transition-colors"
+              className="block text-center text-[#90cdf4] text-xs tracking-widest uppercase mt-3 hover:text-white transition-colors"
               style={{ fontFamily: "'Lato', sans-serif" }}
             >
               Get Directions →
@@ -187,13 +187,13 @@ export default function ContactSection() {
 
         {/* Right: Contact form */}
         <div
-          className={`bg-[#FAFAF8] p-12 lg:p-16 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+          className={`bg-[#ebf4ff] p-12 lg:p-16 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
         >
           {submitted ? (
             <div className="h-full flex flex-col items-center justify-center text-center py-16">
-              <CheckCircle size={56} className="text-[#C9A84C] mb-6" />
+              <CheckCircle size={56} className="text-[#2c5282] mb-6" />
               <h3
-                className="text-[#1D2B5F] mb-4"
+                className="text-[#2c5282] mb-4"
                 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2rem", fontWeight: 600 }}
               >
                 Thank You
@@ -206,7 +206,7 @@ export default function ContactSection() {
           ) : (
             <>
               <h3
-                className="text-[#1D2B5F] mb-2"
+                className="text-[#2c5282] mb-2"
                 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.8rem", fontWeight: 600 }}
               >
                 Request a Free Consultation
@@ -218,7 +218,7 @@ export default function ContactSection() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-xs font-bold tracking-widest uppercase text-[#1D2B5F] mb-2" style={{ fontFamily: "'Lato', sans-serif" }}>
+                    <label className="block text-xs font-bold tracking-widest uppercase text-[#2c5282] mb-2" style={{ fontFamily: "'Lato', sans-serif" }}>
                       First Name *
                     </label>
                     <input
@@ -227,12 +227,12 @@ export default function ContactSection() {
                       required
                       value={form.firstName}
                       onChange={handleChange}
-                      className="w-full border border-[#ddd] bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#C9A84C] transition-colors"
+                      className="w-full border border-[#ddd] bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#2c5282] transition-colors"
                       style={{ fontFamily: "'Lato', sans-serif" }}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold tracking-widest uppercase text-[#1D2B5F] mb-2" style={{ fontFamily: "'Lato', sans-serif" }}>
+                    <label className="block text-xs font-bold tracking-widest uppercase text-[#2c5282] mb-2" style={{ fontFamily: "'Lato', sans-serif" }}>
                       Last Name *
                     </label>
                     <input
@@ -241,14 +241,14 @@ export default function ContactSection() {
                       required
                       value={form.lastName}
                       onChange={handleChange}
-                      className="w-full border border-[#ddd] bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#C9A84C] transition-colors"
+                      className="w-full border border-[#ddd] bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#2c5282] transition-colors"
                       style={{ fontFamily: "'Lato', sans-serif" }}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold tracking-widest uppercase text-[#1D2B5F] mb-2" style={{ fontFamily: "'Lato', sans-serif" }}>
+                  <label className="block text-xs font-bold tracking-widest uppercase text-[#2c5282] mb-2" style={{ fontFamily: "'Lato', sans-serif" }}>
                     Email Address *
                   </label>
                   <input
@@ -257,13 +257,13 @@ export default function ContactSection() {
                     required
                     value={form.email}
                     onChange={handleChange}
-                    className="w-full border border-[#ddd] bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#C9A84C] transition-colors"
+                    className="w-full border border-[#ddd] bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#2c5282] transition-colors"
                     style={{ fontFamily: "'Lato', sans-serif" }}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold tracking-widest uppercase text-[#1D2B5F] mb-2" style={{ fontFamily: "'Lato', sans-serif" }}>
+                  <label className="block text-xs font-bold tracking-widest uppercase text-[#2c5282] mb-2" style={{ fontFamily: "'Lato', sans-serif" }}>
                     Phone Number
                   </label>
                   <input
@@ -271,20 +271,20 @@ export default function ContactSection() {
                     name="phone"
                     value={form.phone}
                     onChange={handleChange}
-                    className="w-full border border-[#ddd] bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#C9A84C] transition-colors"
+                    className="w-full border border-[#ddd] bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#2c5282] transition-colors"
                     style={{ fontFamily: "'Lato', sans-serif" }}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold tracking-widest uppercase text-[#1D2B5F] mb-2" style={{ fontFamily: "'Lato', sans-serif" }}>
+                  <label className="block text-xs font-bold tracking-widest uppercase text-[#2c5282] mb-2" style={{ fontFamily: "'Lato', sans-serif" }}>
                     Area of Interest
                   </label>
                   <select
                     name="practiceArea"
                     value={form.practiceArea}
                     onChange={handleChange}
-                    className="w-full border border-[#ddd] bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#C9A84C] transition-colors appearance-none"
+                    className="w-full border border-[#ddd] bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#2c5282] transition-colors appearance-none"
                     style={{ fontFamily: "'Lato', sans-serif" }}
                   >
                     <option value="">Select a practice area</option>
@@ -295,7 +295,7 @@ export default function ContactSection() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold tracking-widest uppercase text-[#1D2B5F] mb-2" style={{ fontFamily: "'Lato', sans-serif" }}>
+                  <label className="block text-xs font-bold tracking-widest uppercase text-[#2c5282] mb-2" style={{ fontFamily: "'Lato', sans-serif" }}>
                     How Can We Help You?
                   </label>
                   <textarea
@@ -304,7 +304,7 @@ export default function ContactSection() {
                     value={form.message}
                     onChange={handleChange}
                     placeholder="Briefly describe your legal needs..."
-                    className="w-full border border-[#ddd] bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#C9A84C] transition-colors resize-none"
+                    className="w-full border border-[#ddd] bg-white px-4 py-3 text-sm focus:outline-none focus:border-[#2c5282] transition-colors resize-none"
                     style={{ fontFamily: "'Lato', sans-serif" }}
                   />
                 </div>

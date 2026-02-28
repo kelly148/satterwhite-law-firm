@@ -27,10 +27,10 @@ export default function FloatingCTA() {
   return (
     <>
       {/* Mobile: bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#1D2B5F] border-t border-white/10 flex">
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#2c5282] border-t border-white/10 flex">
         <a
           href="tel:7038557380"
-          className="flex-1 flex items-center justify-center gap-2 py-4 text-white text-sm font-bold tracking-wide border-r border-white/10 hover:bg-[#C9A84C] transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 py-4 text-white text-sm font-bold tracking-wide border-r border-white/10 hover:bg-[#1a365d] transition-colors"
           style={{ fontFamily: "'Lato', sans-serif" }}
         >
           <Phone size={16} />
@@ -38,7 +38,7 @@ export default function FloatingCTA() {
         </a>
         <button
           onClick={scrollToContact}
-          className="flex-1 flex items-center justify-center gap-2 py-4 text-white text-sm font-bold tracking-wide bg-[#C9A84C] hover:bg-[#b8862e] transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 py-4 text-white text-sm font-bold tracking-wide bg-[#1a365d] hover:bg-[#14284a] transition-colors"
           style={{ fontFamily: "'Lato', sans-serif" }}
         >
           <Calendar size={16} />
@@ -50,7 +50,7 @@ export default function FloatingCTA() {
       <div className="fixed right-0 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-0">
         <a
           href="tel:7038557380"
-          className="bg-[#1D2B5F] text-white px-3 py-4 flex flex-col items-center gap-2 hover:bg-[#C9A84C] transition-colors group shadow-lg"
+          className="bg-[#2c5282] text-white px-3 py-4 flex flex-col items-center gap-2 hover:bg-[#1a365d] transition-colors group shadow-lg"
           style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
           title="Call (703) 855-7380"
         >
@@ -61,7 +61,7 @@ export default function FloatingCTA() {
         </a>
         <button
           onClick={scrollToContact}
-          className="bg-[#C9A84C] text-white px-3 py-4 flex flex-col items-center gap-2 hover:bg-[#b8862e] transition-colors shadow-lg"
+          className="bg-[#1a365d] text-white px-3 py-4 flex flex-col items-center gap-2 hover:bg-[#14284a] transition-colors shadow-lg"
           style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
           title="Free Consultation"
         >

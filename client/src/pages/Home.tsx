@@ -1,7 +1,7 @@
 /*
  * Home Page — The Satterwhite Law Firm, PLLC
  * Design: "Modern Counsel: Precision & Warmth"
- * Navy (#1D2B5F) + Gold (#C9A84C) + Cormorant Garamond + Lato
+ * Navy (#2c5282) + Gold (#90cdf4) + Cormorant Garamond + Lato
  * Full single-page layout with all sections assembled
  * SEO: Schema.org LegalService + LocalBusiness JSON-LD
  */

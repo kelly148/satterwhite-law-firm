@@ -1,7 +1,8 @@
 /*
  * THE SATTERWHITE LAW FIRM, PLLC — Global Design System
- * Design Philosophy: "Modern Counsel: Precision & Warmth"
- * Primary: Deep Navy (#1D2B5F) | Accent: Champagne Gold (#B8973A)
+ * Design Philosophy: "Modern Counsel: Clean Precision"
+ * Primary: Steel Blue (#2c5282) | Accent: White / Light Blue (#90cdf4)
+ * Background: Light Blue-Tinted (#ebf4ff) | Text: Deep Steel (#1a365d)
  * Headings: Cormorant Garamond (serif) | Body: Lato (sans-serif)
  * Layout: Full-width sections, asymmetric hero, photography-forward
  */
@@ -49,52 +50,52 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Firm brand colors */
-  --color-navy: oklch(0.28 0.09 264);
-  --color-navy-dark: oklch(0.20 0.09 264);
-  --color-navy-light: oklch(0.38 0.09 264);
-  --color-gold: oklch(0.68 0.12 78);
-  --color-gold-light: oklch(0.80 0.10 78);
-  --color-gold-dark: oklch(0.55 0.12 78);
-  --color-ivory: oklch(0.98 0.005 90);
-  --color-warm-gray: oklch(0.95 0.005 90);
-  --color-charcoal: oklch(0.25 0.01 260);
+  /* Firm brand colors — Option 4: Steel Blue & White */
+  --color-navy: oklch(0.35 0.10 250);        /* Steel Blue #2c5282 */
+  --color-navy-dark: oklch(0.25 0.10 250);   /* Deep Navy #1a365d */
+  --color-navy-light: oklch(0.48 0.10 250);  /* Medium Blue #4a6fa5 */
+  --color-gold: oklch(0.78 0.08 220);        /* Light Blue accent #90cdf4 */
+  --color-gold-light: oklch(0.90 0.05 220);  /* Pale Blue #bee3f8 */
+  --color-gold-dark: oklch(0.62 0.10 240);   /* Mid Blue #4a6fa5 */
+  --color-ivory: oklch(0.97 0.01 220);       /* Blue-tinted white #ebf4ff */
+  --color-warm-gray: oklch(0.94 0.01 220);   /* Light blue-gray */
+  --color-charcoal: oklch(0.25 0.08 250);    /* Deep steel */
 }
 
 :root {
   --radius: 0.25rem;
-  --background: oklch(0.99 0.002 90);
-  --foreground: oklch(0.22 0.01 260);
+  --background: oklch(0.98 0.008 220);       /* #ebf4ff light blue tint */
+  --foreground: oklch(0.22 0.08 250);        /* #1a365d deep steel */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.01 260);
+  --card-foreground: oklch(0.22 0.08 250);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.01 260);
-  --primary: oklch(0.28 0.09 264);
+  --popover-foreground: oklch(0.22 0.08 250);
+  --primary: oklch(0.35 0.10 250);           /* Steel Blue */
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.95 0.005 90);
-  --secondary-foreground: oklch(0.28 0.09 264);
-  --muted: oklch(0.96 0.003 90);
-  --muted-foreground: oklch(0.50 0.015 260);
-  --accent: oklch(0.68 0.12 78);
-  --accent-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.94 0.01 220);
+  --secondary-foreground: oklch(0.35 0.10 250);
+  --muted: oklch(0.95 0.008 220);
+  --muted-foreground: oklch(0.48 0.08 250);
+  --accent: oklch(0.78 0.08 220);            /* Light Blue */
+  --accent-foreground: oklch(0.22 0.08 250);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.90 0.005 90);
-  --input: oklch(0.90 0.005 90);
-  --ring: oklch(0.68 0.12 78);
-  --chart-1: oklch(0.28 0.09 264);
-  --chart-2: oklch(0.68 0.12 78);
-  --chart-3: oklch(0.50 0.09 264);
-  --chart-4: oklch(0.80 0.10 78);
-  --chart-5: oklch(0.38 0.09 264);
-  --sidebar: oklch(0.28 0.09 264);
+  --border: oklch(0.88 0.015 220);           /* #bee3f8 */
+  --input: oklch(0.88 0.015 220);
+  --ring: oklch(0.78 0.08 220);
+  --chart-1: oklch(0.35 0.10 250);
+  --chart-2: oklch(0.78 0.08 220);
+  --chart-3: oklch(0.48 0.10 250);
+  --chart-4: oklch(0.90 0.05 220);
+  --chart-5: oklch(0.25 0.10 250);
+  --sidebar: oklch(0.35 0.10 250);
   --sidebar-foreground: oklch(0.99 0 0);
-  --sidebar-primary: oklch(0.68 0.12 78);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.38 0.09 264);
+  --sidebar-primary: oklch(0.78 0.08 220);
+  --sidebar-primary-foreground: oklch(0.22 0.08 250);
+  --sidebar-accent: oklch(0.48 0.10 250);
   --sidebar-accent-foreground: oklch(0.99 0 0);
-  --sidebar-border: oklch(0.38 0.09 264);
-  --sidebar-ring: oklch(0.68 0.12 78);
+  --sidebar-border: oklch(0.48 0.10 250);
+  --sidebar-ring: oklch(0.78 0.08 220);
 }
 
 @layer base {
@@ -153,28 +154,28 @@
     }
   }
 
-  /* Gold accent bar for section headings */
+  /* Accent bar for section headings — now light blue */
   .gold-bar {
     display: inline-block;
     width: 3px;
-    background: oklch(0.68 0.12 78);
+    background: #90cdf4;
     margin-right: 1rem;
     flex-shrink: 0;
   }
 
-  /* Section heading style */
+  /* Section eyebrow label */
   .section-eyebrow {
     font-family: 'Lato', sans-serif;
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: oklch(0.68 0.12 78);
+    color: #90cdf4;
   }
 
-  /* Navy button */
+  /* Steel Blue button */
   .btn-navy {
-    background: oklch(0.28 0.09 264);
+    background: #2c5282;
     color: white;
     padding: 0.875rem 2rem;
     font-family: 'Lato', sans-serif;
@@ -182,36 +183,36 @@
     font-size: 0.8rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    border: 2px solid oklch(0.28 0.09 264);
+    border: 2px solid #2c5282;
     transition: all 0.25s ease;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
   }
   .btn-navy:hover {
-    background: transparent;
-    color: oklch(0.28 0.09 264);
+    background: #1a365d;
+    border-color: #1a365d;
   }
 
-  /* Gold button */
+  /* White/Light Blue accent button (replaces gold) */
   .btn-gold {
-    background: oklch(0.68 0.12 78);
-    color: white;
+    background: #ffffff;
+    color: #2c5282;
     padding: 0.875rem 2rem;
     font-family: 'Lato', sans-serif;
     font-weight: 700;
     font-size: 0.8rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    border: 2px solid oklch(0.68 0.12 78);
+    border: 2px solid #ffffff;
     transition: all 0.25s ease;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
   }
   .btn-gold:hover {
-    background: oklch(0.55 0.12 78);
-    border-color: oklch(0.55 0.12 78);
+    background: #ebf4ff;
+    border-color: #ebf4ff;
   }
 
   /* Outline white button */
@@ -224,7 +225,7 @@
     font-size: 0.8rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    border: 2px solid rgba(255,255,255,0.6);
+    border: 2px solid rgba(255,255,255,0.7);
     transition: all 0.25s ease;
     display: inline-flex;
     align-items: center;
@@ -232,14 +233,14 @@
   }
   .btn-outline-white:hover {
     background: white;
-    color: oklch(0.28 0.09 264);
+    color: #2c5282;
     border-color: white;
   }
 
   /* Practice area card */
   .practice-card {
     background: white;
-    border: 1px solid oklch(0.90 0.005 90);
+    border: 1px solid #bee3f8;
     padding: 2rem;
     transition: all 0.3s ease;
     position: relative;
@@ -252,7 +253,7 @@
     top: 0;
     bottom: 0;
     width: 3px;
-    background: oklch(0.68 0.12 78);
+    background: #2c5282;
     transform: scaleY(0);
     transform-origin: bottom;
     transition: transform 0.3s ease;
@@ -261,7 +262,7 @@
     transform: scaleY(1);
   }
   .practice-card:hover {
-    box-shadow: 0 8px 32px rgba(29, 43, 95, 0.12);
+    box-shadow: 0 8px 32px rgba(44, 82, 130, 0.15);
     transform: translateY(-2px);
   }
 
@@ -269,8 +270,8 @@
   .testimonial-card {
     background: white;
     padding: 2.5rem;
-    border-left: 4px solid oklch(0.68 0.12 78);
-    box-shadow: 0 4px 24px rgba(29, 43, 95, 0.08);
+    border-left: 4px solid #2c5282;
+    box-shadow: 0 4px 24px rgba(44, 82, 130, 0.10);
   }
 
   /* Fade in animation */
@@ -288,10 +289,10 @@
     animation: fadeInUp 0.6s ease-out forwards;
   }
 
-  /* Gold divider line */
+  /* Accent divider line — now steel blue */
   .gold-divider {
     width: 60px;
     height: 2px;
-    background: oklch(0.68 0.12 78);
+    background: #2c5282;
   }
 }

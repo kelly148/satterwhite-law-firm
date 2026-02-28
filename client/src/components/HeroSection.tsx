@@ -123,11 +123,7 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/40 text-xs tracking-widest uppercase">
-        <div className="w-px h-10 bg-gradient-to-b from-transparent to-[#90cdf4] animate-pulse" />
-        <span>Scroll</span>
-      </div>
+
     </section>
   );
 }

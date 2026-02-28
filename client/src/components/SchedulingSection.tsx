@@ -157,9 +157,9 @@ export default function SchedulingSection() {
       </div>
 
       {/* Bottom note */}
-      <div className="bg-[#ebf4ff] border-t border-[#bee3f8] py-6 text-center">
+      <div className="bg-[#ebf4ff] border-t border-[#bee3f8] py-8 text-center">
         <p
-          className="text-[#4a6fa5] text-sm"
+          className="text-[#4a6fa5] text-sm mb-4"
           style={{ fontFamily: "'Lato', sans-serif" }}
         >
           Prefer to call?{" "}
@@ -177,6 +177,21 @@ export default function SchedulingSection() {
             kelly@thesatterwhitelawfirm.com
           </a>
         </p>
+        <div className="border-t border-[#bee3f8] pt-6 mt-2">
+          <p className="text-[#2c5282] text-sm font-semibold mb-2" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem" }}>
+            Already scheduled? Complete your Client Intake Form in advance.
+          </p>
+          <p className="text-[#4a6fa5] text-xs mb-4" style={{ fontFamily: "'Lato', sans-serif" }}>
+            Save time at your consultation by submitting your estate planning information beforehand.
+          </p>
+          <a
+            href="/intake"
+            className="inline-flex items-center gap-2 bg-[#2c5282] text-white text-xs font-bold tracking-widest uppercase py-3 px-8 hover:bg-[#1a365d] transition-colors"
+            style={{ fontFamily: "'Lato', sans-serif", letterSpacing: "0.12em" }}
+          >
+            Complete Client Intake Form →
+          </a>
+        </div>
       </div>
     </section>
   );

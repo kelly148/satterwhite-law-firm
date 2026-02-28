@@ -27,6 +27,7 @@ const navLinks = [
   { label: "Resources", href: "#resources" },
   { label: "Schedule", href: "#schedule" },
   { label: "Contact", href: "#contact" },
+  { label: "Client Intake Form", href: "/intake", external: true },
 ];
 
 export default function Navigation() {
@@ -143,6 +144,12 @@ export default function Navigation() {
 
           {/* CTA */}
           <div className="hidden lg:flex items-center gap-3">
+            <a
+              href="/intake"
+              className="text-xs py-2 px-4 border border-[#90cdf4]/60 text-[#90cdf4] hover:bg-[#90cdf4]/10 rounded-sm font-medium tracking-wide transition-colors"
+            >
+              Client Intake
+            </a>
             <button
               onClick={() => handleNavClick("#contact")}
               className="btn-gold text-xs py-2.5 px-5"

@@ -13,3 +13,4 @@
 - [x] Add intake form link to navigation and scheduling section
 - [x] Add Privacy Policy page at /privacy-policy
 - [x] Link Privacy Policy in footer
+- [x] Polish Privacy Policy page — fix contact block formatting, improve visual design, add proper hyperlinks

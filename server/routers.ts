@@ -89,6 +89,68 @@ export const appRouter = router({
       }),
   }),
 
+  llcIntake: router({
+    /**
+     * Submit LLC formation intake form — sends a detailed notification to the firm owner
+     */
+    submit: publicProcedure
+      .input(z.object({
+        clientFirst: z.string().max(100),
+        clientLast: z.string().max(100),
+        clientEmail: z.string().max(320),
+        clientPhone: z.string().max(50),
+        clientAddress: z.string().max(500),
+        llcName: z.string().max(300),
+        llcType: z.string().max(100),
+        llcState: z.string().max(50),
+        llcAddress: z.string().max(500),
+        memberCount: z.string().max(50),
+        managerName: z.string().max(200),
+      }))
+      .mutation(async ({ input }) => {
+        const submittedAt = new Date().toLocaleString("en-US", {
+          timeZone: "America/New_York",
+          dateStyle: "full",
+          timeStyle: "short",
+        });
+
+        const clientName = [input.clientFirst, input.clientLast].filter(Boolean).join(" ") || "—";
+
+        const content = [
+          `🏢 NEW LLC FORMATION INTAKE FORM SUBMISSION`,
+          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+          ``,
+          `👤 Client Name: ${clientName}`,
+          `📧 Email: ${input.clientEmail || '—'}`,
+          `📞 Phone: ${input.clientPhone || '—'}`,
+          `🏠 Client Address: ${input.clientAddress || '—'}`,
+          ``,
+          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+          `🏛️  ENTITY DETAILS`,
+          ``,
+          `LLC Name: ${input.llcName || '—'}`,
+          `Entity Type: ${input.llcType || '—'}`,
+          `State of Formation: ${input.llcState || '—'}`,
+          `Principal Address: ${input.llcAddress || '—'}`,
+          `Number of Members: ${input.memberCount || '—'}`,
+          `Primary Manager: ${input.managerName || '—'}`,
+          ``,
+          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+          `🕐 Submitted: ${submittedAt} (ET)`,
+          `Reply to: ${input.clientEmail}`,
+        ].join("\n");
+
+        const notified = await notifyOwner({
+          title: `New LLC Formation Intake — ${clientName} — Satterwhite Law`,
+          content,
+        });
+
+        console.log(`[LLC Intake Form] Submission from ${clientName} <${input.clientEmail}> — notified: ${notified}`);
+
+        return { success: true };
+      }),
+  }),
+
   contact: router({
     /**
      * Submit contact form — sends a notification to the firm owner

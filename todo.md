@@ -14,3 +14,6 @@
 - [x] Add Privacy Policy page at /privacy-policy
 - [x] Link Privacy Policy in footer
 - [x] Polish Privacy Policy page — fix contact block formatting, improve visual design, add proper hyperlinks
+- [x] Embed LLC intake form as dedicated page at /llc-intake
+- [x] Wire LLC intake form submission to send email to kelly@thesatterwhitelawfirm.com
+- [x] Add LLC intake form link to navigation and relevant sections

@@ -144,12 +144,20 @@ export default function Navigation() {
 
           {/* CTA */}
           <div className="hidden lg:flex items-center gap-3">
-            <a
-              href="/intake"
-              className="text-xs py-2 px-4 border border-[#90cdf4]/60 text-[#90cdf4] hover:bg-[#90cdf4]/10 rounded-sm font-medium tracking-wide transition-colors"
-            >
-              Client Intake
-            </a>
+            <div className="flex flex-col gap-1">
+              <a
+                href="/intake"
+                className="text-xs py-1.5 px-3 border border-[#90cdf4]/60 text-[#90cdf4] hover:bg-[#90cdf4]/10 rounded-sm font-medium tracking-wide transition-colors text-center"
+              >
+                Trust Intake
+              </a>
+              <a
+                href="/llc-intake"
+                className="text-xs py-1.5 px-3 border border-[#90cdf4]/60 text-[#90cdf4] hover:bg-[#90cdf4]/10 rounded-sm font-medium tracking-wide transition-colors text-center"
+              >
+                LLC Intake
+              </a>
+            </div>
             <button
               onClick={() => handleNavClick("#contact")}
               className="btn-gold text-xs py-2.5 px-5"
@@ -197,9 +205,21 @@ export default function Navigation() {
                 )}
               </div>
             ))}
+            <a
+              href="/intake"
+              className="block w-full text-center py-3 mt-4 border border-[#90cdf4]/60 text-[#90cdf4] text-base font-medium rounded-sm"
+            >
+              Trust Intake Form
+            </a>
+            <a
+              href="/llc-intake"
+              className="block w-full text-center py-3 mt-2 border border-[#90cdf4]/60 text-[#90cdf4] text-base font-medium rounded-sm"
+            >
+              LLC Formation Intake Form
+            </a>
             <button
               onClick={() => handleNavClick("#contact")}
-              className="btn-gold mt-6 justify-center"
+              className="btn-gold mt-4 justify-center"
             >
               Schedule a Free Consultation
             </button>

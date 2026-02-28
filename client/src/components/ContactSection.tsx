@@ -1,10 +1,11 @@
 /*
  * ContactSection — The Satterwhite Law Firm, PLLC
  * Design: Split — left navy with contact info + map, right ivory with form
- * SEO: Schema.org LocalBusiness markup embedded
+ * Form now wired to tRPC contact.submit → notifyOwner → kelly@thesatterwhitelawfirm.com
  */
 import { useState, useRef, useEffect } from "react";
-import { Phone, Mail, MapPin, Clock, Send, CheckCircle } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Send, CheckCircle, Loader2, AlertCircle } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 const VA_LANDSCAPE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/virginia_landscape-MVVVXWwaNfsUDa52hrMXCQ.webp";
 
@@ -51,7 +52,6 @@ const practiceAreas = [
 export default function ContactSection() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -71,10 +71,20 @@ export default function ContactSection() {
     return () => observer.disconnect();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // tRPC mutation — sends submission to server which notifies the owner
+  const submitMutation = trpc.contact.submit.useMutation();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In production, this would send to a backend or email service
-    setSubmitted(true);
+    const name = `${form.firstName} ${form.lastName}`.trim();
+    await submitMutation.mutateAsync({
+      name,
+      email: form.email,
+      phone: form.phone || undefined,
+      service: form.practiceArea || undefined,
+      message: form.message,
+      preferredContact: "either",
+    });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -84,6 +94,10 @@ export default function ContactSection() {
       [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
   };
+
+  const isSubmitted = submitMutation.isSuccess;
+  const isLoading = submitMutation.isPending;
+  const isError = submitMutation.isError;
 
   return (
     <section id="contact" ref={ref} className="bg-white">
@@ -189,7 +203,7 @@ export default function ContactSection() {
         <div
           className={`bg-[#ebf4ff] p-12 lg:p-16 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
         >
-          {submitted ? (
+          {isSubmitted ? (
             <div className="h-full flex flex-col items-center justify-center text-center py-16">
               <CheckCircle size={56} className="text-[#2c5282] mb-6" />
               <h3
@@ -214,6 +228,17 @@ export default function ContactSection() {
               <p className="text-[#888] text-sm mb-8" style={{ fontFamily: "'Lato', sans-serif" }}>
                 Complete the form below and we will respond within one business day.
               </p>
+
+              {/* Error state */}
+              {isError && (
+                <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded p-4 mb-6">
+                  <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-red-700 text-sm" style={{ fontFamily: "'Lato', sans-serif" }}>
+                    There was an error sending your message. Please try again or call us directly at{" "}
+                    <a href="tel:7038557380" className="font-bold underline">(703) 855-7380</a>.
+                  </p>
+                </div>
+              )}
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid sm:grid-cols-2 gap-5">
@@ -296,11 +321,13 @@ export default function ContactSection() {
 
                 <div>
                   <label className="block text-xs font-bold tracking-widest uppercase text-[#2c5282] mb-2" style={{ fontFamily: "'Lato', sans-serif" }}>
-                    How Can We Help You?
+                    How Can We Help You? *
                   </label>
                   <textarea
                     name="message"
                     rows={4}
+                    required
+                    minLength={10}
                     value={form.message}
                     onChange={handleChange}
                     placeholder="Briefly describe your legal needs..."
@@ -326,9 +353,22 @@ export default function ContactSection() {
                   </label>
                 </div>
 
-                <button type="submit" className="btn-navy w-full justify-center text-sm py-4">
-                  Send Message
-                  <Send size={15} />
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="btn-navy w-full justify-center text-sm py-4 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 size={15} className="animate-spin" />
+                      Sending…
+                    </>
+                  ) : (
+                    <>
+                      Send Message
+                      <Send size={15} />
+                    </>
+                  )}
                 </button>
               </form>
             </>

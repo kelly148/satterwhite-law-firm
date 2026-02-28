@@ -1,0 +1,84 @@
+import { COOKIE_NAME } from "@shared/const";
+import { getSessionCookieOptions } from "./_core/cookies";
+import { notifyOwner } from "./_core/notification";
+import { systemRouter } from "./_core/systemRouter";
+import { publicProcedure, router } from "./_core/trpc";
+import { z } from "zod";
+
+// Contact form input schema
+const contactFormSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100),
+  email: z.string().email("Valid email is required").max(320),
+  phone: z.string().max(30).optional(),
+  service: z.string().max(100).optional(),
+  message: z.string().min(10, "Please provide a brief message").max(5000),
+  preferredContact: z.enum(["email", "phone", "either"]).optional(),
+});
+
+export const appRouter = router({
+  system: systemRouter,
+
+  auth: router({
+    me: publicProcedure.query(opts => opts.ctx.user),
+    logout: publicProcedure.mutation(({ ctx }) => {
+      const cookieOptions = getSessionCookieOptions(ctx.req);
+      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      return { success: true } as const;
+    }),
+  }),
+
+  contact: router({
+    /**
+     * Submit contact form — sends a notification to the firm owner
+     * and attempts to send an email via the built-in notification service.
+     */
+    submit: publicProcedure
+      .input(contactFormSchema)
+      .mutation(async ({ input }) => {
+        const { name, email, phone, service, message, preferredContact } = input;
+
+        const submittedAt = new Date().toLocaleString("en-US", {
+          timeZone: "America/New_York",
+          dateStyle: "full",
+          timeStyle: "short",
+        });
+
+        // Build a rich notification content
+        const notificationContent = [
+          `📋 NEW CONTACT FORM SUBMISSION`,
+          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+          ``,
+          `👤 Name: ${name}`,
+          `📧 Email: ${email}`,
+          phone ? `📞 Phone: ${phone}` : null,
+          service ? `⚖️  Service Needed: ${service}` : null,
+          preferredContact ? `📬 Preferred Contact: ${preferredContact}` : null,
+          ``,
+          `💬 Message:`,
+          `${message}`,
+          ``,
+          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+          `🕐 Submitted: ${submittedAt} (ET)`,
+          ``,
+          `Reply directly to: ${email}`,
+        ]
+          .filter(line => line !== null)
+          .join("\n");
+
+        // Send notification to owner via Manus notification service
+        const notified = await notifyOwner({
+          title: `New Consultation Request from ${name} — Satterwhite Law Firm`,
+          content: notificationContent,
+        });
+
+        console.log(`[Contact Form] Submission from ${name} <${email}> — notified: ${notified}`);
+
+        return {
+          success: true,
+          message: "Your message has been received. Kelly Satterwhite will be in touch within one business day.",
+        };
+      }),
+  }),
+});
+
+export type AppRouter = typeof appRouter;

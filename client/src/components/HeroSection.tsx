@@ -110,8 +110,8 @@ export default function HeroSection() {
           <div className="mt-14 flex flex-wrap justify-center gap-8 text-white/60 text-xs tracking-widest uppercase">
             {[
               "Licensed in Virginia & Maryland",
+              "6,000+ Real Estate Transactions",
               "20 Years U.S. Army Service",
-              "Boutique Personal Service",
               "Free Initial Consultation",
             ].map((item) => (
               <div key={item} className="flex items-center gap-2">

@@ -3,13 +3,13 @@
  * Design: Warm ivory strip with 4 key value propositions + gold icons
  * Positioned between Hero and About sections
  */
-import { Shield, Users, MapPin, Phone } from "lucide-react";
+import { Home, Users, MapPin, Phone } from "lucide-react";
 
 const values = [
   {
-    icon: Shield,
-    title: "Comprehensive Protection",
-    desc: "Full-spectrum estate planning from simple wills to complex trust structures",
+    icon: Home,
+    title: "6,000+ Real Estate Transactions",
+    desc: "Unmatched commercial & residential closing experience serving buyers, sellers, agents & lenders",
   },
   {
     icon: Users,

@@ -77,15 +77,15 @@ export default function AboutSection() {
                 twenty years to the United States Army Band — eight of them as its Principal Horn.
               </p>
               <p>
-                That career instilled a discipline, precision, and commitment to excellence that now defines
-                every client engagement at this firm. After being admitted to the Virginia Bar in 2016, Kelly
-                has spent nearly a decade helping families and individuals throughout the DMV protect what
-                matters most: their assets, their businesses, and their legacies.
+That career instilled a discipline, precision, and commitment to excellence that now defines
+              every client engagement at this firm. After being admitted to the Virginia Bar in 2016, Kelly
+              has spent nearly a decade helping families and individuals throughout the DMV protect what
+              matters most: their assets, their businesses, and their legacies.
               </p>
               <p>
-                Kelly also brings rare real-world business acumen to the practice, having successfully managed
-                three offices for a major regional title company — experience that directly informs the firm's
-                business succession, entity formation, and transactional practice.
+Kelly also brings rare real-world business acumen to the practice, having successfully managed
+              three offices for a major regional title company — experience that directly informs the firm's
+              business succession, entity formation, and transactional practice.
               </p>
             </div>
 

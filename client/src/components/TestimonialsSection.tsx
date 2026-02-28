@@ -8,31 +8,31 @@ import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 
 const testimonials = [
   {
-    text: "Kelly took the time to truly understand our family's situation and crafted an estate plan that gave us complete peace of mind. She explained every document in plain language and made the entire process feel manageable. We couldn't recommend her more highly.",
+    text: "Kelly took the time to truly understand our family's situation and crafted an estate plan that gave us complete peace of mind. He explained every document in plain language and made the entire process feel manageable. We couldn't recommend him more highly.",
     author: "Robert & Susan M.",
     location: "Alexandria, Virginia",
     stars: 5,
   },
   {
-    text: "I came to The Satterwhite Law Firm needing both a business succession plan and personal estate planning. Kelly handled both seamlessly and brought a level of thoroughness I hadn't experienced with other attorneys. Her military background really shows in how organized and precise she is.",
+    text: "I came to The Satterwhite Law Firm needing both a business succession plan and personal estate planning. Kelly handled both seamlessly and brought a level of thoroughness I hadn't experienced with other attorneys. His military background really shows in how organized and precise he is.",
     author: "James T.",
     location: "Bethesda, Maryland",
     stars: 5,
   },
   {
-    text: "The 1031 exchange process can be intimidating, but Kelly walked us through every step as our qualified intermediary. She was responsive, knowledgeable, and made sure we met every deadline. Our investment portfolio is better positioned because of her guidance.",
+    text: "The 1031 exchange process can be intimidating, but Kelly walked us through every step as our qualified intermediary. He was responsive, knowledgeable, and made sure we met every deadline. Our investment portfolio is better positioned because of his guidance.",
     author: "Patricia & David L.",
     location: "McLean, Virginia",
     stars: 5,
   },
   {
-    text: "After my husband passed, I was overwhelmed by the estate administration process. Kelly was compassionate, patient, and incredibly competent. She handled everything efficiently and kept me informed throughout. I am so grateful I found her.",
+    text: "After my husband passed, I was overwhelmed by the estate administration process. Kelly was compassionate, patient, and incredibly competent. He handled everything efficiently and kept me informed throughout. I am so grateful I found him.",
     author: "Margaret H.",
     location: "Fairfax, Virginia",
     stars: 5,
   },
   {
-    text: "We needed to set up an LLC and draft comprehensive operating agreements for our new business venture. Kelly's advice was practical, thorough, and clearly informed by real business experience. We're starting on solid legal footing thanks to her.",
+    text: "We needed to set up an LLC and draft comprehensive operating agreements for our new business venture. Kelly's advice was practical, thorough, and clearly informed by real business experience. We're starting on solid legal footing thanks to him.",
     author: "Michael & Andrea K.",
     location: "Rockville, Maryland",
     stars: 5,

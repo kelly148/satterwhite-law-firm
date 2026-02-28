@@ -183,7 +183,23 @@ export default function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-white/10 py-6">
         <div className="container flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/40" style={{ fontFamily: "'Lato', sans-serif" }}>
-          <p>© {new Date().getFullYear()} The Satterwhite Law Firm, PLLC. All Rights Reserved.</p>
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <p>© {new Date().getFullYear()} The Satterwhite Law Firm, PLLC. All Rights Reserved.</p>
+            <span className="hidden sm:inline text-white/20">|</span>
+            <a
+              href="/privacy-policy"
+              className="text-white/50 hover:text-white/80 transition-colors underline underline-offset-2"
+            >
+              Privacy Policy
+            </a>
+            <span className="hidden sm:inline text-white/20">|</span>
+            <a
+              href="/intake"
+              className="text-white/50 hover:text-white/80 transition-colors underline underline-offset-2"
+            >
+              Client Intake Form
+            </a>
+          </div>
           <p className="text-center sm:text-right max-w-xl leading-relaxed">
             <strong className="text-white/50">Attorney Advertising.</strong> The information on this website is for general informational purposes only and does not constitute legal advice. No attorney-client relationship is formed by use of this site. Results may vary. Licensed in Virginia and Maryland.
           </p>

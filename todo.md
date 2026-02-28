@@ -11,3 +11,5 @@
 - [x] Embed trust intake form as dedicated page at /intake
 - [x] Wire intake form submission to send email to kelly@thesatterwhitelawfirm.com
 - [x] Add intake form link to navigation and scheduling section
+- [x] Add Privacy Policy page at /privacy-policy
+- [x] Link Privacy Policy in footer

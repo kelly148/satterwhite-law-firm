@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import ColorOptions from "./pages/ColorOptions";
 import IntakeForm from "./pages/IntakeForm";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
@@ -14,6 +15,7 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path={"/color-options"} component={ColorOptions} />
       <Route path={"/intake"} component={IntakeForm} />
+      <Route path={"/privacy-policy"} component={PrivacyPolicy} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

@@ -92,7 +92,7 @@ export default function HeroSection() {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
-              onClick={() => scrollTo("#contact")}
+              onClick={() => scrollTo("#schedule")}
               className="btn-gold text-sm px-8 py-4 shadow-lg shadow-[#90cdf4]/20"
             >
               Schedule a Free Consultation

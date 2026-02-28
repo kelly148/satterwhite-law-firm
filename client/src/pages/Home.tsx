@@ -17,6 +17,7 @@ import ResourcesSection from "@/components/ResourcesSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import FloatingCTA from "@/components/FloatingCTA";
+import SchedulingSection from "@/components/SchedulingSection";
 
 // Schema.org JSON-LD for SEO
 const schemaMarkup = {
@@ -134,6 +135,7 @@ export default function Home() {
         <PracticeAreasSection />
         <WhyUsSection />
         <TestimonialsSection />
+        <SchedulingSection />
         <ResourcesSection />
         <ContactSection />
       </main>

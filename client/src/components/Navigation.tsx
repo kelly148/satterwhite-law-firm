@@ -4,7 +4,7 @@
  * Logo left, links center-right, phone + CTA right
  */
 import { useState, useEffect } from "react";
-import { Phone, Menu, X, ChevronDown } from "lucide-react";
+import { Phone, Menu, X, ChevronDown, Calendar } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/FullLogo_1c4a4b4a.jpg";
 
@@ -25,6 +25,7 @@ const navLinks = [
   { label: "About", href: "#about" },
   { label: "Why Choose Us", href: "#why-us" },
   { label: "Resources", href: "#resources" },
+  { label: "Schedule", href: "#schedule" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -119,6 +120,15 @@ export default function Navigation() {
                     </div>
                   )}
                 </div>
+              ) : link.label === "Schedule" ? (
+                <button
+                  key={link.label}
+                  onClick={() => handleNavClick(link.href)}
+                  className="px-3 py-2 text-[#90cdf4] hover:text-white text-sm font-bold tracking-wide transition-colors flex items-center gap-1.5 border border-[#90cdf4]/40 hover:border-white/60 rounded-sm"
+                >
+                  <Calendar size={13} />
+                  {link.label}
+                </button>
               ) : (
                 <button
                   key={link.label}

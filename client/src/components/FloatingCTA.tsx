@@ -18,7 +18,7 @@ export default function FloatingCTA() {
   }, []);
 
   const scrollToContact = () => {
-    const el = document.querySelector("#contact");
+    const el = document.querySelector("#schedule") || document.querySelector("#contact");
     if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: "smooth" });
   };
 

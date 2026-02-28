@@ -20,6 +20,20 @@ export default function LLCIntakeForm() {
   });
 
   useEffect(() => {
+    document.title = "LLC Formation Intake Form | The Satterwhite Law Firm, PLLC";
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) {
+      canonical = document.createElement("link") as HTMLLinkElement;
+      canonical.setAttribute("rel", "canonical");
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute("href", "https://www.satterwhitelawfirmpllc.com/llc-intake");
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute("content",
+        "Complete the LLC formation intake form for The Satterwhite Law Firm, PLLC. Business entity formation attorney serving Virginia and Maryland."
+      );
+    }
     // Scroll to top on mount
     window.scrollTo({ top: 0, behavior: "smooth" });
 

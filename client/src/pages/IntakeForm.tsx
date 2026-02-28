@@ -485,6 +485,23 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 `;
 
 export default function IntakeForm() {
+  useEffect(() => {
+    document.title = "Trust & Estate Planning Intake Form | The Satterwhite Law Firm, PLLC";
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) {
+      canonical = document.createElement("link") as HTMLLinkElement;
+      canonical.setAttribute("rel", "canonical");
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute("href", "https://www.satterwhitelawfirmpllc.com/intake");
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute("content",
+        "Complete the trust and estate planning intake form for The Satterwhite Law Firm, PLLC. Serving clients in Virginia and Maryland."
+      );
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
   const containerRef = useRef<HTMLDivElement>(null);
   const submitMutation = trpc.intake.submit.useMutation();
 

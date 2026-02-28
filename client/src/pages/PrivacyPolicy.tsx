@@ -423,6 +423,24 @@ export default function PrivacyPolicy() {
 
   useEffect(() => {
     document.title = "Privacy Policy | The Satterwhite Law Firm, PLLC";
+
+    // Canonical
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) {
+      canonical = document.createElement("link") as HTMLLinkElement;
+      canonical.setAttribute("rel", "canonical");
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute("href", "https://www.satterwhitelawfirmpllc.com/privacy-policy");
+
+    // Meta description
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute("content",
+        "Privacy Policy for The Satterwhite Law Firm, PLLC — Learn how we collect, use, and protect your personal information. Estate planning attorney serving Virginia and Maryland."
+      );
+    }
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 

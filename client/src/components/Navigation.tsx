@@ -8,7 +8,14 @@ import { Phone, Menu, X, ChevronDown, Calendar } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/FullLogo_1c4a4b4a.jpg";
 
-const navLinks = [
+type NavLink = {
+  label: string;
+  href: string;
+  children?: { label: string; href: string }[];
+  isPage?: boolean;
+};
+
+const navLinks: NavLink[] = [
   { label: "Home", href: "#home" },
   {
     label: "Practice Areas",
@@ -27,7 +34,7 @@ const navLinks = [
   { label: "Resources", href: "#resources" },
   { label: "Schedule", href: "#schedule" },
   { label: "Contact", href: "#contact" },
-  { label: "Client Intake Form", href: "/intake", external: true },
+  { label: "Client Intake Form", href: "/intake", isPage: true },
 ];
 
 export default function Navigation() {
@@ -130,6 +137,14 @@ export default function Navigation() {
                   <Calendar size={13} />
                   {link.label}
                 </button>
+              ) : link.isPage ? (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  className="px-3 py-2 text-white/85 hover:text-[#90cdf4] text-sm font-medium tracking-wide transition-colors"
+                >
+                  {link.label}
+                </a>
               ) : (
                 <button
                   key={link.label}
@@ -183,13 +198,23 @@ export default function Navigation() {
           <div className="container py-6 flex flex-col gap-1">
             {navLinks.map((link) => (
               <div key={link.label}>
-                <button
-                  onClick={() => handleNavClick(link.href)}
-                  className="block w-full text-left py-3 border-b border-white/10 text-white text-lg font-medium"
-                  style={{ fontFamily: "'Cormorant Garamond', serif" }}
-                >
-                  {link.label}
-                </button>
+                {link.isPage ? (
+                  <a
+                    href={link.href}
+                    className="block w-full text-left py-3 border-b border-white/10 text-white text-lg font-medium"
+                    style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => handleNavClick(link.href)}
+                    className="block w-full text-left py-3 border-b border-white/10 text-white text-lg font-medium"
+                    style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                  >
+                    {link.label}
+                  </button>
+                )}
                 {link.children && (
                   <div className="pl-4">
                     {link.children.map((child) => (

@@ -20,3 +20,4 @@
 - [x] Final SEO optimization — canonical URLs, meta tags, schema markup, Open Graph
 - [x] Create sitemap.xml and robots.txt
 - [x] Optimize index.html with keyword-rich title, description, and canonical tag
+- [x] Fix "Client Intake Form" nav button — currently calls handleNavClick instead of navigating to /intake

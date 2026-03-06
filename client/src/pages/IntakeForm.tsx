@@ -475,9 +475,21 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 <div id="successScreen" class="success-screen hidden">
   <div class="success-icon">&#10003;</div>
   <div class="success-title">Intake Form Submitted</div>
-  <div class="success-sub">Thank you. Our office will review your information and contact you within one business day to schedule your consultation.</div>
-  <div style="font-size:12px;color:var(--mid-gray);">The Satterwhite Law Firm, PLLC &nbsp;|&nbsp; 1605 Fort Hunt Ct &nbsp;|&nbsp; Alexandria, VA 22307</div>
-  <div style="margin-top:28px;"><button class="btn btn-secondary" onclick="window.print()">Print / Save PDF</button></div>
+  <div class="success-sub">Thank you for completing the intake form. A copy has been saved for your records.</div>
+  <div id="downloadConfirmation" style="display:none;margin:24px 0;padding:16px;background:#f0f9ff;border:1px solid #bfdbfe;border-radius:2px;">
+    <div style="font-size:13px;color:#1e40af;margin-bottom:8px;">✓ Your intake form has been downloaded</div>
+    <div style="font-size:12px;color:#3b82f6;">A formatted copy is ready for your records. Our office will also review your information and contact you within one business day.</div>
+  </div>
+  <div style="margin:28px 0;">
+    <div style="font-size:12px;color:var(--mid-gray);margin-bottom:16px;">Next step: Schedule your free consultation</div>
+    <a href="https://calendly.com/thesatterwhitelawfirm/consultation" target="_blank" class="btn btn-primary" style="display:inline-block;text-decoration:none;margin-right:12px;">📅 Book Consultation</a>
+    <a href="tel:+17038557380" class="btn btn-secondary" style="display:inline-block;text-decoration:none;">📞 Call Us</a>
+  </div>
+  <div style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <div style="font-size:12px;color:var(--mid-gray);margin-bottom:12px;">Or save a copy for your records:</div>
+    <button class="btn btn-secondary" onclick="window.print()">🖨️ Print / Save PDF</button>
+  </div>
+  <div style="font-size:12px;color:var(--mid-gray);margin-top:28px;">The Satterwhite Law Firm, PLLC &nbsp;|&nbsp; 1605 Fort Hunt Ct &nbsp;|&nbsp; Alexandria, VA 22307</div>
 </div>
 
 </div>
@@ -601,10 +613,11 @@ export default function IntakeForm() {
 
           var data = intakeCollectData();
           // Get client name for the PDF filename
-          var clientName = [g('g1-first'), g('g1-mid'), g('g1-last')].filter(Boolean).join(' ') || 'Client';
+          var getVal = function(id) { var el = document.getElementById(id); return el ? el.value : ''; };
+          var clientName = [getVal('g1-first'), getVal('g1-mid'), getVal('g1-last')].filter(Boolean).join(' ') || 'Client';
           data.clientName = clientName;
-          data.clientEmail = g('g1-email');
-          data.clientPhone = g('g1-phone');
+          data.clientEmail = getVal('g1-email');
+          data.clientPhone = getVal('g1-phone');
           data.submittedAt = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'full', timeStyle: 'short' });
 
           // Dispatch custom event so React can intercept

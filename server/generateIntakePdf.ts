@@ -1,162 +1,170 @@
 /**
  * generateIntakePdf.ts — Generate a professional PDF from trust intake form data
- * Converts the complete form data into a formatted, readable PDF document
+ * Uses markdown generation + manus-md-to-pdf for reliable PDF creation
  */
 
 import { storagePut } from "./storage";
 import { randomBytes } from "crypto";
+import { execSync } from "child_process";
+import * as fs from "fs";
+import * as path from "path";
 
 function randomSuffix(): string {
   return randomBytes(4).toString("hex");
 }
 
+function getFieldValue(formData: any, fieldId: string): string {
+  const val = formData[fieldId];
+  if (val === undefined || val === null || val === '') return '';
+  if (typeof val === 'boolean') return val ? 'Yes' : 'No';
+  return String(val).trim();
+}
+
+function generateMarkdownFromFormData(formData: any, clientName: string): string {
+  const lines: string[] = [];
+  
+  lines.push("# TRUST & ESTATE PLANNING INTAKE FORM");
+  lines.push("");
+  lines.push("**The Satterwhite Law Firm, PLLC**");
+  lines.push("");
+  lines.push("1605 Fort Hunt Ct • Alexandria, VA 22307 • (703) 855-7380");
+  lines.push("");
+  lines.push("---");
+  lines.push("");
+  
+  // Section 1: Client Information
+  lines.push("## SECTION 1: CLIENT INFORMATION");
+  lines.push("");
+  const firstName = getFieldValue(formData, 'g1-first');
+  const middleName = getFieldValue(formData, 'g1-mid');
+  const lastName = getFieldValue(formData, 'g1-last');
+  const fullName = [firstName, middleName, lastName].filter(Boolean).join(' ') || 'Not provided';
+  
+  lines.push(`**Full Name:** ${fullName}`);
+  lines.push(`**Date of Birth:** ${getFieldValue(formData, 'g1-dob') || 'Not provided'}`);
+  lines.push(`**Email:** ${getFieldValue(formData, 'g1-email') || 'Not provided'}`);
+  lines.push(`**Phone:** ${getFieldValue(formData, 'g1-phone') || 'Not provided'}`);
+  
+  const address = [
+    getFieldValue(formData, 'g1-addr'),
+    getFieldValue(formData, 'g1-city'),
+    getFieldValue(formData, 'g1-state'),
+    getFieldValue(formData, 'g1-zip')
+  ].filter(Boolean).join(', ') || 'Not provided';
+  lines.push(`**Address:** ${address}`);
+  
+  lines.push(`**Marital Status:** ${getFieldValue(formData, 'g1-marital') || 'Not provided'}`);
+  lines.push("");
+  
+  // Section 2: Family Information
+  lines.push("## SECTION 2: FAMILY INFORMATION");
+  lines.push("");
+  const spouseFirst = getFieldValue(formData, 'spouse-first');
+  const spouseLast = getFieldValue(formData, 'spouse-last');
+  const spouseName = [spouseFirst, spouseLast].filter(Boolean).join(' ') || 'Not provided';
+  lines.push(`**Spouse/Partner:** ${spouseName}`);
+  lines.push("");
+  
+  // Section 3: Assets
+  lines.push("## SECTION 3: ASSETS & PROPERTY");
+  lines.push("");
+  lines.push(`**Estimated Total Estate Value:** ${getFieldValue(formData, 'estate-value') || 'Not provided'}`);
+  lines.push(`**Prior Estate Planning:** ${getFieldValue(formData, 'prior-planning') || 'Not provided'}`);
+  lines.push("");
+  
+  // Section 4: Distribution
+  lines.push("## SECTION 4: DISTRIBUTION PLAN");
+  lines.push("");
+  lines.push(`**Trustee Distribution Standard:** ${getFieldValue(formData, 'lifetime-standard') || 'Not provided'}`);
+  lines.push(`**Spouse Receives:** ${getFieldValue(formData, 'spouse-receives') || 'Not provided'}`);
+  lines.push(`**Children Distribution:** ${getFieldValue(formData, 'children-distribution') || 'Not provided'}`);
+  lines.push("");
+  
+  // Section 5: Fiduciaries
+  lines.push("## SECTION 5: FIDUCIARIES");
+  lines.push("");
+  lines.push(`**Successor Trustee:** ${getFieldValue(formData, 'trustee1') || 'Not provided'}`);
+  lines.push(`**Alternate Trustee:** ${getFieldValue(formData, 'trustee2') || 'Not provided'}`);
+  lines.push(`**Financial POA Agent:** ${getFieldValue(formData, 'poa1') || 'Not provided'}`);
+  lines.push(`**Health Care Agent:** ${getFieldValue(formData, 'hca1') || 'Not provided'}`);
+  lines.push("");
+  
+  // Section 6: Powers of Attorney & Medical Directives
+  lines.push("## SECTION 6: POWERS OF ATTORNEY & MEDICAL DIRECTIVES");
+  lines.push("");
+  lines.push(`**Financial POA Effective Date:** ${getFieldValue(formData, 'poa-effective') || 'Not provided'}`);
+  lines.push(`**Life-Sustaining Treatment:** ${getFieldValue(formData, 'life-sustaining') || 'Not provided'}`);
+  lines.push(`**Organ Donation:** ${getFieldValue(formData, 'organ-donation') || 'Not provided'}`);
+  lines.push(`**Burial/Cremation Preference:** ${getFieldValue(formData, 'burial-preference') || 'Not provided'}`);
+  lines.push("");
+  
+  // Section 7: Review & Notes
+  lines.push("## SECTION 7: REVIEW & ADDITIONAL NOTES");
+  lines.push("");
+  const attorneyNotes = getFieldValue(formData, 'attorney-notes');
+  lines.push(`**Attorney Notes:** ${attorneyNotes || 'None provided'}`);
+  lines.push("");
+  const preferredTimes = getFieldValue(formData, 'preferred-times');
+  lines.push(`**Preferred Meeting Times:** ${preferredTimes || 'Not specified'}`);
+  lines.push("");
+  
+  // Footer
+  lines.push("---");
+  lines.push("");
+  lines.push(`**Client Name:** ${clientName}`);
+  lines.push(`**Submitted:** ${new Date().toLocaleString()}`);
+  lines.push("");
+  lines.push("*This form is confidential and protected by attorney-client privilege.*");
+  
+  return lines.join("\n");
+}
+
 export async function generateIntakePdf(formData: any, clientName: string): Promise<string | null> {
+  const tempDir = "/tmp";
+  const tempMarkdownPath = path.join(tempDir, `intake-${randomSuffix()}.md`);
+  const tempPdfPath = path.join(tempDir, `intake-${randomSuffix()}.pdf`);
+
   try {
-    // Build a comprehensive text document from the form data
-    const sections = [];
+    // Generate markdown content
+    const markdownContent = generateMarkdownFromFormData(formData, clientName);
+    
+    // Write markdown to temp file
+    fs.writeFileSync(tempMarkdownPath, markdownContent, "utf-8");
 
-    // Header
-    sections.push("═══════════════════════════════════════════════════════════");
-    sections.push("TRUST & ESTATE PLANNING INTAKE FORM");
-    sections.push("The Satterwhite Law Firm, PLLC");
-    sections.push("═══════════════════════════════════════════════════════════");
-    sections.push("");
-
-    // Section 1: Client Information
-    sections.push("SECTION 1: CLIENT INFORMATION");
-    sections.push("───────────────────────────────────────────────────────────");
-    if (formData.g1) {
-      sections.push(`Full Name: ${formData.g1.firstName || ""} ${formData.g1.lastName || ""}`);
-      sections.push(`Date of Birth: ${formData.g1.dob || ""}`);
-      sections.push(`Email: ${formData.g1.email || ""}`);
-      sections.push(`Phone: ${formData.g1.phone || ""}`);
-      sections.push(`Address: ${formData.g1.address || ""}, ${formData.g1.city || ""}, ${formData.g1.state || ""} ${formData.g1.zip || ""}`);
-      sections.push(`Marital Status: ${formData.g1.maritalStatus || ""}`);
-      sections.push(`State(s) of Residency: ${Array.isArray(formData.g1.states) ? formData.g1.states.join(", ") : formData.g1.states || ""}`);
+    // Convert markdown to PDF using manus-md-to-pdf
+    try {
+      execSync(`manus-md-to-pdf "${tempMarkdownPath}" "${tempPdfPath}"`, {
+        encoding: "utf-8",
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+    } catch (e) {
+      console.error("[generateIntakePdf] PDF conversion failed:", e);
+      try { fs.unlinkSync(tempMarkdownPath); } catch (err) {}
+      return null;
     }
-    sections.push("");
 
-    // Section 2: Family Information
-    sections.push("SECTION 2: FAMILY INFORMATION");
-    sections.push("───────────────────────────────────────────────────────────");
-    if (formData.g2) {
-      if (formData.g2.spouse) {
-        sections.push(`Spouse Name: ${formData.g2.spouse.name || ""}`);
-        sections.push(`Spouse DOB: ${formData.g2.spouse.dob || ""}`);
-      }
-      if (formData.g2.children && formData.g2.children.length > 0) {
-        sections.push("Children:");
-        formData.g2.children.forEach((child: any, idx: number) => {
-          sections.push(`  ${idx + 1}. ${child.name || ""} (DOB: ${child.dob || ""})`);
-        });
-      }
-      if (formData.g2.grandchildren && formData.g2.grandchildren.length > 0) {
-        sections.push("Grandchildren:");
-        formData.g2.grandchildren.forEach((gc: any, idx: number) => {
-          sections.push(`  ${idx + 1}. ${gc.name || ""}`);
-        });
-      }
+    // Check if PDF was created
+    if (!fs.existsSync(tempPdfPath)) {
+      console.error("[generateIntakePdf] PDF file was not created");
+      try { fs.unlinkSync(tempMarkdownPath); } catch (err) {}
+      return null;
     }
-    sections.push("");
 
-    // Section 3: Assets & Liabilities
-    sections.push("SECTION 3: ASSETS & LIABILITIES");
-    sections.push("───────────────────────────────────────────────────────────");
-    if (formData.g3) {
-      sections.push(`Real Estate: ${formData.g3.realEstate || "Not specified"}`);
-      sections.push(`Bank/Investment Accounts: ${formData.g3.bankAccounts || "Not specified"}`);
-      sections.push(`Business Interests: ${formData.g3.businessInterests || "Not specified"}`);
-      sections.push(`Life Insurance: ${formData.g3.lifeInsurance || "Not specified"}`);
-      sections.push(`Retirement Accounts: ${formData.g3.retirementAccounts || "Not specified"}`);
-      sections.push(`Digital Assets: ${formData.g3.digitalAssets || "Not specified"}`);
-      sections.push(`Liabilities: ${formData.g3.liabilities || "Not specified"}`);
-    }
-    sections.push("");
+    // Read the PDF and upload to S3
+    const pdfBuffer = fs.readFileSync(tempPdfPath);
+    const fileKey = `intake-forms/${clientName.replace(/\s+/g, "-").toLowerCase()}-${randomSuffix()}.pdf`;
+    const { url } = await storagePut(fileKey, pdfBuffer, "application/pdf");
 
-    // Section 4: Distribution Plan
-    sections.push("SECTION 4: DISTRIBUTION PLAN");
-    sections.push("───────────────────────────────────────────────────────────");
-    if (formData.g4) {
-      sections.push(`Primary Distribution Plan: ${formData.g4.distributionPlan || "Not specified"}`);
-      if (formData.g4.customDistribution) {
-        sections.push(`Custom Distribution: ${formData.g4.customDistribution}`);
-      }
-      if (formData.g4.specificBequests && formData.g4.specificBequests.length > 0) {
-        sections.push("Specific Bequests:");
-        formData.g4.specificBequests.forEach((bequest: any, idx: number) => {
-          sections.push(`  ${idx + 1}. ${bequest.description || ""} → ${bequest.recipient || ""}`);
-        });
-      }
-    }
-    sections.push("");
-
-    // Section 5: Fiduciaries
-    sections.push("SECTION 5: FIDUCIARIES");
-    sections.push("───────────────────────────────────────────────────────────");
-    if (formData.g5) {
-      if (formData.g5.trustee) {
-        sections.push(`Trustee: ${formData.g5.trustee.name || ""} (${formData.g5.trustee.relationship || ""})`);
-      }
-      if (formData.g5.alternateSuccessorTrustees && formData.g5.alternateSuccessorTrustees.length > 0) {
-        sections.push("Alternate/Successor Trustees:");
-        formData.g5.alternateSuccessorTrustees.forEach((trustee: any, idx: number) => {
-          sections.push(`  ${idx + 1}. ${trustee.name || ""} (${trustee.relationship || ""})`);
-        });
-      }
-      if (formData.g5.executor) {
-        sections.push(`Executor: ${formData.g5.executor.name || ""} (${formData.g5.executor.relationship || ""})`);
-      }
-      if (formData.g5.guardian) {
-        sections.push(`Guardian for Minor Children: ${formData.g5.guardian.name || ""} (${formData.g5.guardian.relationship || ""})`);
-      }
-    }
-    sections.push("");
-
-    // Section 6: Powers of Attorney & Medical Directives
-    sections.push("SECTION 6: POWERS OF ATTORNEY & MEDICAL DIRECTIVES");
-    sections.push("───────────────────────────────────────────────────────────");
-    if (formData.g6) {
-      if (formData.g6.financialPoaAgent) {
-        sections.push(`Financial POA Agent: ${formData.g6.financialPoaAgent.name || ""} (${formData.g6.financialPoaAgent.relationship || ""})`);
-      }
-      if (formData.g6.healthCareAgent) {
-        sections.push(`Health Care Agent: ${formData.g6.healthCareAgent.name || ""} (${formData.g6.healthCareAgent.relationship || ""})`);
-      }
-      sections.push(`Life-Sustaining Treatment Preference: ${formData.g6.lifeSustainingPreference || "Not specified"}`);
-      sections.push(`Organ/Tissue Donation: ${formData.g6.organDonation || "Not specified"}`);
-      sections.push(`Funeral/Burial Preference: ${formData.g6.funeralPreference || "Not specified"}`);
-    }
-    sections.push("");
-
-    // Section 7: Review & Additional Notes
-    sections.push("SECTION 7: REVIEW & ADDITIONAL NOTES");
-    sections.push("───────────────────────────────────────────────────────────");
-    if (formData.g7) {
-      sections.push(`Attorney Notes: ${formData.g7.attorneyNotes || "None"}`);
-      sections.push(`Preferred Meeting Format: ${formData.g7.preferredFormat || "Not specified"}`);
-      sections.push(`Preferred Times: ${formData.g7.preferredTimes || "Not specified"}`);
-    }
-    sections.push("");
-
-    // Footer
-    sections.push("═══════════════════════════════════════════════════════════");
-    sections.push("This form was completed on: " + new Date().toLocaleString("en-US", {
-      timeZone: "America/New_York",
-      dateStyle: "full",
-      timeStyle: "short",
-    }));
-    sections.push("═══════════════════════════════════════════════════════════");
-
-    // Convert to text document
-    const textContent = sections.join("\n");
-
-    // Upload the text document to S3
-    const fileKey = `intake-forms/${clientName.replace(/\s+/g, "-").toLowerCase()}-${randomSuffix()}.txt`;
-    const { url } = await storagePut(fileKey, textContent, "text/plain");
+    // Clean up temp files
+    try { fs.unlinkSync(tempMarkdownPath); } catch (e) {}
+    try { fs.unlinkSync(tempPdfPath); } catch (e) {}
 
     return url;
   } catch (error) {
     console.error("[generateIntakePdf] Error generating PDF:", error);
+    // Clean up temp files
+    try { fs.unlinkSync(tempMarkdownPath); } catch (e) {}
+    try { fs.unlinkSync(tempPdfPath); } catch (e) {}
     return null;
   }
 }

@@ -24,3 +24,5 @@
 - [x] Fix trust intake form email — capture all 7 sections, generate PDF attachment, and allow client download on success screen
 - [x] Add post-download confirmation and "Book Consultation" button to intake form success screen
 - [x] Fix intake form email PDF attachment — PDF now generated and link included in email notification
+- [ ] Fix intake form PDF generation — currently empty with giant formatting; need to capture all form data and use proper formatting
+- [ ] Attach PDF directly to email notification instead of just including a download link

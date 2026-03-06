@@ -55,7 +55,19 @@ export const appRouter = router({
           console.error("Failed to parse form data JSON", e);
         }
 
+        // Generate PDF from the complete form data
+        let pdfUrl: string | null = null;
+        try {
+          pdfUrl = await generateIntakePdf(formData, input.clientName);
+        } catch (e) {
+          console.error('[Intake Form] PDF generation failed:', e);
+        }
+
         // Generate a formatted text summary from the form data
+        const pdfSection = pdfUrl 
+          ? `📥 DOWNLOAD COMPLETE FORM\n${pdfUrl}\n`
+          : `⚠️ PDF generation failed - form data captured but PDF unavailable\n`;
+
         const content = [
           `📋 NEW TRUST INTAKE FORM SUBMISSION`,
           `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
@@ -65,21 +77,14 @@ export const appRouter = router({
           `📞 Phone: ${input.clientPhone || '—'}`,
           ``,
           `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-          `✅ COMPLETE FORM DATA ATTACHED AS PDF`,
+          `✅ COMPLETE FORM DATA CAPTURED`,
           ``,
-          `All 7 sections of the intake form (Client Info, Family, Assets, Distribution, Fiduciaries, POA/AMD, and Review) have been captured and are included in the attached PDF document.`,
+          `All 7 sections of the intake form (Client Info, Family, Assets, Distribution, Fiduciaries, POA/AMD, and Review) have been captured.`,
           ``,
+          pdfSection,
           `🕐 Submitted: ${submittedAt} (ET)`,
           `Reply to: ${input.clientEmail}`,
         ].join("\n");
-
-        // Generate PDF from the complete form data
-        let pdfUrl: string | null = null;
-        try {
-          pdfUrl = await generateIntakePdf(formData, input.clientName);
-        } catch (e) {
-          console.error('[Intake Form] PDF generation failed:', e);
-        }
 
         // Send the notification
         const notified = await notifyOwner({

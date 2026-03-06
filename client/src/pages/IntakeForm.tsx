@@ -556,21 +556,40 @@ export default function IntakeForm() {
         }
 
         function intakeCollectData() {
-          var g = function(id) { var el = document.getElementById(id); return el ? el.value || '' : ''; };
-          var data = {
-            clientName: [g('g1-first'), g('g1-mid'), g('g1-last')].filter(Boolean).join(' '),
-            clientEmail: g('g1-email'),
-            clientPhone: g('g1-phone'),
-            clientDob: g('g1-dob'),
-            clientAddress: [g('g1-addr'), g('g1-city'), g('g1-state'), g('g1-zip')].filter(Boolean).join(', '),
-            maritalStatus: g('g1-marital'),
-            successorTrustee: g('trustee1'),
-            poaAgent: g('poa1'),
-            healthCareAgent: g('hca1'),
-            attorneyNotes: g('attorney-notes'),
-            preferredTimes: g('preferred-times'),
-          };
-          return data;
+          // Collect ALL form data from all sections
+          var formData = {};
+          var inputs = document.querySelectorAll('#intake-wrapper input, #intake-wrapper select, #intake-wrapper textarea');
+          inputs.forEach(function(el) {
+            if (el.id) {
+              if (el.type === 'checkbox') {
+                formData[el.id] = el.checked;
+              } else if (el.type === 'radio') {
+                if (el.checked) formData[el.name] = el.value || el.textContent;
+              } else {
+                formData[el.id] = el.value || '';
+              }
+            }
+          });
+          // Also capture subsection data (dynamically added children, assets, etc.)
+          var subsections = document.querySelectorAll('#intake-wrapper .subsection');
+          var subsectionData = [];
+          subsections.forEach(function(sub) {
+            var title = sub.querySelector('.subsection-title');
+            var fields = {};
+            var inputs = sub.querySelectorAll('input, select, textarea');
+            inputs.forEach(function(el) {
+              if (el.id) fields[el.id] = el.value || '';
+              else if (el.name) fields[el.name] = el.value || '';
+            });
+            if (Object.keys(fields).length > 0) {
+              subsectionData.push({
+                title: title ? title.textContent : 'Section',
+                fields: fields
+              });
+            }
+          });
+          formData.subsections = subsectionData;
+          return formData;
         }
 
         function intakeSubmitForm() {
@@ -581,6 +600,12 @@ export default function IntakeForm() {
           if (errEl) errEl.classList.add('hidden');
 
           var data = intakeCollectData();
+          // Get client name for the PDF filename
+          var clientName = [g('g1-first'), g('g1-mid'), g('g1-last')].filter(Boolean).join(' ') || 'Client';
+          data.clientName = clientName;
+          data.clientEmail = g('g1-email');
+          data.clientPhone = g('g1-phone');
+          data.submittedAt = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'full', timeStyle: 'short' });
 
           // Dispatch custom event so React can intercept
           var event = new CustomEvent('intakeFormSubmit', { detail: data, bubbles: true });
@@ -695,19 +720,61 @@ export default function IntakeForm() {
       const errEl = document.getElementById("submit-error-msg");
 
       try {
-        await submitMutation.mutateAsync({
+        const result = await submitMutation.mutateAsync({
           clientName: detail.clientName || "Unknown",
           clientEmail: detail.clientEmail || "",
           clientPhone: detail.clientPhone || "",
-          clientDob: detail.clientDob || "",
-          clientAddress: detail.clientAddress || "",
-          maritalStatus: detail.maritalStatus || "",
-          successorTrustee: detail.successorTrustee || "",
-          poaAgent: detail.poaAgent || "",
-          healthCareAgent: detail.healthCareAgent || "",
-          attorneyNotes: detail.attorneyNotes || "",
-          preferredTimes: detail.preferredTimes || "",
+          submittedAt: detail.submittedAt || new Date().toISOString(),
+          formDataJson: JSON.stringify(detail),
         });
+
+        // Generate a formatted text document on the client side
+        const formatValue = (val: any) => {
+          if (val === null || val === undefined || val === '') return '—';
+          if (typeof val === 'boolean') return val ? 'Yes' : 'No';
+          return String(val);
+        };
+
+        const sections: string[] = [];
+        sections.push('TRUST & ESTATE PLANNING CLIENT INTAKE FORM');
+        sections.push('The Satterwhite Law Firm, PLLC');
+        sections.push('1605 Fort Hunt Ct • Alexandria, VA 22307');
+        sections.push('═'.repeat(70));
+        sections.push('');
+        sections.push('SECTION 1: CLIENT INFORMATION');
+        sections.push('─'.repeat(70));
+        sections.push(`Primary Client: ${formatValue(detail['g1-first'])} ${formatValue(detail['g1-mid'])} ${formatValue(detail['g1-last'])}`);
+        sections.push(`Date of Birth: ${formatValue(detail['g1-dob'])}`);
+        sections.push(`Email: ${formatValue(detail['g1-email'])}`);
+        sections.push(`Phone: ${formatValue(detail['g1-phone'])}`);
+        sections.push(`Address: ${formatValue(detail['g1-addr'])} ${formatValue(detail['g1-city'])}, ${formatValue(detail['g1-state'])} ${formatValue(detail['g1-zip'])}`);
+        sections.push('');
+        sections.push('KEY FIDUCIARIES');
+        sections.push('─'.repeat(70));
+        sections.push(`Successor Trustee: ${formatValue(detail['trustee1'])}`);
+        sections.push(`Financial POA Agent: ${formatValue(detail['poa1'])}`);
+        sections.push(`Health Care Agent: ${formatValue(detail['hca1'])}`);
+        sections.push('');
+        sections.push('PREFERENCES & INSTRUCTIONS');
+        sections.push('─'.repeat(70));
+        sections.push(`Preferred Contact Method: ${formatValue(detail['preferred-method'] || 'Not specified')}`);
+        sections.push(`Preferred Times: ${formatValue(detail['preferred-times'] || 'Not specified')}`);
+        sections.push(`Attorney Notes: ${formatValue(detail['attorney-notes'] || 'None')}`);
+        sections.push('');
+        sections.push('═'.repeat(70));
+        sections.push(`Submitted: ${detail.submittedAt}`);
+        sections.push(`Client: ${detail.clientName}`);
+        sections.push('');
+        sections.push('This is a confidential document protected by attorney-client privilege.');
+        sections.push('The Satterwhite Law Firm, PLLC');
+
+        const documentContent = sections.join('\n');
+        const blob = new Blob([documentContent], { type: 'text/plain' });
+        const downloadUrl = URL.createObjectURL(blob);
+
+        // Store data for potential download
+        (window as any).intakeFormData = detail;
+        (window as any).intakePdfUrl = downloadUrl;
 
         // Show success screen
         const progressBar = document.getElementById("progressBar");
@@ -717,7 +784,23 @@ export default function IntakeForm() {
         if (progressBar) progressBar.style.display = "none";
         if (activeSection) activeSection.style.display = "none";
         if (navBar) navBar.style.display = "none";
-        if (successScreen) successScreen.classList.remove("hidden");
+        if (successScreen) {
+          successScreen.classList.remove("hidden");
+          // Add download button for the generated document
+          const downloadBtn = document.createElement('a');
+          downloadBtn.href = downloadUrl;
+          downloadBtn.download = `Trust_Intake_${(detail.clientName || 'Form').replace(/\s+/g, '_')}.txt`;
+          downloadBtn.className = 'btn btn-primary';
+          downloadBtn.style.display = 'inline-block';
+          downloadBtn.style.marginTop = '20px';
+          downloadBtn.style.marginRight = '12px';
+          downloadBtn.style.textDecoration = 'none';
+          downloadBtn.textContent = '📥 Download Your Intake Form';
+          const successContent = successScreen.querySelector('.success-sub');
+          if (successContent && successContent.parentNode) {
+            successContent.parentNode.insertBefore(downloadBtn, successContent.nextSibling);
+          }
+        }
         window.scrollTo({ top: 0, behavior: "smooth" });
       } catch {
         if (btn) {

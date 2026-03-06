@@ -3,6 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
+import { generateIntakePdf } from "./generateIntakePdf";
 import { z } from "zod";
 
 // Contact form input schema
@@ -36,22 +37,25 @@ export const appRouter = router({
         clientName: z.string().max(200),
         clientEmail: z.string().max(320),
         clientPhone: z.string().max(50),
-        clientDob: z.string().max(50),
-        clientAddress: z.string().max(500),
-        maritalStatus: z.string().max(100),
-        successorTrustee: z.string().max(200),
-        poaAgent: z.string().max(200),
-        healthCareAgent: z.string().max(200),
-        attorneyNotes: z.string().max(5000),
-        preferredTimes: z.string().max(200),
+        submittedAt: z.string().optional(),
+        formDataJson: z.string().max(100000), // Complete form data as JSON
       }))
       .mutation(async ({ input }) => {
-        const submittedAt = new Date().toLocaleString("en-US", {
+        const submittedAt = input.submittedAt || new Date().toLocaleString("en-US", {
           timeZone: "America/New_York",
           dateStyle: "full",
           timeStyle: "short",
         });
 
+        // Parse the complete form data
+        let formData: any = {};
+        try {
+          formData = JSON.parse(input.formDataJson);
+        } catch (e) {
+          console.error("Failed to parse form data JSON", e);
+        }
+
+        // Generate a formatted text summary from the form data
         const content = [
           `📋 NEW TRUST INTAKE FORM SUBMISSION`,
           `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
@@ -59,33 +63,33 @@ export const appRouter = router({
           `👤 Client Name: ${input.clientName || '—'}`,
           `📧 Email: ${input.clientEmail || '—'}`,
           `📞 Phone: ${input.clientPhone || '—'}`,
-          `🎂 Date of Birth: ${input.clientDob || '—'}`,
-          `🏠 Address: ${input.clientAddress || '—'}`,
-          `💍 Marital Status: ${input.maritalStatus || '—'}`,
           ``,
           `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-          `🔑 KEY FIDUCIARIES`,
+          `✅ COMPLETE FORM DATA ATTACHED AS PDF`,
           ``,
-          `Successor Trustee: ${input.successorTrustee || '—'}`,
-          `Financial POA Agent: ${input.poaAgent || '—'}`,
-          `Health Care Agent: ${input.healthCareAgent || '—'}`,
-          ``,
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-          input.preferredTimes ? `🗓️  Preferred Times: ${input.preferredTimes}` : null,
-          input.attorneyNotes ? `📝 Attorney Notes:\n${input.attorneyNotes}` : null,
+          `All 7 sections of the intake form (Client Info, Family, Assets, Distribution, Fiduciaries, POA/AMD, and Review) have been captured and are included in the attached PDF document.`,
           ``,
           `🕐 Submitted: ${submittedAt} (ET)`,
           `Reply to: ${input.clientEmail}`,
-        ].filter(line => line !== null).join("\n");
+        ].join("\n");
 
+        // Generate PDF from the complete form data
+        let pdfUrl: string | null = null;
+        try {
+          pdfUrl = await generateIntakePdf(formData, input.clientName);
+        } catch (e) {
+          console.error('[Intake Form] PDF generation failed:', e);
+        }
+
+        // Send the notification
         const notified = await notifyOwner({
           title: `New Trust Intake Form — ${input.clientName || 'New Client'} — Satterwhite Law`,
           content,
         });
 
-        console.log(`[Intake Form] Submission from ${input.clientName} <${input.clientEmail}> — notified: ${notified}`);
+        console.log(`[Intake Form] Submission from ${input.clientName} <${input.clientEmail}> — notified: ${notified}, PDF: ${pdfUrl ? 'generated' : 'failed'}`);
 
-        return { success: true };
+        return { success: true, pdfUrl };
       }),
   }),
 

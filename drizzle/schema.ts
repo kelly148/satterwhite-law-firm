@@ -25,4 +25,18 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+// Intake form submissions table for storing client intake data
+export const intakeSubmissions = mysqlTable("intakeSubmissions", {
+  id: int("id").autoincrement().primaryKey(),
+  clientName: varchar("clientName", { length: 200 }).notNull(),
+  clientEmail: varchar("clientEmail", { length: 320 }).notNull(),
+  clientPhone: varchar("clientPhone", { length: 50 }),
+  formDataJson: text("formDataJson").notNull(), // Complete form data as JSON
+  pdfUrl: varchar("pdfUrl", { length: 500 }), // URL to generated PDF
+  pdfGenerated: timestamp("pdfGenerated"), // When PDF was generated
+  submittedAt: timestamp("submittedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type IntakeSubmission = typeof intakeSubmissions.$inferSelect;
+export type InsertIntakeSubmission = typeof intakeSubmissions.$inferInsert;

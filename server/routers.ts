@@ -4,6 +4,8 @@ import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { generateIntakePdf } from "./generateIntakePdf";
+import { intakeSubmissions } from "../drizzle/schema";
+import { getDb } from "./db";
 import { z } from "zod";
 
 // Contact form input schema
@@ -85,6 +87,23 @@ export const appRouter = router({
           `🕐 Submitted: ${submittedAt} (ET)`,
           `Reply to: ${input.clientEmail}`,
         ].join("\n");
+
+        // Store the submission in the database
+        try {
+          const db = await getDb();
+          if (db) {
+            await db.insert(intakeSubmissions).values({
+              clientName: input.clientName,
+              clientEmail: input.clientEmail,
+              clientPhone: input.clientPhone,
+              formDataJson: input.formDataJson,
+              pdfUrl: pdfUrl || undefined,
+              pdfGenerated: pdfUrl ? new Date() : undefined,
+            });
+          }
+        } catch (e) {
+          console.error('[Intake Form] Failed to store submission in database:', e);
+        }
 
         // Send the notification
         const notified = await notifyOwner({

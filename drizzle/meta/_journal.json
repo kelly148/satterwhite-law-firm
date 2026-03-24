@@ -8,6 +8,13 @@
       "when": 1772294673000,
       "tag": "0000_bizarre_lord_hawal",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1774388378812,
+      "tag": "0001_thin_sasquatch",
+      "breakpoints": true
     }
   ]
 }

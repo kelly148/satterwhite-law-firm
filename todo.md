@@ -26,3 +26,4 @@
 - [x] Fix intake form email PDF attachment — PDF now generated and link included in email notification
 - [x] Fix intake form PDF generation — replaced Python-based tool with pdfkit (Node.js) to eliminate SRE module mismatch error
 - [ ] Attach PDF directly to email notification instead of just including a download link
+- [x] Create intakeSubmissions database table to store client intake form data for recovery

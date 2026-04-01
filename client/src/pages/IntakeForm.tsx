@@ -741,53 +741,8 @@ export default function IntakeForm() {
           formDataJson: JSON.stringify(detail),
         });
 
-        // Generate a formatted text document on the client side
-        const formatValue = (val: any) => {
-          if (val === null || val === undefined || val === '') return '—';
-          if (typeof val === 'boolean') return val ? 'Yes' : 'No';
-          return String(val);
-        };
-
-        const sections: string[] = [];
-        sections.push('TRUST & ESTATE PLANNING CLIENT INTAKE FORM');
-        sections.push('The Satterwhite Law Firm, PLLC');
-        sections.push('1605 Fort Hunt Ct • Alexandria, VA 22307');
-        sections.push('═'.repeat(70));
-        sections.push('');
-        sections.push('SECTION 1: CLIENT INFORMATION');
-        sections.push('─'.repeat(70));
-        sections.push(`Primary Client: ${formatValue(detail['g1-first'])} ${formatValue(detail['g1-mid'])} ${formatValue(detail['g1-last'])}`);
-        sections.push(`Date of Birth: ${formatValue(detail['g1-dob'])}`);
-        sections.push(`Email: ${formatValue(detail['g1-email'])}`);
-        sections.push(`Phone: ${formatValue(detail['g1-phone'])}`);
-        sections.push(`Address: ${formatValue(detail['g1-addr'])} ${formatValue(detail['g1-city'])}, ${formatValue(detail['g1-state'])} ${formatValue(detail['g1-zip'])}`);
-        sections.push('');
-        sections.push('KEY FIDUCIARIES');
-        sections.push('─'.repeat(70));
-        sections.push(`Successor Trustee: ${formatValue(detail['trustee1'])}`);
-        sections.push(`Financial POA Agent: ${formatValue(detail['poa1'])}`);
-        sections.push(`Health Care Agent: ${formatValue(detail['hca1'])}`);
-        sections.push('');
-        sections.push('PREFERENCES & INSTRUCTIONS');
-        sections.push('─'.repeat(70));
-        sections.push(`Preferred Contact Method: ${formatValue(detail['preferred-method'] || 'Not specified')}`);
-        sections.push(`Preferred Times: ${formatValue(detail['preferred-times'] || 'Not specified')}`);
-        sections.push(`Attorney Notes: ${formatValue(detail['attorney-notes'] || 'None')}`);
-        sections.push('');
-        sections.push('═'.repeat(70));
-        sections.push(`Submitted: ${detail.submittedAt}`);
-        sections.push(`Client: ${detail.clientName}`);
-        sections.push('');
-        sections.push('This is a confidential document protected by attorney-client privilege.');
-        sections.push('The Satterwhite Law Firm, PLLC');
-
-        const documentContent = sections.join('\n');
-        const blob = new Blob([documentContent], { type: 'text/plain' });
-        const downloadUrl = URL.createObjectURL(blob);
-
-        // Store data for potential download
-        (window as any).intakeFormData = detail;
-        (window as any).intakePdfUrl = downloadUrl;
+        // Use the server-generated PDF URL if available
+        const pdfUrl: string | null = result?.pdfUrl || null;
 
         // Show success screen
         const progressBar = document.getElementById("progressBar");
@@ -799,19 +754,23 @@ export default function IntakeForm() {
         if (navBar) navBar.style.display = "none";
         if (successScreen) {
           successScreen.classList.remove("hidden");
-          // Add download button for the generated document
-          const downloadBtn = document.createElement('a');
-          downloadBtn.href = downloadUrl;
-          downloadBtn.download = `Trust_Intake_${(detail.clientName || 'Form').replace(/\s+/g, '_')}.txt`;
-          downloadBtn.className = 'btn btn-primary';
-          downloadBtn.style.display = 'inline-block';
-          downloadBtn.style.marginTop = '20px';
-          downloadBtn.style.marginRight = '12px';
-          downloadBtn.style.textDecoration = 'none';
-          downloadBtn.textContent = '📥 Download Your Intake Form';
-          const successContent = successScreen.querySelector('.success-sub');
-          if (successContent && successContent.parentNode) {
-            successContent.parentNode.insertBefore(downloadBtn, successContent.nextSibling);
+          // Add PDF download button if we have a URL from the server
+          if (pdfUrl) {
+            const downloadBtn = document.createElement('a');
+            downloadBtn.href = pdfUrl;
+            downloadBtn.target = '_blank';
+            downloadBtn.rel = 'noopener noreferrer';
+            downloadBtn.download = `Trust_Intake_${(detail.clientName || 'Form').replace(/\s+/g, '_')}.pdf`;
+            downloadBtn.className = 'btn btn-primary';
+            downloadBtn.style.display = 'inline-block';
+            downloadBtn.style.marginTop = '20px';
+            downloadBtn.style.marginRight = '12px';
+            downloadBtn.style.textDecoration = 'none';
+            downloadBtn.textContent = '📥 Download Your Intake Form (PDF)';
+            const successContent = successScreen.querySelector('.success-sub');
+            if (successContent && successContent.parentNode) {
+              successContent.parentNode.insertBefore(downloadBtn, successContent.nextSibling);
+            }
           }
         }
         window.scrollTo({ top: 0, behavior: "smooth" });

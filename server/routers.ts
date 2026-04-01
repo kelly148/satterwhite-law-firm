@@ -18,6 +18,195 @@ const contactFormSchema = z.object({
   preferredContact: z.enum(["email", "phone", "either"]).optional(),
 });
 
+/** Helper: safely get a string value from parsed form data */
+function fv(d: any, key: string, fallback = '—'): string {
+  const v = d?.[key];
+  if (v === undefined || v === null || v === '') return fallback;
+  if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+  return String(v).trim() || fallback;
+}
+
+/** Build a comprehensive plain-text summary of all 7 sections for the email body */
+function buildFullEmailBody(formData: any, clientName: string, submittedAt: string, pdfUrl: string | null): string {
+  const subsections: any[] = Array.isArray(formData.subsections) ? formData.subsections : [];
+
+  const line = '━'.repeat(60);
+  const thin = '─'.repeat(60);
+  const lines: string[] = [];
+
+  lines.push(`📋 NEW TRUST INTAKE FORM SUBMISSION`);
+  lines.push(line);
+  lines.push(`👤 Client: ${clientName}`);
+  lines.push(`📧 Email: ${fv(formData, 'g1-email')}`);
+  lines.push(`📞 Phone: ${fv(formData, 'g1-phone')}`);
+  lines.push(`🕐 Submitted: ${submittedAt} (ET)`);
+  if (pdfUrl) {
+    lines.push(`📥 PDF: ${pdfUrl}`);
+  } else {
+    lines.push(`⚠️  PDF generation failed — all data is in this email`);
+  }
+  lines.push('');
+
+  // ── SECTION 1: CLIENT INFORMATION ────────────────────────────────────────
+  lines.push(line);
+  lines.push('SECTION 1 — CLIENT INFORMATION');
+  lines.push(thin);
+  const firstName = fv(formData, 'g1-first', '');
+  const midName = fv(formData, 'g1-mid', '');
+  const lastName = fv(formData, 'g1-last', '');
+  const suffix = fv(formData, 'g1-suffix', '');
+  const fullName = [firstName, midName, lastName, suffix].filter(s => s && s !== '—').join(' ') || '—';
+  const address = [fv(formData, 'g1-addr', ''), fv(formData, 'g1-city', ''), fv(formData, 'g1-state', ''), fv(formData, 'g1-zip', '')].filter(s => s && s !== '—').join(', ') || '—';
+  lines.push(`Full Name:       ${fullName}`);
+  lines.push(`Date of Birth:   ${fv(formData, 'g1-dob')}`);
+  lines.push(`Place of Birth:  ${fv(formData, 'g1-pob')}`);
+  lines.push(`Email:           ${fv(formData, 'g1-email')}`);
+  lines.push(`Phone:           ${fv(formData, 'g1-phone')}`);
+  lines.push(`Address:         ${address}`);
+  lines.push(`Citizenship:     ${fv(formData, 'g1-citizen')}`);
+  lines.push(`Marital Status:  ${fv(formData, 'g1-marital')}`);
+
+  const spouseFirst = fv(formData, 'g2-first', '');
+  const spouseLast = fv(formData, 'g2-last', '');
+  if (spouseFirst !== '—' || spouseLast !== '—') {
+    lines.push('');
+    lines.push('Spouse / Partner (Grantor 2):');
+    lines.push(`  Name:  ${[spouseFirst, spouseLast].filter(s => s && s !== '—').join(' ') || '—'}`);
+    lines.push(`  DOB:   ${fv(formData, 'g2-dob')}`);
+    lines.push(`  Email: ${fv(formData, 'g2-email')}`);
+  }
+  lines.push('');
+
+  // ── SECTION 2: FAMILY & BENEFICIARIES ────────────────────────────────────
+  lines.push(line);
+  lines.push('SECTION 2 — FAMILY & BENEFICIARIES');
+  lines.push(thin);
+  const children = subsections.filter(s => s.title && (s.title.toLowerCase().includes('child') || /^child\s*\d+$/i.test(s.title)));
+  if (children.length > 0) {
+    lines.push(`Children (${children.length}):`);
+    children.forEach((c: any) => {
+      lines.push(`  ${c.title}:`);
+      Object.entries(c.fields || {}).forEach(([k, v]) => {
+        if (v && String(v).trim()) lines.push(`    ${k}: ${v}`);
+      });
+    });
+  } else {
+    lines.push('Children: None entered');
+  }
+  const otherBens = subsections.filter(s => s.title && s.title.toLowerCase().includes('beneficiar'));
+  if (otherBens.length > 0) {
+    lines.push('');
+    lines.push(`Other Beneficiaries (${otherBens.length}):`);
+    otherBens.forEach((b: any) => {
+      lines.push(`  ${b.title}:`);
+      Object.entries(b.fields || {}).forEach(([k, v]) => {
+        if (v && String(v).trim()) lines.push(`    ${k}: ${v}`);
+      });
+    });
+  }
+  lines.push('');
+
+  // ── SECTION 3: ASSETS & PROPERTY ─────────────────────────────────────────
+  lines.push(line);
+  lines.push('SECTION 3 — ASSETS & PROPERTY');
+  lines.push(thin);
+
+  const assetGroups: [string, string][] = [
+    ['Real Property', 'property'],
+    ['Financial Accounts', 'account'],
+    ['Retirement Accounts', 'retirement'],
+    ['Life Insurance', 'insurance'],
+    ['Business Interests', 'business'],
+    ['Other Assets', 'asset'],
+  ];
+
+  let hasAssets = false;
+  assetGroups.forEach(([label, keyword]) => {
+    const items = subsections.filter(s => s.title && s.title.toLowerCase().includes(keyword));
+    if (items.length > 0) {
+      hasAssets = true;
+      lines.push(`${label} (${items.length}):`);
+      items.forEach((item: any) => {
+        lines.push(`  ${item.title}:`);
+        Object.entries(item.fields || {}).forEach(([k, v]) => {
+          if (v && String(v).trim()) lines.push(`    ${k}: ${v}`);
+        });
+      });
+      lines.push('');
+    }
+  });
+  if (!hasAssets) lines.push('No assets entered');
+  lines.push('');
+
+  // ── SECTION 4: DISTRIBUTION PLAN ─────────────────────────────────────────
+  lines.push(line);
+  lines.push('SECTION 4 — DISTRIBUTION PLAN');
+  lines.push(thin);
+  lines.push(`Primary Distribution: ${fv(formData, 'distType')}`);
+  const bequests = subsections.filter(s => s.title && (s.title.toLowerCase().includes('bequest') || s.title.toLowerCase().includes('gift')));
+  if (bequests.length > 0) {
+    lines.push(`Specific Bequests (${bequests.length}):`);
+    bequests.forEach((b: any) => {
+      Object.entries(b.fields || {}).forEach(([k, v]) => {
+        if (v && String(v).trim()) lines.push(`  ${k}: ${v}`);
+      });
+    });
+  }
+  lines.push('');
+
+  // ── SECTION 5: FIDUCIARIES ────────────────────────────────────────────────
+  lines.push(line);
+  lines.push('SECTION 5 — FIDUCIARIES');
+  lines.push(thin);
+  lines.push(`Successor Trustee (Primary):    ${fv(formData, 'trustee1')}`);
+  lines.push(`Alternate Trustee (1st):        ${fv(formData, 'trustee2')}`);
+  lines.push(`Personal Representative:        ${fv(formData, 'executor1')}`);
+  const guardianNeeded = fv(formData, 'needsGuardian', '');
+  if (guardianNeeded === 'true' || guardianNeeded === 'on') {
+    lines.push(`Guardian (Primary):             ${fv(formData, 'guardian1')}`);
+    lines.push(`Guardian (Alternate):           ${fv(formData, 'guardian2')}`);
+  } else {
+    lines.push(`Guardian Nomination:            Not applicable`);
+  }
+  lines.push('');
+
+  // ── SECTION 6: POA & MEDICAL DIRECTIVES ──────────────────────────────────
+  lines.push(line);
+  lines.push('SECTION 6 — POWERS OF ATTORNEY & MEDICAL DIRECTIVES');
+  lines.push(thin);
+  lines.push(`Financial POA Agent (Primary):  ${fv(formData, 'poa1')}`);
+  lines.push(`Financial POA Agent (Alternate):${fv(formData, 'poa2')}`);
+  lines.push(`Health Care Agent (Primary):    ${fv(formData, 'hca1')}`);
+  lines.push(`Health Care Agent (Alternate):  ${fv(formData, 'hca2')}`);
+  lines.push(`Terminal Condition:             ${fv(formData, 'terminal')}`);
+  lines.push(`Persistent Vegetative State:    ${fv(formData, 'pvs')}`);
+  const hipaa = subsections.filter(s => s.title && s.title.toLowerCase().includes('hipaa'));
+  if (hipaa.length > 0) {
+    lines.push('HIPAA Authorized Individuals:');
+    hipaa.forEach((h: any) => {
+      Object.entries(h.fields || {}).forEach(([k, v]) => {
+        if (v && String(v).trim()) lines.push(`  ${k}: ${v}`);
+      });
+    });
+  }
+  lines.push('');
+
+  // ── SECTION 7: NOTES & PREFERENCES ───────────────────────────────────────
+  lines.push(line);
+  lines.push('SECTION 7 — NOTES & PREFERENCES');
+  lines.push(thin);
+  lines.push(`Attorney Notes:`);
+  lines.push(fv(formData, 'attorney-notes', 'None provided'));
+  lines.push('');
+  lines.push(`Preferred Consultation Times:   ${fv(formData, 'preferred-times')}`);
+  lines.push(`Preferred Consultation Method:  ${fv(formData, 'consult')}`);
+  lines.push('');
+  lines.push(line);
+  lines.push(`Reply to: ${fv(formData, 'g1-email')}`);
+
+  return lines.join('\n');
+}
+
 export const appRouter = router({
   system: systemRouter,
 
@@ -32,7 +221,7 @@ export const appRouter = router({
 
   intake: router({
     /**
-     * Submit trust intake form — sends a detailed notification to the firm owner
+     * Submit trust intake form — generates PDF, stores in DB, sends full notification
      */
     submit: publicProcedure
       .input(z.object({
@@ -40,7 +229,7 @@ export const appRouter = router({
         clientEmail: z.string().max(320),
         clientPhone: z.string().max(50),
         submittedAt: z.string().optional(),
-        formDataJson: z.string().max(100000), // Complete form data as JSON
+        formDataJson: z.string().max(200000), // Complete form data as JSON
       }))
       .mutation(async ({ input }) => {
         const submittedAt = input.submittedAt || new Date().toLocaleString("en-US", {
@@ -65,28 +254,8 @@ export const appRouter = router({
           console.error('[Intake Form] PDF generation failed:', e);
         }
 
-        // Generate a formatted text summary from the form data
-        const pdfSection = pdfUrl 
-          ? `📥 DOWNLOAD COMPLETE FORM\n${pdfUrl}\n`
-          : `⚠️ PDF generation failed - form data captured but PDF unavailable\n`;
-
-        const content = [
-          `📋 NEW TRUST INTAKE FORM SUBMISSION`,
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-          ``,
-          `👤 Client Name: ${input.clientName || '—'}`,
-          `📧 Email: ${input.clientEmail || '—'}`,
-          `📞 Phone: ${input.clientPhone || '—'}`,
-          ``,
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-          `✅ COMPLETE FORM DATA CAPTURED`,
-          ``,
-          `All 7 sections of the intake form (Client Info, Family, Assets, Distribution, Fiduciaries, POA/AMD, and Review) have been captured.`,
-          ``,
-          pdfSection,
-          `🕐 Submitted: ${submittedAt} (ET)`,
-          `Reply to: ${input.clientEmail}`,
-        ].join("\n");
+        // Build comprehensive email content with ALL form data
+        const content = buildFullEmailBody(formData, input.clientName, submittedAt, pdfUrl);
 
         // Store the submission in the database
         try {
@@ -182,7 +351,6 @@ export const appRouter = router({
   contact: router({
     /**
      * Submit contact form — sends a notification to the firm owner
-     * and attempts to send an email via the built-in notification service.
      */
     submit: publicProcedure
       .input(contactFormSchema)
@@ -195,7 +363,6 @@ export const appRouter = router({
           timeStyle: "short",
         });
 
-        // Build a rich notification content
         const notificationContent = [
           `📋 NEW CONTACT FORM SUBMISSION`,
           `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
@@ -217,7 +384,6 @@ export const appRouter = router({
           .filter(line => line !== null)
           .join("\n");
 
-        // Send notification to owner via Manus notification service
         const notified = await notifyOwner({
           title: `New Consultation Request from ${name} — Satterwhite Law Firm`,
           content: notificationContent,

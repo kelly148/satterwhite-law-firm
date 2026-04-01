@@ -27,3 +27,8 @@
 - [x] Fix intake form PDF generation — replaced Python-based tool with pdfkit (Node.js) to eliminate SRE module mismatch error
 - [ ] Attach PDF directly to email notification instead of just including a download link
 - [x] Create intakeSubmissions database table to store client intake form data for recovery
+- [x] Fix PDF to include ALL form fields (assets, distribution, family details, POA details, HIPAA, etc.) — currently only captures a subset
+- [x] Fix email notification to include the full formatted form data in the email body (not just name/email/phone + PDF link)
+- [x] Fix client download on success screen to generate a proper PDF (currently downloads a .txt file)
+- [x] Fix many form fields missing IDs — dynamically-added subsection fields captured via subsection collector instead
+- [x] Fix radio buttons in distribution and POA sections — captured via name attribute in intakeCollectData()

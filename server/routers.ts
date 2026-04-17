@@ -1,4 +1,6 @@
 import { COOKIE_NAME } from "@shared/const";
+import Stripe from "stripe";
+import { SERVICE_PRODUCTS, CUSTOM_MIN_CENTS, CUSTOM_MAX_CENTS } from "./stripeProducts";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
@@ -397,6 +399,99 @@ export const appRouter = router({
         };
       }),
   }),
+
+  payment: router({
+    /**
+     * List all available services/products for the payment page
+     */
+    listServices: publicProcedure.query(() => {
+      return SERVICE_PRODUCTS;
+    }),
+
+    /**
+     * Create a Stripe Checkout Session for a selected service or custom amount
+     */
+    createCheckout: publicProcedure
+      .input(
+        z.object({
+          serviceId: z.string().optional(), // one of SERVICE_PRODUCTS[].id
+          customAmountCents: z.number().int().optional(), // for custom amounts
+          customerName: z.string().max(200).optional(),
+          customerEmail: z.string().email().max(320).optional(),
+          origin: z.string().url(), // window.location.origin from frontend
+        })
+      )
+      .mutation(async ({ input }) => {
+        const stripe = getStripe();
+        if (!stripe) {
+          throw new Error("Payment processing is not configured. Please contact the office.");
+        }
+
+        let amount: number;
+        let productName: string;
+        let productDescription: string;
+
+        if (input.serviceId) {
+          const product = SERVICE_PRODUCTS.find(p => p.id === input.serviceId);
+          if (!product) throw new Error("Unknown service selected.");
+          amount = product.amount;
+          productName = product.name;
+          productDescription = product.description;
+        } else if (input.customAmountCents) {
+          if (input.customAmountCents < CUSTOM_MIN_CENTS) {
+            throw new Error(`Minimum payment is $${CUSTOM_MIN_CENTS / 100}.`);
+          }
+          if (input.customAmountCents > CUSTOM_MAX_CENTS) {
+            throw new Error(`Maximum payment is $${CUSTOM_MAX_CENTS / 100}.`);
+          }
+          amount = input.customAmountCents;
+          productName = "Legal Services Payment";
+          productDescription = "Payment to The Satterwhite Law Firm, PLLC";
+        } else {
+          throw new Error("Please select a service or enter a custom amount.");
+        }
+
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          mode: "payment",
+          allow_promotion_codes: true,
+          customer_email: input.customerEmail || undefined,
+          line_items: [
+            {
+              price_data: {
+                currency: "usd",
+                unit_amount: amount,
+                product_data: {
+                  name: productName,
+                  description: productDescription,
+                  images: [
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/FullLogo_1c4a4b4a.jpg",
+                  ],
+                },
+              },
+              quantity: 1,
+            },
+          ],
+          metadata: {
+            customer_name: input.customerName || "",
+            customer_email: input.customerEmail || "",
+            service_id: input.serviceId || "custom",
+          },
+          success_url: `${input.origin}/pay/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${input.origin}/pay`,
+        });
+
+        return { checkoutUrl: session.url };
+      }),
+  }),
 });
 
+// ── Stripe payment router ─────────────────────────────────────────────────────
+function getStripe(): Stripe | null {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) return null;
+  return new Stripe(key, { apiVersion: "2026-03-25.dahlia" });
+}
+
+export { appRouter as default };
 export type AppRouter = typeof appRouter;

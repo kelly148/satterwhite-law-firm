@@ -172,6 +172,12 @@ export default function Navigation() {
               >
                 LLC Intake
               </a>
+              <a
+                href="/pay"
+                className="text-xs py-1.5 px-3 border border-[#b8913f]/70 text-[#e2b96a] hover:bg-[#b8913f]/10 rounded-sm font-medium tracking-wide transition-colors text-center"
+              >
+                💳 Pay Online
+              </a>
             </div>
             <button
               onClick={() => handleNavClick("#contact")}
@@ -241,6 +247,12 @@ export default function Navigation() {
               className="block w-full text-center py-3 mt-2 border border-[#90cdf4]/60 text-[#90cdf4] text-base font-medium rounded-sm"
             >
               LLC Formation Intake Form
+            </a>
+            <a
+              href="/pay"
+              className="block w-full text-center py-3 mt-2 border border-[#b8913f]/70 text-[#e2b96a] text-base font-medium rounded-sm"
+            >
+              💳 Pay Online
             </a>
             <button
               onClick={() => handleNavClick("#contact")}

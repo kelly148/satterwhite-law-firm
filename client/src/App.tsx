@@ -9,6 +9,9 @@ import ColorOptions from "./pages/ColorOptions";
 import IntakeForm from "./pages/IntakeForm";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import LLCIntakeForm from "./pages/LLCIntakeForm";
+import Pay from "./pages/Pay";
+import PaySuccess from "./pages/PaySuccess";
+
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
@@ -18,6 +21,8 @@ function Router() {
       <Route path={"/intake"} component={IntakeForm} />
       <Route path={"/privacy-policy"} component={PrivacyPolicy} />
       <Route path={"/llc-intake"} component={LLCIntakeForm} />
+      <Route path={"/pay"} component={Pay} />
+      <Route path={"/pay/success"} component={PaySuccess} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

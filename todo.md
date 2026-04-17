@@ -32,3 +32,14 @@
 - [x] Fix client download on success screen to generate a proper PDF (currently downloads a .txt file)
 - [x] Fix many form fields missing IDs — dynamically-added subsection fields captured via subsection collector instead
 - [x] Fix radio buttons in distribution and POA sections — captured via name attribute in intakeCollectData()
+- [x] Add Stripe integration scaffold (webdev_add_feature)
+- [x] Build /pay page with selectable payment amounts (consultation fee, retainer, custom)
+- [x] Wire Stripe Checkout on the backend via tRPC
+- [x] Add payment success and cancel pages
+- [x] Add "Pay Online" link to navigation and contact section
+- [x] Write Stripe payment tests
+- [x] Fix Stripe webhook endpoint — return valid JSON with verified:true, register with express.raw before express.json
+- [x] Build /pay page with service fee options and Stripe Checkout
+- [x] Add payment success and cancel pages
+- [x] Add Pay Online link to navigation
+- [x] Write Stripe webhook and payment tests

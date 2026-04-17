@@ -32,6 +32,7 @@ export default function Pay() {
   const [customerEmail, setCustomerEmail] = useState("");
   const [isCustom, setIsCustom] = useState(false);
   const [memo, setMemo] = useState("");
+  const [matterNumber, setMatterNumber] = useState("");
 
   const selectedService = services?.find(s => s.id === selectedServiceId);
 
@@ -76,6 +77,7 @@ export default function Pay() {
         customerName: customerName.trim(),
         customerEmail: customerEmail.trim(),
         memo: memo.trim() || undefined,
+        matterNumber: matterNumber.trim() || undefined,
         origin: window.location.origin,
       });
 
@@ -320,6 +322,19 @@ export default function Pay() {
                       maxLength={200}
                     />
                     <div style={{ fontSize: 11, color: "#aaa", marginTop: 3 }}>Appears on your receipt and in our records</div>
+                  </div>
+                  <div>
+                    <Label htmlFor="payMatter" style={{ fontSize: 12, fontWeight: 600, color: "#555", marginBottom: 4, display: "block" }}>
+                      Matter / File # <span style={{ fontWeight: 400, color: "#999" }}>(optional)</span>
+                    </Label>
+                    <Input
+                      id="payMatter"
+                      placeholder="e.g. SLF-2026-042"
+                      value={matterNumber}
+                      onChange={e => setMatterNumber(e.target.value)}
+                      maxLength={50}
+                    />
+                    <div style={{ fontSize: 11, color: "#aaa", marginTop: 3 }}>Links this payment to an open client matter</div>
                   </div>
                 </div>
 

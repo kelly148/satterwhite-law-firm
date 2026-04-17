@@ -36,6 +36,20 @@
       "when": 1776437367764,
       "tag": "0004_orange_warpath",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1776454286065,
+      "tag": "0005_long_spyke",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1776454458435,
+      "tag": "0006_outgoing_anthem",
+      "breakpoints": true
     }
   ]
 }

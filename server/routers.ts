@@ -249,6 +249,67 @@ export const appRouter = router({
     }),
 
     /**
+     * Send the intake PDF to the client via email — admin only
+     */
+    sendPdfToClient: protectedProcedure
+      .input(z.object({ id: z.number().int() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") {
+          throw new Error("Admin access required.");
+        }
+        const db = await getDb();
+        if (!db) throw new Error("Database unavailable.");
+        const rows = await db
+          .select()
+          .from(intakeSubmissions)
+          .where(eq(intakeSubmissions.id, input.id))
+          .limit(1);
+        const submission = rows[0];
+        if (!submission) throw new Error("Submission not found.");
+        if (!submission.pdfUrl) throw new Error("No PDF available for this submission.");
+
+        const formType = submission.formType === "llc" ? "LLC Formation" : "Estate Planning Trust";
+        const emailBody = [
+          `Dear ${submission.clientName},`,
+          "",
+          `Thank you for completing your ${formType} intake form with The Satterwhite Law Firm, PLLC.`,
+          "A copy of your completed intake form is available at the link below:",
+          "",
+          submission.pdfUrl,
+          "",
+          "Our office will be in touch within one business day to discuss next steps.",
+          "If you have any questions in the meantime, please don't hesitate to reach out:",
+          "",
+          "  Phone: (703) 855-7380",
+          "  Email: kelly@thesatterwhitelawfirm.com",
+          "",
+          "Warm regards,",
+          "Kelly Satterwhite",
+          "The Satterwhite Law Firm, PLLC",
+          "1605 Fort Hunt Ct, Alexandria, VA 22307",
+        ].join("\n");
+
+        // Notify the owner to forward the PDF to the client
+        // (Direct client email is not available via built-in APIs; owner forwards manually)
+        await notifyOwner({
+          title: `Send PDF to Client — ${submission.clientName}`,
+          content: [
+            `Please forward the intake form PDF to the client:`,
+            ``,
+            `Client: ${submission.clientName}`,
+            `Email: ${submission.clientEmail}`,
+            `Phone: ${submission.clientPhone || "N/A"}`,
+            `Form Type: ${formType}`,
+            ``,
+            `PDF Link: ${submission.pdfUrl}`,
+            ``,
+            emailBody,
+          ].join("\n"),
+        });
+        return { success: true };
+      }),
+
+    /**
      * Get a single intake submission with full form data — admin only
      */
     getSubmission: protectedProcedure
@@ -480,6 +541,7 @@ export const appRouter = router({
           customerName: z.string().max(200).optional(),
           customerEmail: z.string().email().max(320).optional(),
           memo: z.string().max(200).optional(), // client-supplied note/memo
+          matterNumber: z.string().max(50).optional(), // matter/file number for bookkeeping
           origin: z.string().url(), // window.location.origin from frontend
         })
       )
@@ -546,6 +608,7 @@ export const appRouter = router({
             service_id: input.serviceId || "custom",
             service_name: productName,
             memo: input.memo || "",
+            matter_number: input.matterNumber || "",
           },
           success_url: `${input.origin}/pay/success?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${input.origin}/pay`,

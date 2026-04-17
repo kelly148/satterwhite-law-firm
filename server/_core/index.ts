@@ -8,6 +8,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { registerStripeWebhook } from "../stripeWebhook";
+import { registerCalendlyWebhook } from "../calendlyWebhook";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -35,6 +36,9 @@ async function startServer() {
   // ⚠️ Stripe webhook MUST be registered BEFORE express.json() so the raw body
   // is preserved for HMAC-SHA256 signature verification.
   registerStripeWebhook(app);
+
+  // Calendly webhook — registered before express.json() for consistency
+  registerCalendlyWebhook(app);
 
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));

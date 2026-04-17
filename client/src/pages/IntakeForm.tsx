@@ -482,7 +482,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   </div>
   <div style="margin:28px 0;">
     <div style="font-size:12px;color:var(--mid-gray);margin-bottom:16px;">Next step: Schedule your free consultation</div>
-    <a href="https://calendly.com/thesatterwhitelawfirm/consultation" target="_blank" class="btn btn-primary" style="display:inline-block;text-decoration:none;margin-right:12px;">📅 Book Consultation</a>
+    <a href="https://calendly.com/kelly-thesatterwhitelawfirm/30min" target="_blank" class="btn btn-primary" style="display:inline-block;text-decoration:none;margin-right:12px;">📅 Book Consultation</a>
     <a href="tel:+17038557380" class="btn btn-secondary" style="display:inline-block;text-decoration:none;">📞 Call Us</a>
   </div>
   <div style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">

@@ -70,7 +70,7 @@ export default function PaySuccess() {
                 <div style={{ fontWeight: 600, color: "#1a2744", fontSize: 14, marginBottom: 2 }}>Schedule Your Consultation</div>
                 <div style={{ fontSize: 13, color: "#666" }}>Book your appointment online at your convenience.</div>
                 <a
-                  href="https://calendly.com/thesatterwhitelawfirm/consultation"
+                  href="https://calendly.com/kelly-thesatterwhitelawfirm/30min"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ fontSize: 13, color: "#1a2744", fontWeight: 600, textDecoration: "underline", marginTop: 4, display: "inline-block" }}
@@ -101,7 +101,7 @@ export default function PaySuccess() {
 
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <a
-            href="https://calendly.com/thesatterwhitelawfirm/consultation"
+            href="https://calendly.com/kelly-thesatterwhitelawfirm/30min"
             target="_blank"
             rel="noopener noreferrer"
           >

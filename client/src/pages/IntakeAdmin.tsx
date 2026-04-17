@@ -167,6 +167,22 @@ export default function IntakeAdmin() {
     { enabled: selectedId !== null && isAuthenticated && user?.role === "admin" }
   );
 
+  const sendPdf = trpc.intake.sendPdfToClient.useMutation();
+  const [sendingId, setSendingId] = useState<number | null>(null);
+  const [sentIds, setSentIds] = useState<Set<number>>(new Set());
+
+  const handleSendPdf = async (id: number) => {
+    setSendingId(id);
+    try {
+      await sendPdf.mutateAsync({ id });
+      setSentIds(prev => new Set(Array.from(prev).concat(id)));
+    } catch (err: any) {
+      alert(err?.message || "Failed to send PDF. Please try again.");
+    } finally {
+      setSendingId(null);
+    }
+  };
+
   // ── Auth guard ────────────────────────────────────────────────────────────
   if (loading) {
     return (
@@ -353,14 +369,32 @@ export default function IntakeAdmin() {
                       )}
                     </td>
                     <td style={{ padding: "14px 16px" }}>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSelectedId(s.id)}
-                        style={{ fontSize: 12 }}
-                      >
-                        View Form
-                      </Button>
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedId(s.id)}
+                          style={{ fontSize: 12 }}
+                        >
+                          View Form
+                        </Button>
+                        {s.pdfUrl && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSendPdf(s.id)}
+                            disabled={sendingId === s.id || sentIds.has(s.id)}
+                            style={{
+                              fontSize: 12,
+                              background: sentIds.has(s.id) ? "#f0fdf4" : undefined,
+                              color: sentIds.has(s.id) ? "#16a34a" : undefined,
+                              borderColor: sentIds.has(s.id) ? "#86efac" : undefined,
+                            }}
+                          >
+                            {sendingId === s.id ? "Sending…" : sentIds.has(s.id) ? "✓ Sent" : "Send to Client"}
+                          </Button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -383,7 +417,16 @@ export default function IntakeAdmin() {
                   {selectedSubmission.clientEmail} &nbsp;·&nbsp; {selectedSubmission.clientPhone || "No phone"} &nbsp;·&nbsp;
                   Submitted {formatDate(selectedSubmission.submittedAt)}
                   {selectedSubmission.pdfUrl && (
-                    <> &nbsp;·&nbsp; <a href={selectedSubmission.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#2c5282" }}>Download PDF</a></>
+                    <> &nbsp;·&nbsp; <a href={selectedSubmission.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#2c5282" }}>Download PDF</a>
+                    &nbsp;·&nbsp;
+                    <button
+                      onClick={() => handleSendPdf(selectedSubmission.id)}
+                      disabled={sendingId === selectedSubmission.id || sentIds.has(selectedSubmission.id)}
+                      style={{ background: "none", border: "none", cursor: "pointer", color: sentIds.has(selectedSubmission.id) ? "#16a34a" : "#2c5282", fontSize: 13, fontWeight: 600, padding: 0 }}
+                    >
+                      {sendingId === selectedSubmission.id ? "Sending…" : sentIds.has(selectedSubmission.id) ? "✓ Sent to Client" : "Send to Client"}
+                    </button>
+                    </>
                   )}
                 </>
               )}

@@ -1,0 +1,1 @@
+ALTER TABLE `payments` ADD `matter_number` varchar(50);

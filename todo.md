@@ -52,3 +52,7 @@
 - [x] Add memo/note field to payment page and pass through Stripe checkout metadata
 - [x] Build /admin/intake page — searchable table of all trust and LLC intake submissions
 - [x] Send automatic payment receipt email to client when Stripe webhook fires
+- [x] Fix broken Calendly URL on PaySuccess and IntakeForm success screens (use kelly-thesatterwhitelawfirm/30min)
+- [x] Add matter/file number field to payment page alongside memo
+- [x] Add Send to Client button on intake admin page to email client their PDF
+- [x] Build Calendly webhook endpoint — record bookings in DB and notify attorney

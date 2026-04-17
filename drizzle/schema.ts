@@ -55,9 +55,29 @@ export const payments = mysqlTable("payments", {
   currency: varchar("currency", { length: 10 }).default("usd").notNull(),
   status: varchar("status", { length: 50 }).default("completed").notNull(),
   memo: varchar("memo", { length: 200 }), // client-supplied note/memo
+  matterNumber: varchar("matter_number", { length: 50 }), // matter/file number for bookkeeping
   paidAt: timestamp("paidAt").defaultNow().notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = typeof payments.$inferInsert;
+
+// Calendly consultation bookings table
+export const consultationBookings = mysqlTable("consultationBookings", {
+  id: int("id").autoincrement().primaryKey(),
+  calendlyEventId: varchar("calendlyEventId", { length: 200 }).notNull().unique(),
+  calendlyEventType: varchar("calendlyEventType", { length: 200 }),
+  inviteeName: varchar("inviteeName", { length: 200 }),
+  inviteeEmail: varchar("inviteeEmail", { length: 320 }),
+  inviteePhone: varchar("inviteePhone", { length: 50 }),
+  startTime: timestamp("startTime"),
+  endTime: timestamp("endTime"),
+  status: varchar("status", { length: 50 }).default("active").notNull(), // active | canceled
+  cancelReason: text("cancelReason"),
+  notes: text("notes"), // any questions/answers from the booking form
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ConsultationBooking = typeof consultationBookings.$inferSelect;
+export type InsertConsultationBooking = typeof consultationBookings.$inferInsert;

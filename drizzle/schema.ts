@@ -31,6 +31,7 @@ export const intakeSubmissions = mysqlTable("intakeSubmissions", {
   clientName: varchar("clientName", { length: 200 }).notNull(),
   clientEmail: varchar("clientEmail", { length: 320 }).notNull(),
   clientPhone: varchar("clientPhone", { length: 50 }),
+  formType: varchar("formType", { length: 20 }).default("trust").notNull(), // 'trust' or 'llc'
   formDataJson: text("formDataJson").notNull(), // Complete form data as JSON
   pdfUrl: varchar("pdfUrl", { length: 500 }), // URL to generated PDF
   pdfGenerated: timestamp("pdfGenerated"), // When PDF was generated
@@ -53,6 +54,7 @@ export const payments = mysqlTable("payments", {
   amountCents: int("amountCents").notNull(),
   currency: varchar("currency", { length: 10 }).default("usd").notNull(),
   status: varchar("status", { length: 50 }).default("completed").notNull(),
+  memo: varchar("memo", { length: 200 }), // client-supplied note/memo
   paidAt: timestamp("paidAt").defaultNow().notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });

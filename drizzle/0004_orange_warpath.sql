@@ -1,0 +1,1 @@
+ALTER TABLE `intakeSubmissions` ADD `formType` varchar(20) DEFAULT 'trust' NOT NULL;

@@ -49,3 +49,6 @@
 - [x] Add 1031 Exchange Qualified Intermediary fee ($1,250) to payment page
 - [x] Add Pay Invoice link to contact section and footer
 - [x] Build payment history admin page (store completed Stripe payments in DB, display in admin)
+- [x] Add memo/note field to payment page and pass through Stripe checkout metadata
+- [x] Build /admin/intake page — searchable table of all trust and LLC intake submissions
+- [x] Send automatic payment receipt email to client when Stripe webhook fires

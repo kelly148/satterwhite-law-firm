@@ -13,6 +13,7 @@ import Stripe from "stripe";
 import { eq } from "drizzle-orm";
 import { getDb } from "./db";
 import { payments } from "../drizzle/schema";
+import { notifyOwner } from "./_core/notification";
 
 function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -103,6 +104,7 @@ async function processStripeEvent(event: Stripe.Event): Promise<void> {
 
         const serviceName = session.metadata?.service_name || null;
         const serviceId = session.metadata?.service_id || null;
+        const memo = session.metadata?.memo || null;
         const amountCents = session.amount_total ?? 0;
 
         // Idempotency check — avoid duplicate inserts
@@ -126,12 +128,14 @@ async function processStripeEvent(event: Stripe.Event): Promise<void> {
             customerEmail,
             serviceName,
             serviceId,
+            memo,
             amountCents,
             currency: session.currency ?? "usd",
             status: "completed",
             paidAt: new Date(),
           });
           console.log(`[Stripe] Payment record saved — ${paymentIntentId}, $${amountCents / 100}`);
+          // Receipt email is sent automatically by Stripe via receipt_email on the PaymentIntent
         } else {
           console.log(`[Stripe] Duplicate event ignored — ${paymentIntentId}`);
         }

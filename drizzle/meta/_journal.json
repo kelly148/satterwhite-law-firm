@@ -22,6 +22,20 @@
       "when": 1776433691144,
       "tag": "0002_dashing_the_liberteens",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1776436725902,
+      "tag": "0003_mysterious_the_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1776437367764,
+      "tag": "0004_orange_warpath",
+      "breakpoints": true
     }
   ]
 }

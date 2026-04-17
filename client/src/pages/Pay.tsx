@@ -31,6 +31,7 @@ export default function Pay() {
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [isCustom, setIsCustom] = useState(false);
+  const [memo, setMemo] = useState("");
 
   const selectedService = services?.find(s => s.id === selectedServiceId);
 
@@ -74,6 +75,7 @@ export default function Pay() {
         customAmountCents,
         customerName: customerName.trim(),
         customerEmail: customerEmail.trim(),
+        memo: memo.trim() || undefined,
         origin: window.location.origin,
       });
 
@@ -305,6 +307,19 @@ export default function Pay() {
                       value={customerEmail}
                       onChange={e => setCustomerEmail(e.target.value)}
                     />
+                  </div>
+                  <div>
+                    <Label htmlFor="payMemo" style={{ fontSize: 12, fontWeight: 600, color: "#555", marginBottom: 4, display: "block" }}>
+                      Memo / Note <span style={{ fontWeight: 400, color: "#999" }}>(optional)</span>
+                    </Label>
+                    <Input
+                      id="payMemo"
+                      placeholder="e.g. 50% deposit — Johnson Estate Trust"
+                      value={memo}
+                      onChange={e => setMemo(e.target.value)}
+                      maxLength={200}
+                    />
+                    <div style={{ fontSize: 11, color: "#aaa", marginTop: 3 }}>Appears on your receipt and in our records</div>
                   </div>
                 </div>
 

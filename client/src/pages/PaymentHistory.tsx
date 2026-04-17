@@ -97,9 +97,14 @@ export default function PaymentHistory() {
               <div style={{ color: "#90cdf4", fontSize: 12 }}>Admin Dashboard</div>
             </div>
           </div>
-          <a href="/" style={{ display: "flex", alignItems: "center", gap: 6, color: "#90cdf4", fontSize: 13, textDecoration: "none" }}>
-            <ArrowLeft size={14} /> Back to Site
-          </a>
+          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+            <a href="/admin/intake" style={{ color: "#90cdf4", fontSize: 13, textDecoration: "none" }}>
+              📋 Intake Submissions
+            </a>
+            <a href="/" style={{ display: "flex", alignItems: "center", gap: 6, color: "#90cdf4", fontSize: 13, textDecoration: "none" }}>
+              <ArrowLeft size={14} /> Back to Site
+            </a>
+          </div>
         </div>
       </div>
 
@@ -161,7 +166,7 @@ export default function PaymentHistory() {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: "#f7f5f0", borderBottom: "2px solid #e2ddd6" }}>
-                  {["Date", "Client", "Service", "Amount", "Status", "Payment ID"].map((h) => (
+                  {["Date", "Client", "Service / Memo", "Amount", "Status", "Payment ID"].map((h) => (
                     <th
                       key={h}
                       style={{
@@ -200,7 +205,8 @@ export default function PaymentHistory() {
                       )}
                     </td>
                     <td style={{ padding: "14px 16px", fontSize: 13, color: "#444" }}>
-                      {p.serviceName || <span style={{ color: "#aaa", fontStyle: "italic" }}>Custom amount</span>}
+                      <div>{p.serviceName || <span style={{ color: "#aaa", fontStyle: "italic" }}>Custom amount</span>}</div>
+                      {(p as any).memo && <div style={{ fontSize: 11, color: "#888", marginTop: 2, fontStyle: "italic" }}>{(p as any).memo}</div>}
                     </td>
                     <td style={{ padding: "14px 16px", fontSize: 14, fontWeight: 700, color: "#1a2744", whiteSpace: "nowrap" }}>
                       {formatCents(p.amountCents)}

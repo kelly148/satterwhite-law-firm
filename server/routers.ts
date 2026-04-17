@@ -7,7 +7,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { generateIntakePdf } from "./generateIntakePdf";
 import { intakeSubmissions, payments } from "../drizzle/schema";
-import { desc } from "drizzle-orm";
+import { desc, eq, like, or } from "drizzle-orm";
 import { protectedProcedure } from "./_core/trpc";
 import { getDb } from "./db";
 import { z } from "zod";
@@ -225,6 +225,49 @@ export const appRouter = router({
 
   intake: router({
     /**
+     * List all intake submissions — admin only
+     */
+    listSubmissions: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") {
+        throw new Error("Admin access required.");
+      }
+      const db = await getDb();
+      if (!db) return [];
+      return db
+        .select({
+          id: intakeSubmissions.id,
+          clientName: intakeSubmissions.clientName,
+          clientEmail: intakeSubmissions.clientEmail,
+          clientPhone: intakeSubmissions.clientPhone,
+          formType: intakeSubmissions.formType,
+          pdfUrl: intakeSubmissions.pdfUrl,
+          submittedAt: intakeSubmissions.submittedAt,
+        })
+        .from(intakeSubmissions)
+        .orderBy(desc(intakeSubmissions.submittedAt))
+        .limit(500);
+    }),
+
+    /**
+     * Get a single intake submission with full form data — admin only
+     */
+    getSubmission: protectedProcedure
+      .input(z.object({ id: z.number().int() }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") {
+          throw new Error("Admin access required.");
+        }
+        const db = await getDb();
+        if (!db) return null;
+        const rows = await db
+          .select()
+          .from(intakeSubmissions)
+          .where(eq(intakeSubmissions.id, input.id))
+          .limit(1);
+        return rows[0] ?? null;
+      }),
+
+    /**
      * Submit trust intake form — generates PDF, stores in DB, sends full notification
      */
     submit: publicProcedure
@@ -436,6 +479,7 @@ export const appRouter = router({
           customAmountCents: z.number().int().optional(), // for custom amounts
           customerName: z.string().max(200).optional(),
           customerEmail: z.string().email().max(320).optional(),
+          memo: z.string().max(200).optional(), // client-supplied note/memo
           origin: z.string().url(), // window.location.origin from frontend
         })
       )
@@ -474,6 +518,12 @@ export const appRouter = router({
           mode: "payment",
           allow_promotion_codes: true,
           customer_email: input.customerEmail || undefined,
+          payment_intent_data: {
+            receipt_email: input.customerEmail || undefined,
+            description: input.memo
+              ? `${productName} — ${input.memo}`
+              : productName,
+          },
           line_items: [
             {
               price_data: {
@@ -495,6 +545,7 @@ export const appRouter = router({
             customer_email: input.customerEmail || "",
             service_id: input.serviceId || "custom",
             service_name: productName,
+            memo: input.memo || "",
           },
           success_url: `${input.origin}/pay/success?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${input.origin}/pay`,

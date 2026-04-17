@@ -43,3 +43,6 @@
 - [x] Add payment success and cancel pages
 - [x] Add Pay Online link to navigation
 - [x] Write Stripe webhook and payment tests
+- [x] Remove initial consultation from payment page (consultations are free)
+- [x] Update Revocable Living Trust Package price to $1,750.00
+- [x] Move custom amount section to the top of the payment page

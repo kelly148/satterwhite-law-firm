@@ -10,13 +10,12 @@ import { Separator } from "@/components/ui/separator";
 import { CreditCard, Shield, Lock, CheckCircle2, ChevronRight } from "lucide-react";
 
 const CATEGORY_LABELS: Record<string, string> = {
-  consultation: "Consultation",
   estate: "Estate Planning",
   business: "Business Services",
   custom: "Custom",
 };
 
-const CATEGORY_ORDER = ["consultation", "estate", "business"];
+const CATEGORY_ORDER = ["estate", "business"];
 
 function formatCents(cents: number): string {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
@@ -110,7 +109,7 @@ export default function Pay() {
             Secure Online Payment
           </h1>
           <p style={{ color: "#a0b4cc", fontSize: 15, maxWidth: 520, margin: "0 auto" }}>
-            Pay your consultation fee, retainer, or legal service invoice securely online.
+            Pay your retainer, legal service invoice, or a custom balance securely online.
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: 24, marginTop: 20 }}>
             <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#90cdf4" }}>
@@ -140,6 +139,59 @@ export default function Pay() {
               <div style={{ color: "#888", padding: "40px 0", textAlign: "center" }}>Loading services…</div>
             ) : (
               <>
+                {/* Custom amount — shown first */}
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", color: "#b8913f", textTransform: "uppercase", marginBottom: 10 }}>
+                    Custom Amount
+                  </div>
+                  <button
+                    onClick={handleSelectCustom}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "14px 18px",
+                      border: isCustom ? "2px solid #1a2744" : "2px solid #e2ddd6",
+                      borderRadius: 6,
+                      background: isCustom ? "#f0f4f8" : "white",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      width: "100%",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                        {isCustom && <CheckCircle2 size={15} color="#1a2744" />}
+                        <span style={{ fontWeight: 600, fontSize: 14, color: "#1a2744" }}>Enter a Custom Amount</span>
+                      </div>
+                      <span style={{ fontSize: 12, color: "#666" }}>Pay a specific invoice amount or balance — e.g. half up front, half at completion</span>
+                    </div>
+                    <ChevronRight size={16} color="#999" />
+                  </button>
+
+                  {isCustom && (
+                    <div style={{ marginTop: 12, padding: "14px 18px", background: "#f0f4f8", borderRadius: 6, border: "1px solid #ddd" }}>
+                      <Label htmlFor="customAmount" style={{ fontSize: 12, fontWeight: 600, color: "#555", marginBottom: 6, display: "block" }}>
+                        Amount (USD)
+                      </Label>
+                      <div style={{ position: "relative" }}>
+                        <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#555", fontWeight: 600 }}>$</span>
+                        <Input
+                          id="customAmount"
+                          type="number"
+                          min="0.50"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={customAmount}
+                          onChange={e => setCustomAmount(e.target.value)}
+                          style={{ paddingLeft: 28 }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {groupedServices.map(group => (
                   <div key={group.category} style={{ marginBottom: 28 }}>
                     <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", color: "#b8913f", textTransform: "uppercase", marginBottom: 10 }}>
@@ -182,58 +234,6 @@ export default function Pay() {
                   </div>
                 ))}
 
-                {/* Custom amount */}
-                <div style={{ marginBottom: 28 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", color: "#b8913f", textTransform: "uppercase", marginBottom: 10 }}>
-                    Custom Amount
-                  </div>
-                  <button
-                    onClick={handleSelectCustom}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "14px 18px",
-                      border: isCustom ? "2px solid #1a2744" : "2px solid #e2ddd6",
-                      borderRadius: 6,
-                      background: isCustom ? "#f0f4f8" : "white",
-                      cursor: "pointer",
-                      textAlign: "left",
-                      width: "100%",
-                      transition: "all 0.15s",
-                    }}
-                  >
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-                        {isCustom && <CheckCircle2 size={15} color="#1a2744" />}
-                        <span style={{ fontWeight: 600, fontSize: 14, color: "#1a2744" }}>Enter a Custom Amount</span>
-                      </div>
-                      <span style={{ fontSize: 12, color: "#666" }}>Pay a specific invoice amount or balance</span>
-                    </div>
-                    <ChevronRight size={16} color="#999" />
-                  </button>
-
-                  {isCustom && (
-                    <div style={{ marginTop: 12, padding: "14px 18px", background: "#f0f4f8", borderRadius: 6, border: "1px solid #ddd" }}>
-                      <Label htmlFor="customAmount" style={{ fontSize: 12, fontWeight: 600, color: "#555", marginBottom: 6, display: "block" }}>
-                        Amount (USD)
-                      </Label>
-                      <div style={{ position: "relative" }}>
-                        <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#555", fontWeight: 600 }}>$</span>
-                        <Input
-                          id="customAmount"
-                          type="number"
-                          min="0.50"
-                          step="0.01"
-                          placeholder="0.00"
-                          value={customAmount}
-                          onChange={e => setCustomAmount(e.target.value)}
-                          style={{ paddingLeft: 28 }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
               </>
             )}
           </div>

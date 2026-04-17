@@ -55,16 +55,15 @@ describe("SERVICE_PRODUCTS", () => {
     }
   });
 
-  it("initial-consultation product should be $250", () => {
+  it("initial-consultation product should NOT exist (consultations are free)", () => {
     const consultation = SERVICE_PRODUCTS.find(p => p.id === "initial-consultation");
-    expect(consultation).toBeDefined();
-    expect(consultation!.amount).toBe(25000);
+    expect(consultation).toBeUndefined();
   });
 
-  it("revocable-living-trust product should be $1,500", () => {
+  it("revocable-living-trust product should be $1,750", () => {
     const trust = SERVICE_PRODUCTS.find(p => p.id === "revocable-living-trust");
     expect(trust).toBeDefined();
-    expect(trust!.amount).toBe(150000);
+    expect(trust!.amount).toBe(175000);
   });
 });
 
@@ -181,7 +180,7 @@ describe("Checkout input validation", () => {
   });
 
   it("should accept valid service id", () => {
-    const result = validateCheckoutInput({ serviceId: "initial-consultation" });
+    const result = validateCheckoutInput({ serviceId: "revocable-living-trust" });
     expect(result.valid).toBe(true);
   });
 

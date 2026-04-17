@@ -10,22 +10,15 @@ export interface ServiceProduct {
   name: string;
   description: string;
   amount: number; // cents
-  category: "consultation" | "estate" | "business" | "custom";
+  category: "estate" | "business" | "custom";
 }
 
 export const SERVICE_PRODUCTS: ServiceProduct[] = [
   {
-    id: "initial-consultation",
-    name: "Initial Consultation",
-    description: "60-minute estate planning consultation with Kelly Satterwhite, Esq.",
-    amount: 25000, // $250.00
-    category: "consultation",
-  },
-  {
     id: "revocable-living-trust",
     name: "Revocable Living Trust Package",
     description: "Revocable living trust, pour-over will, durable POA, and advance medical directive.",
-    amount: 150000, // $1,500.00
+    amount: 175000, // $1,750.00
     category: "estate",
   },
   {

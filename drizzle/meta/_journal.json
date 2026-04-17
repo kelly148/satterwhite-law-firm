@@ -15,6 +15,13 @@
       "when": 1774388378812,
       "tag": "0001_thin_sasquatch",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1776433691144,
+      "tag": "0002_dashing_the_liberteens",
+      "breakpoints": true
     }
   ]
 }

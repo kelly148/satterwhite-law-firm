@@ -49,7 +49,7 @@ describe("SERVICE_PRODUCTS", () => {
   });
 
   it("every product should have a valid category", () => {
-    const validCategories = ["consultation", "estate", "business", "custom"];
+    const validCategories = ["estate", "business", "exchange", "custom"];
     for (const product of SERVICE_PRODUCTS) {
       expect(validCategories).toContain(product.category);
     }

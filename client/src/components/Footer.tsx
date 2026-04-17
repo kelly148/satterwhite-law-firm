@@ -18,12 +18,13 @@ const practiceLinks = [
 ];
 
 const quickLinks = [
-  { label: "Home", href: "#home" },
-  { label: "About Kelly Satterwhite", href: "#about" },
-  { label: "Why Choose Us", href: "#why-us" },
-  { label: "Client Resources & FAQ", href: "#resources" },
-  { label: "Contact & Directions", href: "#contact" },
-  { label: "Schedule a Consultation", href: "#contact" },
+  { label: "Home", href: "#home", isPage: false },
+  { label: "About Kelly Satterwhite", href: "#about", isPage: false },
+  { label: "Why Choose Us", href: "#why-us", isPage: false },
+  { label: "Client Resources & FAQ", href: "#resources", isPage: false },
+  { label: "Contact & Directions", href: "#contact", isPage: false },
+  { label: "Schedule a Consultation", href: "#contact", isPage: false },
+  { label: "💳 Pay Invoice Online", href: "/pay", isPage: true },
 ];
 
 export default function Footer() {
@@ -140,15 +141,25 @@ export default function Footer() {
               Quick Links
             </h4>
             <ul className="space-y-2.5">
-              {quickLinks.map(({ label, href }) => (
+              {quickLinks.map(({ label, href, isPage }) => (
                 <li key={label}>
-                  <button
-                    onClick={() => scrollTo(href)}
-                    className="text-white/60 hover:text-[#90cdf4] transition-colors text-sm text-left"
-                    style={{ fontFamily: "'Lato', sans-serif" }}
-                  >
-                    {label}
-                  </button>
+                  {isPage ? (
+                    <a
+                      href={href}
+                      className="text-[#e2b96a] hover:text-[#f0d090] transition-colors text-sm text-left font-semibold"
+                      style={{ fontFamily: "'Lato', sans-serif" }}
+                    >
+                      {label}
+                    </a>
+                  ) : (
+                    <button
+                      onClick={() => scrollTo(href)}
+                      className="text-white/60 hover:text-[#90cdf4] transition-colors text-sm text-left"
+                      style={{ fontFamily: "'Lato', sans-serif" }}
+                    >
+                      {label}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -198,6 +209,13 @@ export default function Footer() {
               className="text-white/50 hover:text-white/80 transition-colors underline underline-offset-2"
             >
               Client Intake Form
+            </a>
+            <span className="hidden sm:inline text-white/20">|</span>
+            <a
+              href="/pay"
+              className="text-[#e2b96a] hover:text-[#f0d090] transition-colors underline underline-offset-2 font-semibold"
+            >
+              Pay Invoice
             </a>
           </div>
           <p className="text-center sm:text-right max-w-xl leading-relaxed">

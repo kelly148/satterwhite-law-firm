@@ -10,7 +10,7 @@ export interface ServiceProduct {
   name: string;
   description: string;
   amount: number; // cents
-  category: "estate" | "business" | "custom";
+  category: "estate" | "business" | "exchange" | "custom";
 }
 
 export const SERVICE_PRODUCTS: ServiceProduct[] = [
@@ -41,6 +41,13 @@ export const SERVICE_PRODUCTS: ServiceProduct[] = [
     description: "Business entity formation including articles of organization and operating agreement.",
     amount: 75000, // $750.00
     category: "business",
+  },
+  {
+    id: "1031-exchange",
+    name: "1031 Exchange Qualified Intermediary",
+    description: "Qualified intermediary services for IRC §1031 like-kind exchange transactions.",
+    amount: 125000, // $1,250.00
+    category: "exchange",
   },
   {
     id: "retainer",

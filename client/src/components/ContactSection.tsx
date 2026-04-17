@@ -370,6 +370,22 @@ export default function ContactSection() {
                     </>
                   )}
                 </button>
+
+                {/* Pay Invoice CTA */}
+                <div style={{ marginTop: 12, textAlign: "center" }}>
+                  <span style={{ fontSize: 13, color: "#a0aec0" }}>Already have an invoice?{" "}</span>
+                  <a
+                    href="/pay"
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: "#b8913f",
+                      textDecoration: "underline",
+                    }}
+                  >
+                    Pay Online →
+                  </a>
+                </div>
               </form>
             </>
           )}

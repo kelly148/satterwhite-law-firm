@@ -12,10 +12,11 @@ import { CreditCard, Shield, Lock, CheckCircle2, ChevronRight } from "lucide-rea
 const CATEGORY_LABELS: Record<string, string> = {
   estate: "Estate Planning",
   business: "Business Services",
+  exchange: "1031 Exchanges",
   custom: "Custom",
 };
 
-const CATEGORY_ORDER = ["estate", "business"];
+const CATEGORY_ORDER = ["estate", "business", "exchange"];
 
 function formatCents(cents: number): string {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);

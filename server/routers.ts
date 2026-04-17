@@ -6,7 +6,9 @@ import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { generateIntakePdf } from "./generateIntakePdf";
-import { intakeSubmissions } from "../drizzle/schema";
+import { intakeSubmissions, payments } from "../drizzle/schema";
+import { desc } from "drizzle-orm";
+import { protectedProcedure } from "./_core/trpc";
 import { getDb } from "./db";
 import { z } from "zod";
 
@@ -409,6 +411,22 @@ export const appRouter = router({
     }),
 
     /**
+     * List all completed payments — admin only
+     */
+    listPayments: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") {
+        throw new Error("Admin access required.");
+      }
+      const db = await getDb();
+      if (!db) return [];
+      return db
+        .select()
+        .from(payments)
+        .orderBy(desc(payments.paidAt))
+        .limit(500);
+    }),
+
+    /**
      * Create a Stripe Checkout Session for a selected service or custom amount
      */
     createCheckout: publicProcedure
@@ -476,6 +494,7 @@ export const appRouter = router({
             customer_name: input.customerName || "",
             customer_email: input.customerEmail || "",
             service_id: input.serviceId || "custom",
+            service_name: productName,
           },
           success_url: `${input.origin}/pay/success?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${input.origin}/pay`,

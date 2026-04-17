@@ -11,6 +11,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import LLCIntakeForm from "./pages/LLCIntakeForm";
 import Pay from "./pages/Pay";
 import PaySuccess from "./pages/PaySuccess";
+import PaymentHistory from "./pages/PaymentHistory";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -23,6 +24,7 @@ function Router() {
       <Route path={"/llc-intake"} component={LLCIntakeForm} />
       <Route path={"/pay"} component={Pay} />
       <Route path={"/pay/success"} component={PaySuccess} />
+      <Route path={"/admin/payments"} component={PaymentHistory} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

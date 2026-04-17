@@ -40,3 +40,22 @@ export const intakeSubmissions = mysqlTable("intakeSubmissions", {
 
 export type IntakeSubmission = typeof intakeSubmissions.$inferSelect;
 export type InsertIntakeSubmission = typeof intakeSubmissions.$inferInsert;
+
+// Stripe payments table — stores completed payment records from webhook events
+export const payments = mysqlTable("payments", {
+  id: int("id").autoincrement().primaryKey(),
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 200 }).notNull().unique(),
+  stripeSessionId: varchar("stripeSessionId", { length: 200 }),
+  customerName: varchar("customerName", { length: 200 }),
+  customerEmail: varchar("customerEmail", { length: 320 }),
+  serviceName: varchar("serviceName", { length: 200 }),
+  serviceId: varchar("serviceId", { length: 100 }),
+  amountCents: int("amountCents").notNull(),
+  currency: varchar("currency", { length: 10 }).default("usd").notNull(),
+  status: varchar("status", { length: 50 }).default("completed").notNull(),
+  paidAt: timestamp("paidAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Payment = typeof payments.$inferSelect;
+export type InsertPayment = typeof payments.$inferInsert;

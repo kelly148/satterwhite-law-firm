@@ -46,3 +46,6 @@
 - [x] Remove initial consultation from payment page (consultations are free)
 - [x] Update Revocable Living Trust Package price to $1,750.00
 - [x] Move custom amount section to the top of the payment page
+- [x] Add 1031 Exchange Qualified Intermediary fee ($1,250) to payment page
+- [x] Add Pay Invoice link to contact section and footer
+- [x] Build payment history admin page (store completed Stripe payments in DB, display in admin)

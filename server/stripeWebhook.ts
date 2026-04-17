@@ -10,6 +10,9 @@
 import type { Express, Request, Response } from "express";
 import express from "express";
 import Stripe from "stripe";
+import { eq } from "drizzle-orm";
+import { getDb } from "./db";
+import { payments } from "../drizzle/schema";
 
 function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -21,13 +24,6 @@ function getStripe(): Stripe | null {
 }
 
 export function registerStripeWebhook(app: Express): void {
-  /**
-   * POST /api/stripe/webhook
-   *
-   * Must use express.raw() so the raw body is available for HMAC verification.
-   * Always returns HTTP 200 with { verified: true } — even on errors — so Stripe
-   * does not retry indefinitely.
-   */
   app.post(
     "/api/stripe/webhook",
     express.raw({ type: "application/json" }),
@@ -37,8 +33,6 @@ export function registerStripeWebhook(app: Express): void {
       const stripe = getStripe();
 
       // ── Test event detection (Manus platform verification) ──────────────
-      // The Manus platform sends a synthetic test event to verify the endpoint.
-      // It expects { verified: true } in the response body.
       let rawBody: string;
       try {
         rawBody = req.body instanceof Buffer ? req.body.toString("utf8") : String(req.body);
@@ -69,7 +63,6 @@ export function registerStripeWebhook(app: Express): void {
         event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
       } catch (err: any) {
         console.error("[Stripe Webhook] Signature verification failed:", err.message);
-        // Still return 200 so Stripe does not retry — but log the failure
         return res.status(200).json({ verified: false, error: "signature verification failed" });
       }
 
@@ -90,7 +83,61 @@ async function processStripeEvent(event: Stripe.Event): Promise<void> {
       console.log(
         `[Stripe] Checkout completed — session: ${session.id}, customer: ${session.customer_email}, amount: ${session.amount_total}`
       );
-      // TODO: update order/payment record in DB if needed
+
+      try {
+        const paymentIntentId =
+          typeof session.payment_intent === "string"
+            ? session.payment_intent
+            : (session.payment_intent as any)?.id ?? `session_${session.id}`;
+
+        const customerName =
+          session.metadata?.customer_name ||
+          session.customer_details?.name ||
+          null;
+
+        const customerEmail =
+          session.customer_email ||
+          session.customer_details?.email ||
+          session.metadata?.customer_email ||
+          null;
+
+        const serviceName = session.metadata?.service_name || null;
+        const serviceId = session.metadata?.service_id || null;
+        const amountCents = session.amount_total ?? 0;
+
+        // Idempotency check — avoid duplicate inserts
+        const db = await getDb();
+        if (!db) {
+          console.error("[Stripe] Database not available — cannot save payment record");
+          break;
+        }
+
+        const existing = await db
+          .select({ id: payments.id })
+          .from(payments)
+          .where(eq(payments.stripePaymentIntentId, paymentIntentId))
+          .limit(1);
+
+        if (existing.length === 0) {
+          await db.insert(payments).values({
+            stripePaymentIntentId: paymentIntentId,
+            stripeSessionId: session.id,
+            customerName,
+            customerEmail,
+            serviceName,
+            serviceId,
+            amountCents,
+            currency: session.currency ?? "usd",
+            status: "completed",
+            paidAt: new Date(),
+          });
+          console.log(`[Stripe] Payment record saved — ${paymentIntentId}, $${amountCents / 100}`);
+        } else {
+          console.log(`[Stripe] Duplicate event ignored — ${paymentIntentId}`);
+        }
+      } catch (err) {
+        console.error("[Stripe] Failed to save payment record:", err);
+      }
       break;
     }
 

@@ -57,3 +57,6 @@
 - [x] Add Send to Client button on intake admin page to email client their PDF
 - [x] Build Calendly webhook endpoint — record bookings in DB and notify attorney
 - [x] Simplify payment page to custom amount only — remove all pre-priced service buttons
+- [x] Build /admin/consultations page showing all Calendly bookings from DB (name, email, date/time, status)
+- [x] Add phone number field to payment form and save to DB
+- [x] Add Pay Invoice button to intake form success screen linking to /pay

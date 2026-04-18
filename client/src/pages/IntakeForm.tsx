@@ -485,7 +485,12 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <a href="https://calendly.com/kelly-thesatterwhitelawfirm/30min" target="_blank" class="btn btn-primary" style="display:inline-block;text-decoration:none;margin-right:12px;">📅 Book Consultation</a>
     <a href="tel:+17038557380" class="btn btn-secondary" style="display:inline-block;text-decoration:none;">📞 Call Us</a>
   </div>
-  <div style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+  <div style="margin:20px 0;padding:20px;background:#f5f0e8;border:1px solid #d4b896;border-radius:6px;">
+    <div style="font-size:13px;font-weight:600;color:#1a2744;margin-bottom:6px;">💳 Ready to pay your retainer?</div>
+    <div style="font-size:12px;color:#666;margin-bottom:14px;">Pay your deposit or balance securely online — all major cards accepted.</div>
+    <a href="/pay" class="btn btn-primary" style="display:inline-block;text-decoration:none;">Pay Invoice Online</a>
+  </div>
+  <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:20px;">
     <div style="font-size:12px;color:var(--mid-gray);margin-bottom:12px;">Or save a copy for your records:</div>
     <button class="btn btn-secondary" onclick="window.print()">🖨️ Print / Save PDF</button>
   </div>

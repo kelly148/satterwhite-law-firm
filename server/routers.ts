@@ -6,7 +6,7 @@ import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { generateIntakePdf } from "./generateIntakePdf";
-import { intakeSubmissions, payments } from "../drizzle/schema";
+import { intakeSubmissions, payments, consultationBookings } from "../drizzle/schema";
 import { desc, eq, like, or } from "drizzle-orm";
 import { protectedProcedure } from "./_core/trpc";
 import { getDb } from "./db";
@@ -540,6 +540,7 @@ export const appRouter = router({
           customAmountCents: z.number().int().optional(), // for custom amounts
           customerName: z.string().max(200).optional(),
           customerEmail: z.string().email().max(320).optional(),
+          customerPhone: z.string().max(50).optional(), // client phone for follow-up
           memo: z.string().max(200).optional(), // client-supplied note/memo
           matterNumber: z.string().max(50).optional(), // matter/file number for bookkeeping
           origin: z.string().url(), // window.location.origin from frontend
@@ -605,6 +606,7 @@ export const appRouter = router({
           metadata: {
             customer_name: input.customerName || "",
             customer_email: input.customerEmail || "",
+            customer_phone: input.customerPhone || "",
             service_id: input.serviceId || "custom",
             service_name: productName,
             memo: input.memo || "",
@@ -616,6 +618,24 @@ export const appRouter = router({
 
         return { checkoutUrl: session.url };
       }),
+  }),
+
+  consultations: router({
+    /**
+     * List all Calendly consultation bookings — admin only
+     */
+    listBookings: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") {
+        throw new Error("Admin access required.");
+      }
+      const db = await getDb();
+      if (!db) return [];
+      return db
+        .select()
+        .from(consultationBookings)
+        .orderBy(desc(consultationBookings.startTime))
+        .limit(500);
+    }),
   }),
 });
 

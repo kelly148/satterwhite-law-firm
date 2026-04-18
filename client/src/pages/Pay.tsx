@@ -18,6 +18,7 @@ export default function Pay() {
   const [customAmount, setCustomAmount] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [memo, setMemo] = useState("");
   const [matterNumber, setMatterNumber] = useState("");
 
@@ -43,6 +44,7 @@ export default function Pay() {
         customAmountCents: amountCents,
         customerName: customerName.trim(),
         customerEmail: customerEmail.trim(),
+        customerPhone: customerPhone.trim() || undefined,
         memo: memo.trim() || undefined,
         matterNumber: matterNumber.trim() || undefined,
         origin: window.location.origin,
@@ -145,6 +147,18 @@ export default function Pay() {
                   placeholder="Your full legal name"
                   value={customerName}
                   onChange={e => setCustomerName(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="payPhone" style={{ fontSize: 12, fontWeight: 600, color: "#555", marginBottom: 4, display: "block" }}>
+                  Phone Number <span style={{ fontWeight: 400, color: "#999" }}>(optional)</span>
+                </Label>
+                <Input
+                  id="payPhone"
+                  type="tel"
+                  placeholder="(703) 555-0100"
+                  value={customerPhone}
+                  onChange={e => setCustomerPhone(e.target.value)}
                 />
               </div>
               <div>

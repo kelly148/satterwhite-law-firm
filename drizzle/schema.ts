@@ -49,6 +49,7 @@ export const payments = mysqlTable("payments", {
   stripeSessionId: varchar("stripeSessionId", { length: 200 }),
   customerName: varchar("customerName", { length: 200 }),
   customerEmail: varchar("customerEmail", { length: 320 }),
+  customerPhone: varchar("customerPhone", { length: 50 }),
   serviceName: varchar("serviceName", { length: 200 }),
   serviceId: varchar("serviceId", { length: 100 }),
   amountCents: int("amountCents").notNull(),

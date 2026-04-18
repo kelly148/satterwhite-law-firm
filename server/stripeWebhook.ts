@@ -106,6 +106,7 @@ async function processStripeEvent(event: Stripe.Event): Promise<void> {
         const serviceId = session.metadata?.service_id || null;
         const memo = session.metadata?.memo || null;
         const matterNumber = session.metadata?.matter_number || null;
+        const customerPhone = session.metadata?.customer_phone || null;
         const amountCents = session.amount_total ?? 0;
 
         // Idempotency check — avoid duplicate inserts
@@ -127,6 +128,7 @@ async function processStripeEvent(event: Stripe.Event): Promise<void> {
             stripeSessionId: session.id,
             customerName,
             customerEmail,
+            customerPhone,
             serviceName,
             serviceId,
             memo,

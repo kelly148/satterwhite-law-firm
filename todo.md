@@ -56,3 +56,4 @@
 - [x] Add matter/file number field to payment page alongside memo
 - [x] Add Send to Client button on intake admin page to email client their PDF
 - [x] Build Calendly webhook endpoint — record bookings in DB and notify attorney
+- [x] Simplify payment page to custom amount only — remove all pre-priced service buttons

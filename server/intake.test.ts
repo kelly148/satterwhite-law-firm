@@ -50,33 +50,35 @@ function buildEmailSummary(formData: any, clientName: string): string {
 }
 
 // ── Sample form data matching what the intake form sends ──────────────────────
+// NOTE: This is entirely fabricated test data. Do NOT put real client
+// information in test fixtures — it ends up committed to the repository.
 const sampleFormData = {
-  'g1-first': '***REDACTED***',
+  'g1-first': 'Jane',
   'g1-mid': '',
-  'g1-last': '***REDACTED***',
+  'g1-last': 'Doe',
   'g1-suffix': '',
-  'g1-dob': '***REDACTED***',
-  'g1-pob': '***REDACTED***, MD',
-  'g1-email': '***REDACTED***',
-  'g1-phone': '***REDACTED***',
-  'g1-addr': '***REDACTED***',
-  'g1-city': '***REDACTED***',
-  'g1-state': 'MD',
-  'g1-zip': '20774',
+  'g1-dob': '1970-01-01',
+  'g1-pob': 'Anytown, VA',
+  'g1-email': 'jane.doe@example.com',
+  'g1-phone': '5550000000',
+  'g1-addr': '123 Example St',
+  'g1-city': 'Anytown',
+  'g1-state': 'VA',
+  'g1-zip': '20000',
   'g1-citizen': 'US',
   'g1-marital': 'Widowed',
   'hasSpouse': false,
-  'trustee1': '***REDACTED***',
-  'poa1': '***REDACTED***',
-  'hca1': '***REDACTED***',
+  'trustee1': 'Sam Sample',
+  'poa1': 'Sam Sample',
+  'hca1': 'Sam Sample',
   'terminal': 'Withhold or withdraw life-sustaining treatment and allow natural death',
   'pvs': 'Withhold or withdraw life-sustaining treatment and allow natural death',
-  'attorney-notes': 'There may be some documents in both ***REDACTED*** ***REDACTED*** (Wife) and deceased husband ***REDACTED***\'s name.',
+  'attorney-notes': 'Example note: documents may exist in more than one name.',
   'preferred-times': 'Weekends',
   'subsections': [
     {
       title: 'Primary Client (Grantor 1)',
-      fields: { 'g1-first': '***REDACTED***', 'g1-last': '***REDACTED***' }
+      fields: { 'g1-first': 'Jane', 'g1-last': 'Doe' }
     },
     {
       title: 'Child 1',
@@ -84,7 +86,7 @@ const sampleFormData = {
     },
     {
       title: 'Property 1',
-      fields: { 'Property Address': '***REDACTED***', 'Type': 'Primary Residence', 'Approx. Value': '$350,000' }
+      fields: { 'Property Address': '123 Example St', 'Type': 'Primary Residence', 'Approx. Value': '$350,000' }
     },
   ]
 };
@@ -92,34 +94,34 @@ const sampleFormData = {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 describe('Intake Form — Email Body Builder', () => {
   it('includes client name and contact info', () => {
-    const body = buildEmailSummary(sampleFormData, '***REDACTED*** ***REDACTED***');
-    expect(body).toContain('***REDACTED*** ***REDACTED***');
-    expect(body).toContain('***REDACTED***');
-    expect(body).toContain('***REDACTED***');
+    const body = buildEmailSummary(sampleFormData, 'Jane Doe');
+    expect(body).toContain('Jane Doe');
+    expect(body).toContain('jane.doe@example.com');
+    expect(body).toContain('5550000000');
   });
 
   it('includes fiduciary names', () => {
-    const body = buildEmailSummary(sampleFormData, '***REDACTED*** ***REDACTED***');
-    expect(body).toContain('***REDACTED***');
+    const body = buildEmailSummary(sampleFormData, 'Jane Doe');
+    expect(body).toContain('Sam Sample');
   });
 
   it('includes medical directive preferences', () => {
-    const body = buildEmailSummary(sampleFormData, '***REDACTED*** ***REDACTED***');
+    const body = buildEmailSummary(sampleFormData, 'Jane Doe');
     expect(body).toContain('Withhold or withdraw');
   });
 
   it('includes attorney notes', () => {
-    const body = buildEmailSummary(sampleFormData, '***REDACTED*** ***REDACTED***');
-    expect(body).toContain('***REDACTED***');
+    const body = buildEmailSummary(sampleFormData, 'Jane Doe');
+    expect(body).toContain('Example note');
   });
 
   it('counts children from subsections', () => {
-    const body = buildEmailSummary(sampleFormData, '***REDACTED*** ***REDACTED***');
+    const body = buildEmailSummary(sampleFormData, 'Jane Doe');
     expect(body).toContain('Children count: 1');
   });
 
   it('counts properties from subsections', () => {
-    const body = buildEmailSummary(sampleFormData, '***REDACTED*** ***REDACTED***');
+    const body = buildEmailSummary(sampleFormData, 'Jane Doe');
     expect(body).toContain('Properties count: 1');
   });
 });

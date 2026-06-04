@@ -156,6 +156,11 @@ class SDKServer {
 
   private getSessionSecret() {
     const secret = ENV.cookieSecret;
+    if (!secret) {
+      // Never sign or verify sessions with an empty key — that would make
+      // session tokens trivially forgeable.
+      throw new Error("JWT_SECRET is not configured — cannot create or verify sessions.");
+    }
     return new TextEncoder().encode(secret);
   }
 
@@ -292,10 +297,16 @@ class SDKServer {
       throw ForbiddenError("User not found");
     }
 
-    await db.upsertUser({
-      openId: user.openId,
-      lastSignedIn: signedInAt,
-    });
+    // Refresh lastSignedIn at most once per hour to avoid a database write on
+    // every authenticated request (admin pages fire several per page load).
+    const lastSignedInMs = user.lastSignedIn ? new Date(user.lastSignedIn).getTime() : 0;
+    const ONE_HOUR_MS = 60 * 60 * 1000;
+    if (signedInAt.getTime() - lastSignedInMs > ONE_HOUR_MS) {
+      await db.upsertUser({
+        openId: user.openId,
+        lastSignedIn: signedInAt,
+      });
+    }
 
     return user;
   }

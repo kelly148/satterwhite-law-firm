@@ -1,14 +1,13 @@
 import { COOKIE_NAME } from "@shared/const";
-import Stripe from "stripe";
 import { SERVICE_PRODUCTS, CUSTOM_MIN_CENTS, CUSTOM_MAX_CENTS } from "./stripeProducts";
+import { getStripe } from "./stripeClient";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 import { generateIntakePdf } from "./generateIntakePdf";
 import { intakeSubmissions, payments, consultationBookings } from "../drizzle/schema";
-import { desc, eq, like, or } from "drizzle-orm";
-import { protectedProcedure } from "./_core/trpc";
+import { desc, eq } from "drizzle-orm";
 import { getDb } from "./db";
 import { z } from "zod";
 
@@ -227,10 +226,7 @@ export const appRouter = router({
     /**
      * List all intake submissions — admin only
      */
-    listSubmissions: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== "admin") {
-        throw new Error("Admin access required.");
-      }
+    listSubmissions: adminProcedure.query(async () => {
       const db = await getDb();
       if (!db) return [];
       return db
@@ -251,12 +247,9 @@ export const appRouter = router({
     /**
      * Send the intake PDF to the client via email — admin only
      */
-    sendPdfToClient: protectedProcedure
+    sendPdfToClient: adminProcedure
       .input(z.object({ id: z.number().int() }))
-      .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== "admin") {
-          throw new Error("Admin access required.");
-        }
+      .mutation(async ({ input }) => {
         const db = await getDb();
         if (!db) throw new Error("Database unavailable.");
         const rows = await db
@@ -312,12 +305,9 @@ export const appRouter = router({
     /**
      * Get a single intake submission with full form data — admin only
      */
-    getSubmission: protectedProcedure
+    getSubmission: adminProcedure
       .input(z.object({ id: z.number().int() }))
-      .query(async ({ ctx, input }) => {
-        if (ctx.user.role !== "admin") {
-          throw new Error("Admin access required.");
-        }
+      .query(async ({ input }) => {
         const db = await getDb();
         if (!db) return null;
         const rows = await db
@@ -346,12 +336,14 @@ export const appRouter = router({
           timeStyle: "short",
         });
 
-        // Parse the complete form data
-        let formData: any = {};
+        // Parse the complete form data. If this fails the submission is
+        // unusable, so reject it rather than silently storing an empty record.
+        let formData: any;
         try {
           formData = JSON.parse(input.formDataJson);
         } catch (e) {
-          console.error("Failed to parse form data JSON", e);
+          console.error("[Intake Form] Failed to parse form data JSON", e);
+          throw new Error("Submitted form data was invalid. Please try again or call the office.");
         }
 
         // Generate PDF from the complete form data
@@ -517,10 +509,7 @@ export const appRouter = router({
     /**
      * List all completed payments — admin only
      */
-    listPayments: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== "admin") {
-        throw new Error("Admin access required.");
-      }
+    listPayments: adminProcedure.query(async () => {
       const db = await getDb();
       if (!db) return [];
       return db
@@ -624,10 +613,7 @@ export const appRouter = router({
     /**
      * List all Calendly consultation bookings — admin only
      */
-    listBookings: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== "admin") {
-        throw new Error("Admin access required.");
-      }
+    listBookings: adminProcedure.query(async () => {
       const db = await getDb();
       if (!db) return [];
       return db
@@ -638,13 +624,6 @@ export const appRouter = router({
     }),
   }),
 });
-
-// ── Stripe payment router ─────────────────────────────────────────────────────
-function getStripe(): Stripe | null {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) return null;
-  return new Stripe(key, { apiVersion: "2026-03-25.dahlia" });
-}
 
 export { appRouter as default };
 export type AppRouter = typeof appRouter;

@@ -44,6 +44,21 @@ All of these must be added in Railway → your web service → **Variables** tab
 | `VITE_STRIPE_PUBLISHABLE_KEY` | `pk_live_...` (live) or `pk_test_...` (testing) |
 | `STRIPE_WEBHOOK_SECRET` | From Stripe Dashboard → Developers → Webhooks → your endpoint → Signing secret |
 
+### Email — intake PDF delivery via Resend (optional but recommended)
+When these are set, completed intake forms are emailed to the firm **with the PDF
+attached**. If they are not set, the app falls back to the platform notification
+(text summary + download link).
+
+| Variable | Value |
+|---|---|
+| `RESEND_API_KEY` | From [Resend](https://resend.com) → API Keys (`re_...`) |
+| `EMAIL_FROM` | A verified sender on your Resend-verified domain, e.g. `Satterwhite Law Intake <intake@thesatterwhitelawfirm.com>` |
+| `EMAIL_TO` | Where submissions are sent (defaults to `kelly@thesatterwhitelawfirm.com` if omitted) |
+
+> Setup: create a Resend account, verify the `thesatterwhitelawfirm.com` domain
+> (add the DNS records Resend provides), create an API key, then add the three
+> variables above in Railway.
+
 ### Calendly (optional)
 | Variable | Value |
 |---|---|

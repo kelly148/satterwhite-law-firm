@@ -29,7 +29,34 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
+/**
+ * Validate that critical environment variables are present before the server
+ * accepts traffic. In production we refuse to start with a missing/weak
+ * JWT_SECRET, because falling back to an empty signing key would let anyone
+ * forge an admin session.
+ */
+function validateEnv() {
+  const isProduction = process.env.NODE_ENV === "production";
+  if (!isProduction) return;
+
+  const secret = process.env.JWT_SECRET ?? "";
+  if (secret.length < 32) {
+    throw new Error(
+      "JWT_SECRET is missing or too short (need at least 32 characters). " +
+        "Generate one with `openssl rand -base64 32` and set it in Railway → Variables."
+    );
+  }
+
+  if (!process.env.DATABASE_URL) {
+    console.warn(
+      "[Startup] DATABASE_URL is not set — database features (intake storage, payments, bookings) will not work."
+    );
+  }
+}
+
 async function startServer() {
+  validateEnv();
+
   const app = express();
   const server = createServer(app);
 
@@ -40,9 +67,11 @@ async function startServer() {
   // Calendly webhook — registered before express.json() for consistency
   registerCalendlyWebhook(app);
 
-  // Configure body parser with larger size limit for file uploads
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  // Body size limit. The largest legitimate payload is an intake form, which
+  // validation caps at ~200 KB; 2 MB leaves generous headroom while avoiding a
+  // needlessly large denial-of-service surface.
+  app.use(express.json({ limit: "2mb" }));
+  app.use(express.urlencoded({ limit: "2mb", extended: true }));
 
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
@@ -64,10 +93,16 @@ async function startServer() {
   }
 
   const preferredPort = parseInt(process.env.PORT || "3000");
-  const port = await findAvailablePort(preferredPort);
 
-  if (port !== preferredPort) {
-    console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
+  // In production (e.g. Railway) the platform assigns PORT and routes traffic
+  // to exactly that port — we must bind to it, never hop to a different one.
+  // In development we fall back to finding a free port for convenience.
+  let port = preferredPort;
+  if (process.env.NODE_ENV !== "production") {
+    port = await findAvailablePort(preferredPort);
+    if (port !== preferredPort) {
+      console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
+    }
   }
 
   server.listen(port, () => {

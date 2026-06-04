@@ -14,15 +14,7 @@ import { eq } from "drizzle-orm";
 import { getDb } from "./db";
 import { payments } from "../drizzle/schema";
 import { notifyOwner } from "./_core/notification";
-
-function getStripe(): Stripe | null {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) {
-    console.warn("[Stripe] STRIPE_SECRET_KEY not set");
-    return null;
-  }
-  return new Stripe(key, { apiVersion: "2026-03-25.dahlia" });
-}
+import { getStripe } from "./stripeClient";
 
 export function registerStripeWebhook(app: Express): void {
   app.post(
@@ -54,9 +46,16 @@ export function registerStripeWebhook(app: Express): void {
       }
 
       // ── Signature verification ───────────────────────────────────────────
-      if (!stripe || !webhookSecret || !sig) {
-        console.warn("[Stripe Webhook] Missing stripe instance, webhook secret, or signature header");
-        return res.status(200).json({ verified: true, warning: "signature not verified" });
+      // Return a non-2xx status on any real failure so Stripe RETRIES delivery
+      // and the misconfiguration is visible — never silently "succeed", or a
+      // genuine completed payment could be lost forever with no record.
+      if (!stripe || !webhookSecret) {
+        console.error("[Stripe Webhook] Not configured (missing STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET)");
+        return res.status(500).json({ verified: false, error: "webhook not configured" });
+      }
+      if (!sig) {
+        console.warn("[Stripe Webhook] Missing stripe-signature header");
+        return res.status(400).json({ verified: false, error: "missing signature" });
       }
 
       let event: Stripe.Event;
@@ -64,7 +63,7 @@ export function registerStripeWebhook(app: Express): void {
         event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
       } catch (err: any) {
         console.error("[Stripe Webhook] Signature verification failed:", err.message);
-        return res.status(200).json({ verified: false, error: "signature verification failed" });
+        return res.status(400).json({ verified: false, error: "signature verification failed" });
       }
 
       console.log(`[Stripe Webhook] Received event: ${event.type} (${event.id})`);

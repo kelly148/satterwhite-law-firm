@@ -1,14 +1,14 @@
 import { COOKIE_NAME } from "@shared/const";
-import Stripe from "stripe";
 import { SERVICE_PRODUCTS, CUSTOM_MIN_CENTS, CUSTOM_MAX_CENTS } from "./stripeProducts";
+import { getStripe } from "./stripeClient";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { notifyOwner } from "./_core/notification";
+import { sendEmail, isEmailConfigured } from "./email";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 import { generateIntakePdf } from "./generateIntakePdf";
 import { intakeSubmissions, payments, consultationBookings } from "../drizzle/schema";
-import { desc, eq, like, or } from "drizzle-orm";
-import { protectedProcedure } from "./_core/trpc";
+import { desc, eq } from "drizzle-orm";
 import { getDb } from "./db";
 import { z } from "zod";
 
@@ -22,27 +22,28 @@ const contactFormSchema = z.object({
   preferredContact: z.enum(["email", "phone", "either"]).optional(),
 });
 
-/** Helper: safely get a string value from parsed form data */
-function fv(d: any, key: string, fallback = '—'): string {
-  const v = d?.[key];
-  if (v === undefined || v === null || v === '') return fallback;
-  if (typeof v === 'boolean') return v ? 'Yes' : 'No';
-  return String(v).trim() || fallback;
-}
-
-/** Build a comprehensive plain-text summary of all 7 sections for the email body */
-function buildFullEmailBody(formData: any, clientName: string, submittedAt: string, pdfUrl: string | null): string {
-  const subsections: any[] = Array.isArray(formData.subsections) ? formData.subsections : [];
-
+/**
+ * Build a comprehensive plain-text summary of the submission for the email body.
+ * Renders generically from the captured `sections` structure so that whatever
+ * the client entered is included — no field can be silently omitted.
+ */
+function buildFullEmailBody(
+  formData: any,
+  clientName: string,
+  clientEmail: string,
+  clientPhone: string,
+  submittedAt: string,
+  pdfUrl: string | null,
+): string {
   const line = '━'.repeat(60);
   const thin = '─'.repeat(60);
   const lines: string[] = [];
 
   lines.push(`📋 NEW TRUST INTAKE FORM SUBMISSION`);
   lines.push(line);
-  lines.push(`👤 Client: ${clientName}`);
-  lines.push(`📧 Email: ${fv(formData, 'g1-email')}`);
-  lines.push(`📞 Phone: ${fv(formData, 'g1-phone')}`);
+  lines.push(`👤 Client: ${clientName || '—'}`);
+  lines.push(`📧 Email: ${clientEmail || '—'}`);
+  lines.push(`📞 Phone: ${clientPhone || '—'}`);
   lines.push(`🕐 Submitted: ${submittedAt} (ET)`);
   if (pdfUrl) {
     lines.push(`📥 PDF: ${pdfUrl}`);
@@ -51,162 +52,34 @@ function buildFullEmailBody(formData: any, clientName: string, submittedAt: stri
   }
   lines.push('');
 
-  // ── SECTION 1: CLIENT INFORMATION ────────────────────────────────────────
-  lines.push(line);
-  lines.push('SECTION 1 — CLIENT INFORMATION');
-  lines.push(thin);
-  const firstName = fv(formData, 'g1-first', '');
-  const midName = fv(formData, 'g1-mid', '');
-  const lastName = fv(formData, 'g1-last', '');
-  const suffix = fv(formData, 'g1-suffix', '');
-  const fullName = [firstName, midName, lastName, suffix].filter(s => s && s !== '—').join(' ') || '—';
-  const address = [fv(formData, 'g1-addr', ''), fv(formData, 'g1-city', ''), fv(formData, 'g1-state', ''), fv(formData, 'g1-zip', '')].filter(s => s && s !== '—').join(', ') || '—';
-  lines.push(`Full Name:       ${fullName}`);
-  lines.push(`Date of Birth:   ${fv(formData, 'g1-dob')}`);
-  lines.push(`Place of Birth:  ${fv(formData, 'g1-pob')}`);
-  lines.push(`Email:           ${fv(formData, 'g1-email')}`);
-  lines.push(`Phone:           ${fv(formData, 'g1-phone')}`);
-  lines.push(`Address:         ${address}`);
-  lines.push(`Citizenship:     ${fv(formData, 'g1-citizen')}`);
-  lines.push(`Marital Status:  ${fv(formData, 'g1-marital')}`);
-
-  const spouseFirst = fv(formData, 'g2-first', '');
-  const spouseLast = fv(formData, 'g2-last', '');
-  if (spouseFirst !== '—' || spouseLast !== '—') {
-    lines.push('');
-    lines.push('Spouse / Partner (Grantor 2):');
-    lines.push(`  Name:  ${[spouseFirst, spouseLast].filter(s => s && s !== '—').join(' ') || '—'}`);
-    lines.push(`  DOB:   ${fv(formData, 'g2-dob')}`);
-    lines.push(`  Email: ${fv(formData, 'g2-email')}`);
+  const sections: any[] = Array.isArray(formData?.sections) ? formData.sections : [];
+  if (sections.length === 0) {
+    lines.push('(No detailed form data was captured for this submission.)');
   }
-  lines.push('');
 
-  // ── SECTION 2: FAMILY & BENEFICIARIES ────────────────────────────────────
-  lines.push(line);
-  lines.push('SECTION 2 — FAMILY & BENEFICIARIES');
-  lines.push(thin);
-  const children = subsections.filter(s => s.title && (s.title.toLowerCase().includes('child') || /^child\s*\d+$/i.test(s.title)));
-  if (children.length > 0) {
-    lines.push(`Children (${children.length}):`);
-    children.forEach((c: any) => {
-      lines.push(`  ${c.title}:`);
-      Object.entries(c.fields || {}).forEach(([k, v]) => {
-        if (v && String(v).trim()) lines.push(`    ${k}: ${v}`);
-      });
-    });
-  } else {
-    lines.push('Children: None entered');
-  }
-  const otherBens = subsections.filter(s => s.title && s.title.toLowerCase().includes('beneficiar'));
-  if (otherBens.length > 0) {
-    lines.push('');
-    lines.push(`Other Beneficiaries (${otherBens.length}):`);
-    otherBens.forEach((b: any) => {
-      lines.push(`  ${b.title}:`);
-      Object.entries(b.fields || {}).forEach(([k, v]) => {
-        if (v && String(v).trim()) lines.push(`    ${k}: ${v}`);
-      });
-    });
-  }
-  lines.push('');
+  sections.forEach((sec: any, idx: number) => {
+    lines.push(line);
+    lines.push(`SECTION ${idx + 1} — ${String(sec.title || 'Details').toUpperCase()}`);
+    lines.push(thin);
 
-  // ── SECTION 3: ASSETS & PROPERTY ─────────────────────────────────────────
-  lines.push(line);
-  lines.push('SECTION 3 — ASSETS & PROPERTY');
-  lines.push(thin);
-
-  const assetGroups: [string, string][] = [
-    ['Real Property', 'property'],
-    ['Financial Accounts', 'account'],
-    ['Retirement Accounts', 'retirement'],
-    ['Life Insurance', 'insurance'],
-    ['Business Interests', 'business'],
-    ['Other Assets', 'asset'],
-  ];
-
-  let hasAssets = false;
-  assetGroups.forEach(([label, keyword]) => {
-    const items = subsections.filter(s => s.title && s.title.toLowerCase().includes(keyword));
-    if (items.length > 0) {
-      hasAssets = true;
-      lines.push(`${label} (${items.length}):`);
-      items.forEach((item: any) => {
-        lines.push(`  ${item.title}:`);
-        Object.entries(item.fields || {}).forEach(([k, v]) => {
-          if (v && String(v).trim()) lines.push(`    ${k}: ${v}`);
-        });
-      });
+    (sec.groups || []).forEach((g: any) => {
+      const fields = (g.fields || []).filter((f: any) => f && f.value && String(f.value).trim() !== '');
+      if (fields.length === 0) return;
       lines.push('');
-    }
+      lines.push(`  ${g.title || 'Details'}`);
+      fields.forEach((f: any) => lines.push(`    ${f.label || 'Field'}: ${f.value}`));
+    });
+
+    (sec.fields || []).forEach((f: any) => {
+      if (!f || !f.value || String(f.value).trim() === '') return;
+      lines.push(`${f.label || 'Field'}: ${f.value}`);
+    });
+
+    lines.push('');
   });
-  if (!hasAssets) lines.push('No assets entered');
-  lines.push('');
 
-  // ── SECTION 4: DISTRIBUTION PLAN ─────────────────────────────────────────
   lines.push(line);
-  lines.push('SECTION 4 — DISTRIBUTION PLAN');
-  lines.push(thin);
-  lines.push(`Primary Distribution: ${fv(formData, 'distType')}`);
-  const bequests = subsections.filter(s => s.title && (s.title.toLowerCase().includes('bequest') || s.title.toLowerCase().includes('gift')));
-  if (bequests.length > 0) {
-    lines.push(`Specific Bequests (${bequests.length}):`);
-    bequests.forEach((b: any) => {
-      Object.entries(b.fields || {}).forEach(([k, v]) => {
-        if (v && String(v).trim()) lines.push(`  ${k}: ${v}`);
-      });
-    });
-  }
-  lines.push('');
-
-  // ── SECTION 5: FIDUCIARIES ────────────────────────────────────────────────
-  lines.push(line);
-  lines.push('SECTION 5 — FIDUCIARIES');
-  lines.push(thin);
-  lines.push(`Successor Trustee (Primary):    ${fv(formData, 'trustee1')}`);
-  lines.push(`Alternate Trustee (1st):        ${fv(formData, 'trustee2')}`);
-  lines.push(`Personal Representative:        ${fv(formData, 'executor1')}`);
-  const guardianNeeded = fv(formData, 'needsGuardian', '');
-  if (guardianNeeded === 'true' || guardianNeeded === 'on') {
-    lines.push(`Guardian (Primary):             ${fv(formData, 'guardian1')}`);
-    lines.push(`Guardian (Alternate):           ${fv(formData, 'guardian2')}`);
-  } else {
-    lines.push(`Guardian Nomination:            Not applicable`);
-  }
-  lines.push('');
-
-  // ── SECTION 6: POA & MEDICAL DIRECTIVES ──────────────────────────────────
-  lines.push(line);
-  lines.push('SECTION 6 — POWERS OF ATTORNEY & MEDICAL DIRECTIVES');
-  lines.push(thin);
-  lines.push(`Financial POA Agent (Primary):  ${fv(formData, 'poa1')}`);
-  lines.push(`Financial POA Agent (Alternate):${fv(formData, 'poa2')}`);
-  lines.push(`Health Care Agent (Primary):    ${fv(formData, 'hca1')}`);
-  lines.push(`Health Care Agent (Alternate):  ${fv(formData, 'hca2')}`);
-  lines.push(`Terminal Condition:             ${fv(formData, 'terminal')}`);
-  lines.push(`Persistent Vegetative State:    ${fv(formData, 'pvs')}`);
-  const hipaa = subsections.filter(s => s.title && s.title.toLowerCase().includes('hipaa'));
-  if (hipaa.length > 0) {
-    lines.push('HIPAA Authorized Individuals:');
-    hipaa.forEach((h: any) => {
-      Object.entries(h.fields || {}).forEach(([k, v]) => {
-        if (v && String(v).trim()) lines.push(`  ${k}: ${v}`);
-      });
-    });
-  }
-  lines.push('');
-
-  // ── SECTION 7: NOTES & PREFERENCES ───────────────────────────────────────
-  lines.push(line);
-  lines.push('SECTION 7 — NOTES & PREFERENCES');
-  lines.push(thin);
-  lines.push(`Attorney Notes:`);
-  lines.push(fv(formData, 'attorney-notes', 'None provided'));
-  lines.push('');
-  lines.push(`Preferred Consultation Times:   ${fv(formData, 'preferred-times')}`);
-  lines.push(`Preferred Consultation Method:  ${fv(formData, 'consult')}`);
-  lines.push('');
-  lines.push(line);
-  lines.push(`Reply to: ${fv(formData, 'g1-email')}`);
+  lines.push(`Reply to: ${clientEmail || '—'}`);
 
   return lines.join('\n');
 }
@@ -227,10 +100,7 @@ export const appRouter = router({
     /**
      * List all intake submissions — admin only
      */
-    listSubmissions: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== "admin") {
-        throw new Error("Admin access required.");
-      }
+    listSubmissions: adminProcedure.query(async () => {
       const db = await getDb();
       if (!db) return [];
       return db
@@ -251,12 +121,9 @@ export const appRouter = router({
     /**
      * Send the intake PDF to the client via email — admin only
      */
-    sendPdfToClient: protectedProcedure
+    sendPdfToClient: adminProcedure
       .input(z.object({ id: z.number().int() }))
-      .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== "admin") {
-          throw new Error("Admin access required.");
-        }
+      .mutation(async ({ input }) => {
         const db = await getDb();
         if (!db) throw new Error("Database unavailable.");
         const rows = await db
@@ -312,12 +179,9 @@ export const appRouter = router({
     /**
      * Get a single intake submission with full form data — admin only
      */
-    getSubmission: protectedProcedure
+    getSubmission: adminProcedure
       .input(z.object({ id: z.number().int() }))
-      .query(async ({ ctx, input }) => {
-        if (ctx.user.role !== "admin") {
-          throw new Error("Admin access required.");
-        }
+      .query(async ({ input }) => {
         const db = await getDb();
         if (!db) return null;
         const rows = await db
@@ -346,24 +210,37 @@ export const appRouter = router({
           timeStyle: "short",
         });
 
-        // Parse the complete form data
-        let formData: any = {};
+        // Parse the complete form data. If this fails the submission is
+        // unusable, so reject it rather than silently storing an empty record.
+        let formData: any;
         try {
           formData = JSON.parse(input.formDataJson);
         } catch (e) {
-          console.error("Failed to parse form data JSON", e);
+          console.error("[Intake Form] Failed to parse form data JSON", e);
+          throw new Error("Submitted form data was invalid. Please try again or call the office.");
         }
 
-        // Generate PDF from the complete form data
+        // Generate PDF from the complete form data — returns both the uploaded
+        // URL (for the DB record / email body) and the raw bytes (to attach).
         let pdfUrl: string | null = null;
+        let pdfBuffer: Buffer | null = null;
         try {
-          pdfUrl = await generateIntakePdf(formData, input.clientName);
+          const pdf = await generateIntakePdf(formData, input.clientName);
+          pdfUrl = pdf.url;
+          pdfBuffer = pdf.buffer;
         } catch (e) {
           console.error('[Intake Form] PDF generation failed:', e);
         }
 
         // Build comprehensive email content with ALL form data
-        const content = buildFullEmailBody(formData, input.clientName, submittedAt, pdfUrl);
+        const content = buildFullEmailBody(
+          formData,
+          input.clientName,
+          input.clientEmail,
+          input.clientPhone,
+          submittedAt,
+          pdfUrl,
+        );
 
         // Store the submission in the database
         try {
@@ -382,13 +259,26 @@ export const appRouter = router({
           console.error('[Intake Form] Failed to store submission in database:', e);
         }
 
-        // Send the notification
-        const notified = await notifyOwner({
-          title: `New Trust Intake Form — ${input.clientName || 'New Client'} — Satterwhite Law`,
-          content,
-        });
+        const subject = `New Trust Intake Form — ${input.clientName || 'New Client'} — Satterwhite Law`;
 
-        console.log(`[Intake Form] Submission from ${input.clientName} <${input.clientEmail}> — notified: ${notified}, PDF: ${pdfUrl ? 'generated' : 'failed'}`);
+        // Preferred path: email the completed PDF as a real attachment (Resend).
+        // Falls back to the platform notification (text + link) if email isn't
+        // configured or the send fails.
+        let delivered = false;
+        if (isEmailConfigured()) {
+          const filename = `Trust_Intake_${(input.clientName || 'Form').replace(/\s+/g, '_')}.pdf`;
+          delivered = await sendEmail({
+            subject,
+            text: content,
+            replyTo: input.clientEmail || undefined,
+            attachments: pdfBuffer ? [{ filename, content: pdfBuffer }] : undefined,
+          });
+        }
+        if (!delivered) {
+          delivered = await notifyOwner({ title: subject, content });
+        }
+
+        console.log(`[Intake Form] Submission from ${input.clientName} <${input.clientEmail}> — delivered: ${delivered}, PDF: ${pdfBuffer ? 'generated' : 'failed'}`);
 
         return { success: true, pdfUrl };
       }),
@@ -517,10 +407,7 @@ export const appRouter = router({
     /**
      * List all completed payments — admin only
      */
-    listPayments: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== "admin") {
-        throw new Error("Admin access required.");
-      }
+    listPayments: adminProcedure.query(async () => {
       const db = await getDb();
       if (!db) return [];
       return db
@@ -624,10 +511,7 @@ export const appRouter = router({
     /**
      * List all Calendly consultation bookings — admin only
      */
-    listBookings: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== "admin") {
-        throw new Error("Admin access required.");
-      }
+    listBookings: adminProcedure.query(async () => {
       const db = await getDb();
       if (!db) return [];
       return db
@@ -638,13 +522,6 @@ export const appRouter = router({
     }),
   }),
 });
-
-// ── Stripe payment router ─────────────────────────────────────────────────────
-function getStripe(): Stripe | null {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) return null;
-  return new Stripe(key, { apiVersion: "2026-03-25.dahlia" });
-}
 
 export { appRouter as default };
 export type AppRouter = typeof appRouter;

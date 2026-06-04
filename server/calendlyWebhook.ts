@@ -18,6 +18,7 @@
  */
 
 import type { Express, Request, Response } from "express";
+import express from "express";
 import crypto from "crypto";
 import { getDb } from "./db";
 import { consultationBookings } from "../drizzle/schema";
@@ -25,48 +26,77 @@ import { eq } from "drizzle-orm";
 import { notifyOwner } from "./_core/notification";
 
 export function registerCalendlyWebhook(app: Express): void {
-  app.post("/api/calendly/webhook", async (req: Request, res: Response) => {
-    // ── Signature verification (optional but recommended) ──────────────────
-    const signingKey = process.env.CALENDLY_WEBHOOK_SECRET;
-    if (signingKey) {
-      const signature = req.headers["calendly-webhook-signature"] as string | undefined;
-      if (signature) {
+  // IMPORTANT: this route uses express.raw() so the ORIGINAL request bytes are
+  // preserved for HMAC signature verification. It must be registered BEFORE
+  // express.json() in the server entry point.
+  app.post(
+    "/api/calendly/webhook",
+    express.raw({ type: "application/json" }),
+    async (req: Request, res: Response) => {
+      // Recover the raw request body as a string.
+      let rawBody: string;
+      try {
+        rawBody = req.body instanceof Buffer ? req.body.toString("utf8") : String(req.body ?? "");
+      } catch {
+        rawBody = "";
+      }
+
+      // ── Signature verification ───────────────────────────────────────────
+      const signingKey = process.env.CALENDLY_WEBHOOK_SECRET;
+      if (signingKey) {
+        const signature = req.headers["calendly-webhook-signature"] as string | undefined;
+        if (!signature) {
+          console.warn("[Calendly Webhook] Missing signature header — rejecting event");
+          return res.status(400).json({ received: false, error: "missing signature" });
+        }
         try {
           // Calendly uses: t=<timestamp>,v1=<hmac>
           const parts = signature.split(",");
           const tPart = parts.find(p => p.startsWith("t="));
           const v1Part = parts.find(p => p.startsWith("v1="));
-          if (tPart && v1Part) {
-            const timestamp = tPart.slice(2);
-            const receivedSig = v1Part.slice(3);
-            const rawBody = JSON.stringify(req.body);
-            const expectedSig = crypto
-              .createHmac("sha256", signingKey)
-              .update(`${timestamp}.${rawBody}`)
-              .digest("hex");
-            if (!crypto.timingSafeEqual(Buffer.from(receivedSig, "hex"), Buffer.from(expectedSig, "hex"))) {
-              console.warn("[Calendly Webhook] Signature mismatch — ignoring event");
-              return res.status(200).json({ received: true, warning: "signature mismatch" });
-            }
+          if (!tPart || !v1Part) {
+            console.warn("[Calendly Webhook] Malformed signature header — rejecting event");
+            return res.status(400).json({ received: false, error: "malformed signature" });
+          }
+          const timestamp = tPart.slice(2);
+          const receivedSig = v1Part.slice(3);
+          const expectedSig = crypto
+            .createHmac("sha256", signingKey)
+            .update(`${timestamp}.${rawBody}`)
+            .digest("hex");
+          const received = Buffer.from(receivedSig, "hex");
+          const expected = Buffer.from(expectedSig, "hex");
+          if (received.length !== expected.length || !crypto.timingSafeEqual(received, expected)) {
+            console.warn("[Calendly Webhook] Signature mismatch — rejecting event");
+            return res.status(400).json({ received: false, error: "signature mismatch" });
           }
         } catch (err) {
           console.warn("[Calendly Webhook] Signature check error:", err);
+          return res.status(400).json({ received: false, error: "signature check failed" });
         }
       }
+
+      // Parse the (now verified) raw body.
+      let payload: any;
+      try {
+        payload = JSON.parse(rawBody);
+      } catch {
+        console.warn("[Calendly Webhook] Body is not valid JSON");
+        return res.status(400).json({ received: false, error: "invalid JSON" });
+      }
+
+      const eventType: string = payload?.event ?? "";
+      const invitee = payload?.payload?.invitee ?? {};
+      const eventDetails = payload?.payload?.event ?? {};
+
+      console.log(`[Calendly Webhook] Received: ${eventType}`);
+
+      // Respond immediately — process async
+      res.status(200).json({ received: true });
+
+      setImmediate(() => processCalendlyEvent(eventType, invitee, eventDetails, payload).catch(console.error));
     }
-
-    const payload = req.body;
-    const eventType: string = payload?.event ?? "";
-    const invitee = payload?.payload?.invitee ?? {};
-    const eventDetails = payload?.payload?.event ?? {};
-
-    console.log(`[Calendly Webhook] Received: ${eventType}`);
-
-    // Respond immediately — process async
-    res.status(200).json({ received: true });
-
-    setImmediate(() => processCalendlyEvent(eventType, invitee, eventDetails, payload).catch(console.error));
-  });
+  );
 }
 
 async function processCalendlyEvent(

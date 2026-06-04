@@ -1,183 +1,189 @@
 /**
- * intake.test.ts — Unit tests for the trust intake form submission system
- * Tests: email body builder, PDF generation logic, and data capture completeness
+ * intake.test.ts — Tests for the trust intake form submission system.
+ *
+ * The form now submits a complete, structured snapshot:
+ *   { sections: [ { title, fields:[{label,value}], groups:[{title,fields}] } ] }
+ * The email body and PDF render generically from this, so NO field can be
+ * silently dropped. These tests lock that contract and specifically verify the
+ * data that the old version used to lose (children, assets, alternate
+ * fiduciaries, medical directives).
  */
 import { describe, it, expect } from "vitest";
 
-// ── Helper: replicate the fv() function from routers.ts ──────────────────────
-function fv(d: any, key: string, fallback = '—'): string {
-  const v = d?.[key];
-  if (v === undefined || v === null || v === '') return fallback;
-  if (typeof v === 'boolean') return v ? 'Yes' : 'No';
-  return String(v).trim() || fallback;
-}
+// ── Replicates the generic email body renderer in server/routers.ts ──────────
+type Field = { label: string; value: string };
+type Group = { title: string; fields: Field[] };
+type Section = { title: string; fields: Field[]; groups: Group[] };
 
-// ── Helper: replicate the buildFullEmailBody logic ────────────────────────────
-function buildEmailSummary(formData: any, clientName: string): string {
-  const subsections: any[] = Array.isArray(formData.subsections) ? formData.subsections : [];
+function renderEmailBody(formData: { sections?: Section[] }): string {
   const lines: string[] = [];
-
-  lines.push(`Client: ${clientName}`);
-  lines.push(`Email: ${fv(formData, 'g1-email')}`);
-  lines.push(`Phone: ${fv(formData, 'g1-phone')}`);
-
-  // Section 1
-  const firstName = fv(formData, 'g1-first', '');
-  const lastName = fv(formData, 'g1-last', '');
-  lines.push(`Full Name: ${[firstName, lastName].filter(s => s && s !== '—').join(' ')}`);
-  lines.push(`Marital Status: ${fv(formData, 'g1-marital')}`);
-
-  // Section 5 — Fiduciaries
-  lines.push(`Trustee: ${fv(formData, 'trustee1')}`);
-  lines.push(`POA Agent: ${fv(formData, 'poa1')}`);
-  lines.push(`Health Care Agent: ${fv(formData, 'hca1')}`);
-
-  // Section 6 — Directives
-  lines.push(`Terminal: ${fv(formData, 'terminal')}`);
-  lines.push(`PVS: ${fv(formData, 'pvs')}`);
-
-  // Section 7 — Notes
-  lines.push(`Attorney Notes: ${fv(formData, 'attorney-notes')}`);
-
-  // Subsections
-  const children = subsections.filter(s => s.title && /child/i.test(s.title));
-  lines.push(`Children count: ${children.length}`);
-
-  const properties = subsections.filter(s => s.title && /property/i.test(s.title));
-  lines.push(`Properties count: ${properties.length}`);
-
-  return lines.join('\n');
+  const sections = Array.isArray(formData.sections) ? formData.sections : [];
+  if (sections.length === 0) lines.push("(No detailed form data was captured for this submission.)");
+  sections.forEach((sec, idx) => {
+    lines.push(`SECTION ${idx + 1} — ${String(sec.title || "Details").toUpperCase()}`);
+    (sec.groups || []).forEach((g) => {
+      const fields = (g.fields || []).filter((f) => f && f.value && String(f.value).trim() !== "");
+      if (!fields.length) return;
+      lines.push(`  ${g.title}`);
+      fields.forEach((f) => lines.push(`    ${f.label}: ${f.value}`));
+    });
+    (sec.fields || []).forEach((f) => {
+      if (!f || !f.value || String(f.value).trim() === "") return;
+      lines.push(`${f.label}: ${f.value}`);
+    });
+  });
+  return lines.join("\n");
 }
 
-// ── Sample form data matching what the intake form sends ──────────────────────
-const sampleFormData = {
-  'g1-first': '***REDACTED***',
-  'g1-mid': '',
-  'g1-last': '***REDACTED***',
-  'g1-suffix': '',
-  'g1-dob': '***REDACTED***',
-  'g1-pob': '***REDACTED***, MD',
-  'g1-email': '***REDACTED***',
-  'g1-phone': '***REDACTED***',
-  'g1-addr': '***REDACTED***',
-  'g1-city': '***REDACTED***',
-  'g1-state': 'MD',
-  'g1-zip': '20774',
-  'g1-citizen': 'US',
-  'g1-marital': 'Widowed',
-  'hasSpouse': false,
-  'trustee1': '***REDACTED***',
-  'poa1': '***REDACTED***',
-  'hca1': '***REDACTED***',
-  'terminal': 'Withhold or withdraw life-sustaining treatment and allow natural death',
-  'pvs': 'Withhold or withdraw life-sustaining treatment and allow natural death',
-  'attorney-notes': 'There may be some documents in both ***REDACTED*** ***REDACTED*** (Wife) and deceased husband ***REDACTED***\'s name.',
-  'preferred-times': 'Weekends',
-  'subsections': [
+// ── A realistic full submission (fabricated data only) ───────────────────────
+const sampleSubmission: { sections: Section[] } = {
+  sections: [
     {
-      title: 'Primary Client (Grantor 1)',
-      fields: { 'g1-first': '***REDACTED***', 'g1-last': '***REDACTED***' }
+      title: "Client Information",
+      fields: [{ label: "How Did You Hear About Us?", value: "Referral — existing client" }],
+      groups: [
+        {
+          title: "Primary Client (Grantor 1)",
+          fields: [
+            { label: "First Name", value: "Jane" },
+            { label: "Last Name", value: "Doe" },
+            { label: "Date of Birth", value: "1970-01-01" },
+            { label: "Marital Status", value: "Married" },
+          ],
+        },
+        {
+          title: "Spouse / Partner (Grantor 2)",
+          fields: [{ label: "First Name", value: "John" }],
+        },
+      ],
     },
     {
-      title: 'Child 1',
-      fields: { 'First Name': 'Test', 'Last Name': 'Child', 'Date of Birth': '2010-01-01' }
+      title: "Family & Beneficiaries",
+      fields: [],
+      groups: [
+        { title: "Child 1", fields: [{ label: "First Name", value: "Amy" }, { label: "Date of Birth", value: "2012-05-05" }] },
+        { title: "Child 2", fields: [{ label: "First Name", value: "Ben" }, { label: "Date of Birth", value: "2014-08-08" }] },
+      ],
     },
     {
-      title: 'Property 1',
-      fields: { 'Property Address': '***REDACTED***', 'Type': 'Primary Residence', 'Approx. Value': '$350,000' }
+      title: "Assets & Property",
+      fields: [],
+      groups: [
+        { title: "Property 1", fields: [{ label: "Property Address", value: "123 Example St" }, { label: "Approx. Value", value: "$500,000" }] },
+        { title: "Account", fields: [{ label: "Institution", value: "Example Bank" }, { label: "Approx. Balance", value: "$80,000" }] },
+      ],
     },
-  ]
+    {
+      title: "Fiduciaries",
+      fields: [],
+      groups: [
+        {
+          title: "Trustee",
+          fields: [
+            { label: "Successor Trustee — Primary", value: "Sam Sample" },
+            { label: "Alternate Successor Trustee (1st)", value: "Pat Proxy" },
+          ],
+        },
+        {
+          title: "Personal Representative (Executor) — Pour-Over Will",
+          fields: [{ label: "Personal Representative — Primary", value: "Sam Sample" }],
+        },
+      ],
+    },
+    {
+      title: "Powers of Attorney & Advance Medical Directive",
+      fields: [],
+      groups: [
+        {
+          title: "Health Care Power of Attorney & Advance Medical Directive",
+          fields: [
+            { label: "Health Care Agent — Primary", value: "John Doe" },
+            { label: "Terminal Condition", value: "Withhold or withdraw life-sustaining treatment and allow natural death" },
+          ],
+        },
+      ],
+    },
+    {
+      title: "Notes & Preferences",
+      fields: [{ label: "Preferred Days / Times", value: "Weekday evenings" }],
+      groups: [
+        { title: "Notes for the Attorney", fields: [{ label: "Anything else we should know before your consultation?", value: "We have a blended family." }] },
+      ],
+    },
+  ],
 };
 
-// ── Tests ─────────────────────────────────────────────────────────────────────
-describe('Intake Form — Email Body Builder', () => {
-  it('includes client name and contact info', () => {
-    const body = buildEmailSummary(sampleFormData, '***REDACTED*** ***REDACTED***');
-    expect(body).toContain('***REDACTED*** ***REDACTED***');
-    expect(body).toContain('***REDACTED***');
-    expect(body).toContain('***REDACTED***');
+describe("Intake email body — completeness", () => {
+  const body = renderEmailBody(sampleSubmission);
+
+  it("includes every section", () => {
+    expect(body).toContain("CLIENT INFORMATION");
+    expect(body).toContain("FAMILY & BENEFICIARIES");
+    expect(body).toContain("ASSETS & PROPERTY");
+    expect(body).toContain("FIDUCIARIES");
+    expect(body).toContain("MEDICAL DIRECTIVE");
+    expect(body).toContain("NOTES & PREFERENCES");
   });
 
-  it('includes fiduciary names', () => {
-    const body = buildEmailSummary(sampleFormData, '***REDACTED*** ***REDACTED***');
-    expect(body).toContain('***REDACTED***');
+  it("includes ALL children (previously dropped)", () => {
+    expect(body).toContain("Child 1");
+    expect(body).toContain("Amy");
+    expect(body).toContain("Child 2");
+    expect(body).toContain("Ben");
   });
 
-  it('includes medical directive preferences', () => {
-    const body = buildEmailSummary(sampleFormData, '***REDACTED*** ***REDACTED***');
-    expect(body).toContain('Withhold or withdraw');
+  it("includes assets (previously dropped)", () => {
+    expect(body).toContain("Property 1");
+    expect(body).toContain("123 Example St");
+    expect(body).toContain("Example Bank");
+    expect(body).toContain("$80,000");
   });
 
-  it('includes attorney notes', () => {
-    const body = buildEmailSummary(sampleFormData, '***REDACTED*** ***REDACTED***');
-    expect(body).toContain('***REDACTED***');
+  it("includes alternate fiduciaries (previously dropped)", () => {
+    expect(body).toContain("Alternate Successor Trustee (1st): Pat Proxy");
+    expect(body).toContain("Personal Representative — Primary: Sam Sample");
   });
 
-  it('counts children from subsections', () => {
-    const body = buildEmailSummary(sampleFormData, '***REDACTED*** ***REDACTED***');
-    expect(body).toContain('Children count: 1');
+  it("includes medical directive selections (previously dropped)", () => {
+    expect(body).toContain("Terminal Condition: Withhold or withdraw");
   });
 
-  it('counts properties from subsections', () => {
-    const body = buildEmailSummary(sampleFormData, '***REDACTED*** ***REDACTED***');
-    expect(body).toContain('Properties count: 1');
-  });
-});
-
-describe('Intake Form — Field Value Helper (fv)', () => {
-  it('returns fallback for missing fields', () => {
-    expect(fv({}, 'missing-field')).toBe('—');
+  it("includes loose section-level fields", () => {
+    expect(body).toContain("How Did You Hear About Us?: Referral — existing client");
+    expect(body).toContain("Preferred Days / Times: Weekday evenings");
   });
 
-  it('returns fallback for empty string', () => {
-    expect(fv({ key: '' }, 'key')).toBe('—');
+  it("omits empty fields", () => {
+    const withEmpty: { sections: Section[] } = {
+      sections: [{ title: "Test", fields: [{ label: "Empty", value: "" }, { label: "Filled", value: "X" }], groups: [] }],
+    };
+    const out = renderEmailBody(withEmpty);
+    expect(out).toContain("Filled: X");
+    expect(out).not.toContain("Empty:");
   });
 
-  it('converts boolean true to Yes', () => {
-    expect(fv({ flag: true }, 'flag')).toBe('Yes');
-  });
-
-  it('converts boolean false to No', () => {
-    expect(fv({ flag: false }, 'flag')).toBe('No');
-  });
-
-  it('returns string value correctly', () => {
-    expect(fv({ name: 'Kelly Satterwhite' }, 'name')).toBe('Kelly Satterwhite');
-  });
-
-  it('trims whitespace from values', () => {
-    expect(fv({ name: '  Kelly  ' }, 'name')).toBe('Kelly');
-  });
-
-  it('uses custom fallback when provided', () => {
-    expect(fv({}, 'missing', 'Not provided')).toBe('Not provided');
+  it("handles a submission with no sections gracefully", () => {
+    expect(renderEmailBody({ sections: [] })).toContain("No detailed form data");
   });
 });
 
-describe('Intake Form — Subsection Data Capture', () => {
-  it('captures children from subsections array', () => {
-    const subsections = sampleFormData.subsections;
-    const children = subsections.filter(s => s.title && /child/i.test(s.title));
-    expect(children).toHaveLength(1);
-    expect(children[0].fields['First Name']).toBe('Test');
+describe("Intake data contract", () => {
+  it("every section has a title and fields/groups arrays", () => {
+    sampleSubmission.sections.forEach((sec) => {
+      expect(typeof sec.title).toBe("string");
+      expect(Array.isArray(sec.fields)).toBe(true);
+      expect(Array.isArray(sec.groups)).toBe(true);
+    });
   });
 
-  it('captures real property from subsections array', () => {
-    const subsections = sampleFormData.subsections;
-    const props = subsections.filter(s => s.title && /property/i.test(s.title));
-    expect(props).toHaveLength(1);
-    expect(props[0].fields['Approx. Value']).toBe('$350,000');
-  });
-
-  it('handles empty subsections gracefully', () => {
-    const data = { ...sampleFormData, subsections: [] };
-    const subsections: any[] = Array.isArray(data.subsections) ? data.subsections : [];
-    expect(subsections).toHaveLength(0);
-  });
-
-  it('handles missing subsections key gracefully', () => {
-    const data = { 'g1-first': 'Test' };
-    const subsections: any[] = Array.isArray((data as any).subsections) ? (data as any).subsections : [];
-    expect(subsections).toHaveLength(0);
+  it("every group field is a {label,value} pair", () => {
+    sampleSubmission.sections.forEach((sec) => {
+      sec.groups.forEach((g) => {
+        g.fields.forEach((f) => {
+          expect(typeof f.label).toBe("string");
+          expect(typeof f.value).toBe("string");
+        });
+      });
+    });
   });
 });

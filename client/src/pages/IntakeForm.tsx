@@ -6,9 +6,10 @@
  */
 import { useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
+import { collectIntakeData } from "@/lib/intakeCollect";
 
 // The full intake form HTML content (inlined for reliability)
-const INTAKE_HTML = `
+export const INTAKE_HTML = `
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{--navy:#1a2744;--gold:#b8913f;--cream:#faf8f4;--warm-gray:#f0ede8;--mid-gray:#8a8680;--dark:#1e1c19;--border:#ddd9d2;}
@@ -525,6 +526,10 @@ export default function IntakeForm() {
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // Expose the shared, tested data collector so the injected click handlers
+    // can call the exact same code covered by unit tests.
+    (window as unknown as { __intakeCollect?: typeof collectIntakeData }).__intakeCollect = collectIntakeData;
+
     // Inject the HTML
     containerRef.current.innerHTML = INTAKE_HTML;
 
@@ -572,41 +577,13 @@ export default function IntakeForm() {
           document.getElementById('rv-hca').textContent = g('hca1');
         }
 
+        // Data collection lives in client/src/lib/intakeCollect.ts (a tested,
+        // shared module) and is exposed on window so this injected handler can
+        // call the exact same code that the unit tests cover.
         function intakeCollectData() {
-          // Collect ALL form data from all sections
-          var formData = {};
-          var inputs = document.querySelectorAll('#intake-wrapper input, #intake-wrapper select, #intake-wrapper textarea');
-          inputs.forEach(function(el) {
-            if (el.id) {
-              if (el.type === 'checkbox') {
-                formData[el.id] = el.checked;
-              } else if (el.type === 'radio') {
-                if (el.checked) formData[el.name] = el.value || el.textContent;
-              } else {
-                formData[el.id] = el.value || '';
-              }
-            }
-          });
-          // Also capture subsection data (dynamically added children, assets, etc.)
-          var subsections = document.querySelectorAll('#intake-wrapper .subsection');
-          var subsectionData = [];
-          subsections.forEach(function(sub) {
-            var title = sub.querySelector('.subsection-title');
-            var fields = {};
-            var inputs = sub.querySelectorAll('input, select, textarea');
-            inputs.forEach(function(el) {
-              if (el.id) fields[el.id] = el.value || '';
-              else if (el.name) fields[el.name] = el.value || '';
-            });
-            if (Object.keys(fields).length > 0) {
-              subsectionData.push({
-                title: title ? title.textContent : 'Section',
-                fields: fields
-              });
-            }
-          });
-          formData.subsections = subsectionData;
-          return formData;
+          var root = document.getElementById('intake-wrapper');
+          if (window.__intakeCollect && root) return window.__intakeCollect(root);
+          return { sections: [] };
         }
 
         function intakeSubmitForm() {

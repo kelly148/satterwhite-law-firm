@@ -88,9 +88,47 @@ function FormDataViewer({ formDataJson, formType }: { formDataJson: string; form
     padding: "8px 14px",
   };
 
-  // Render named fields (non-subsection data)
+  const fieldRow = (label: string, value: any, key: React.Key) => (
+    <div key={key} style={fieldStyle}>
+      <span style={labelStyle}>{label}</span>
+      <span style={valueStyle}>{value && String(value).trim() !== "" ? String(value) : "—"}</span>
+    </div>
+  );
+
+  // ── New format: { sections: [{ title, fields, groups:[{title,fields}] }] } ──
+  const sections: any[] = Array.isArray(data.sections) ? data.sections : [];
+  if (sections.length > 0) {
+    return (
+      <div>
+        {sections.map((section: any, i: number) => (
+          <div key={i} style={sectionStyle}>
+            <div style={sectionHeaderStyle}>{`Section ${i + 1} — ${section.title || "Details"}`}</div>
+            <div style={sectionBodyStyle}>
+              {(section.groups || []).map((g: any, gi: number) => {
+                const gFields = (g.fields || []).filter((f: any) => f && f.value && String(f.value).trim() !== "");
+                if (gFields.length === 0) return null;
+                return (
+                  <div key={gi} style={{ marginBottom: 10, paddingLeft: 12, borderLeft: "3px solid #e2ddd6" }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#b8913f", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                      {g.title || `Entry ${gi + 1}`}
+                    </div>
+                    {gFields.map((f: any, m: number) => fieldRow(f.label || `Field ${m + 1}`, f.value, m))}
+                  </div>
+                );
+              })}
+              {(section.fields || [])
+                .filter((f: any) => f && f.value && String(f.value).trim() !== "")
+                .map((f: any, j: number) => fieldRow(f.label || `Field ${j + 1}`, f.value, `loose-${j}`))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Legacy format fallback (older submissions) ────────────────────────────
   const namedFields = Object.entries(data).filter(
-    ([k]) => k !== "subsections" && !k.startsWith("_")
+    ([k]) => k !== "subsections" && k !== "sections" && !k.startsWith("_")
   );
 
   return (
@@ -99,12 +137,9 @@ function FormDataViewer({ formDataJson, formType }: { formDataJson: string; form
         <div style={sectionStyle}>
           <div style={sectionHeaderStyle}>Form Fields</div>
           <div style={sectionBodyStyle}>
-            {namedFields.map(([key, value]) => (
-              <div key={key} style={fieldStyle}>
-                <span style={labelStyle}>{key.replace(/^[a-z0-9]+-/, "").replace(/-/g, " ")}</span>
-                <span style={valueStyle}>{String(value ?? "—")}</span>
-              </div>
-            ))}
+            {namedFields.map(([key, value]) =>
+              fieldRow(key.replace(/^[a-z0-9]+-/, "").replace(/-/g, " "), value, key)
+            )}
           </div>
         </div>
       )}
@@ -113,32 +148,15 @@ function FormDataViewer({ formDataJson, formType }: { formDataJson: string; form
         <div key={i} style={sectionStyle}>
           <div style={sectionHeaderStyle}>{section.title || `Section ${i + 1}`}</div>
           <div style={sectionBodyStyle}>
-            {Array.isArray(section.fields) && section.fields.length > 0 ? (
-              section.fields.map((field: any, j: number) => (
-                <div key={j} style={fieldStyle}>
-                  <span style={labelStyle}>{field.label || field.name || `Field ${j + 1}`}</span>
-                  <span style={valueStyle}>{field.value || "—"}</span>
-                </div>
-              ))
-            ) : (
-              <div style={{ color: "#aaa", fontSize: 12, padding: "4px 0" }}>No fields captured</div>
-            )}
-
-            {Array.isArray(section.subsections) &&
-              section.subsections.map((sub: any, k: number) => (
-                <div key={k} style={{ marginTop: 10, paddingLeft: 12, borderLeft: "3px solid #e2ddd6" }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "#b8913f", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                    {sub.title || `Entry ${k + 1}`}
-                  </div>
-                  {Array.isArray(sub.fields) &&
-                    sub.fields.map((f: any, m: number) => (
-                      <div key={m} style={fieldStyle}>
-                        <span style={labelStyle}>{f.label || f.name || `Field ${m + 1}`}</span>
-                        <span style={valueStyle}>{f.value || "—"}</span>
-                      </div>
-                    ))}
-                </div>
-              ))}
+            {section.fields && typeof section.fields === "object" && !Array.isArray(section.fields)
+              ? Object.entries(section.fields)
+                  .filter(([, v]) => v && String(v).trim() !== "")
+                  .map(([k, v]) => fieldRow(k.replace(/[-_]/g, " "), v, k))
+              : Array.isArray(section.fields)
+                ? section.fields.map((field: any, j: number) =>
+                    fieldRow(field.label || field.name || `Field ${j + 1}`, field.value, j)
+                  )
+                : <div style={{ color: "#aaa", fontSize: 12, padding: "4px 0" }}>No fields captured</div>}
           </div>
         </div>
       ))}

@@ -24,11 +24,11 @@ const faqs = [
   },
   {
     q: "How does a 1031 exchange work?",
-    a: "Under Internal Revenue Code §1031, a real estate investor can defer capital gains taxes on the sale of investment property by reinvesting the proceeds into a 'like-kind' replacement property within specific time limits. The Satterwhite Law Firm acts as a Qualified Intermediary (QI), holding the sale proceeds and facilitating the exchange to ensure compliance with IRS requirements. Proper QI services are legally required for a valid 1031 exchange.",
+    a: "Under Internal Revenue Code §1031, a real estate investor can defer capital gains taxes on the sale of investment property by reinvesting the proceeds into a 'like-kind' replacement property within specific time limits. A Qualified Intermediary (QI) must hold the sale proceeds and facilitate the exchange to ensure compliance with IRS requirements; we coordinate these services through a separate, affiliated qualified intermediary. Proper QI services are legally required for a valid 1031 exchange.",
   },
   {
     q: "Does Virginia have an estate tax?",
-    a: "Virginia does not impose a state-level estate tax or inheritance tax. However, Maryland does have both an estate tax (on estates over $5 million) and an inheritance tax (on certain non-direct-descendant beneficiaries). For clients with assets in both states, or those who may relocate, this distinction is an important planning consideration. Federal estate tax applies to estates exceeding the federal exemption amount (currently over $13 million per individual, though this is scheduled to change in 2026).",
+    a: "Virginia does not impose a state-level estate tax or inheritance tax. However, Maryland does have both an estate tax (on estates over $5 million) and an inheritance tax (on certain non-direct-descendant beneficiaries). For clients with assets in both states, or those who may relocate, this distinction is an important planning consideration. Federal estate tax applies only to estates exceeding the federal exemption amount, which for 2026 is $15 million per individual (effectively $30 million for a married couple) and was made permanent and indexed for inflation under the 2025 federal tax law.",
   },
   {
     q: "What is business succession planning and when should I start?",

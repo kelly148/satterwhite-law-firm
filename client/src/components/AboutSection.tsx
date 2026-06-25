@@ -51,7 +51,7 @@ export default function AboutSection() {
               />
               {/* Stat badge */}
               <div className="absolute -bottom-6 left-8 bg-[#2c5282] text-white px-6 py-4 shadow-xl">
-                <p className="text-3xl font-bold text-white" style={{ fontFamily: "'Cormorant Garamond', serif" }}>9+</p>
+                <p className="text-3xl font-bold text-white" style={{ fontFamily: "'Cormorant Garamond', serif" }}>10</p>
                 <p className="text-xs tracking-widest uppercase text-white/70 mt-0.5">Years in Practice</p>
               </div>
             </div>
@@ -81,7 +81,7 @@ export default function AboutSection() {
               <p>
                 That career instilled a discipline, precision, and commitment to excellence that now defines
                 every client engagement at this firm. After being admitted to the Virginia Bar in 2016, Kelly
-                has spent nearly a decade helping families and individuals throughout the DMV protect what
+                has spent a decade helping families and individuals throughout the DMV protect what
                 matters most: their assets, their businesses, and their legacies.
               </p>
               <p>

@@ -22,7 +22,7 @@ const differentiators = [
   {
     icon: Star,
     title: "Rare Cross-Disciplinary Experience",
-    desc: "Two decades of military discipline, a background in title company operations, and nearly a decade of legal practice combine to give clients a uniquely thorough and practical perspective no other attorney in the DMV can match.",
+    desc: "Two decades of military discipline, a background in title company operations, and a decade of legal practice combine to give clients a uniquely thorough and practical perspective grounded in real-world experience.",
   },
   {
     icon: Clock,
@@ -113,7 +113,7 @@ export default function WhyUsSection() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 mt-10 pt-10 border-t border-white/20">
               {[
-                { val: "9+", label: "Years in Practice" },
+                { val: "10", label: "Years in Practice" },
                 { val: "VA & MD", label: "Licensed States" },
                 { val: "20", label: "Years Military Service" },
               ].map(({ val, label }) => (

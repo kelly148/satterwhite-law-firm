@@ -59,9 +59,9 @@ const practices = [
     id: "1031-exchanges",
     icon: ArrowLeftRight,
     title: "1031 Exchanges",
-    subtitle: "Qualified Intermediary Services",
+    subtitle: "Like-Kind Exchange Facilitation",
     description:
-      "As a qualified intermediary, The Satterwhite Law Firm facilitates tax-deferred like-kind exchanges under IRC §1031, allowing real estate investors to defer capital gains taxes and reinvest proceeds into replacement properties.",
+      "We guide real estate investors through tax-deferred like-kind exchanges under IRC §1031, coordinating qualified intermediary services through a separate, affiliated entity so investors can defer capital gains taxes and reinvest proceeds into replacement properties.",
     items: ["Qualified Intermediary Services", "Like-Kind Exchange Facilitation", "Delayed Exchanges", "Reverse Exchanges", "Real Property Transactions"],
   },
   {

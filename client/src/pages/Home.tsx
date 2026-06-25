@@ -82,7 +82,7 @@ const schemaMarkup = [
       "Business Succession Planning",
       "Business Entity Formation",
       "LLC Formation",
-      "1031 Exchange Qualified Intermediary",
+      "1031 Exchange Facilitation",
       "Asset Protection Planning",
       "Mergers and Acquisitions",
       "Asset Sales"
@@ -99,7 +99,6 @@ const schemaMarkup = [
     "paymentAccepted": "Cash, Check, Credit Card",
     "currenciesAccepted": "USD",
     "sameAs": [
-      "https://thesatterwhitelawfirm.org",
       "https://satterwhitelawfirmpllc.com"
     ]
   },

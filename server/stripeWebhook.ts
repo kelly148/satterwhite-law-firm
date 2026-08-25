@@ -25,26 +25,6 @@ export function registerStripeWebhook(app: Express): void {
       const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
       const stripe = getStripe();
 
-      // ── Test event detection (Manus platform verification) ──────────────
-      let rawBody: string;
-      try {
-        rawBody = req.body instanceof Buffer ? req.body.toString("utf8") : String(req.body);
-      } catch {
-        rawBody = "";
-      }
-
-      let parsedEvent: any = null;
-      try {
-        parsedEvent = JSON.parse(rawBody);
-      } catch {
-        // not valid JSON — fall through to signature verification
-      }
-
-      if (parsedEvent?.id?.startsWith("evt_test_")) {
-        console.log("[Stripe Webhook] Test event detected — returning verification response");
-        return res.status(200).json({ verified: true });
-      }
-
       // ── Signature verification ───────────────────────────────────────────
       // Return a non-2xx status on any real failure so Stripe RETRIES delivery
       // and the misconfiguration is visible — never silently "succeed", or a

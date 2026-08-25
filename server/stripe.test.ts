@@ -4,7 +4,6 @@
  * Tests cover:
  * - SERVICE_PRODUCTS definitions
  * - createCheckout input validation logic
- * - Webhook test-event detection
  * - Amount calculation helpers
  */
 
@@ -104,29 +103,6 @@ describe("formatCents helper", () => {
 
   it("should format 50 as $0.50", () => {
     expect(formatCents(50)).toBe("$0.50");
-  });
-});
-
-// ── WEBHOOK TEST EVENT DETECTION ─────────────────────────────────────────────
-
-describe("Webhook test event detection", () => {
-  it("should detect test events by evt_test_ prefix", () => {
-    const isTestEvent = (id: string) => id.startsWith("evt_test_");
-    expect(isTestEvent("evt_test_abc123")).toBe(true);
-    expect(isTestEvent("evt_1234567890")).toBe(false);
-    expect(isTestEvent("evt_live_abc123")).toBe(false);
-  });
-
-  it("should not treat real events as test events", () => {
-    const isTestEvent = (id: string) => id.startsWith("evt_test_");
-    const realEventIds = [
-      "evt_1RealEvent",
-      "evt_3NbLpkLXzYUe2NQKL",
-      "evt_checkout_session_completed",
-    ];
-    for (const id of realEventIds) {
-      expect(isTestEvent(id)).toBe(false);
-    }
   });
 });
 

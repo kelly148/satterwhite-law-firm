@@ -55,9 +55,9 @@ function validateEnv() {
     );
   }
 
-  if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS || !process.env.EMAIL_FROM) {
     console.warn(
-      "[Startup] RESEND_API_KEY / EMAIL_FROM are not set — intake, contact and booking " +
+      "[Startup] SMTP_USER / SMTP_PASS / EMAIL_FROM are not set — intake, contact and booking " +
         "notifications will not be delivered."
     );
   }

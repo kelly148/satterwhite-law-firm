@@ -27,19 +27,41 @@ Set these in Railway → your web service → **Variables** tab.
 Sign in at `/admin/login`. Without `ADMIN_PASSWORD_HASH` the admin pages are
 unreachable (the server logs a warning at startup).
 
-### Email — Resend
-Email is now the **only** notification channel. Without it, intake submissions,
+### Email — Google Workspace SMTP
+Email is the **only** notification channel. Without it, intake submissions,
 contact-form messages and Calendly bookings are still written to the database
 but nobody is notified.
 
+Mail goes out through the firm's existing Google Workspace mailbox over SMTP,
+authenticated with a Google **App Password** rather than the account password.
+No third-party email vendor is involved, and no new DNS records are needed —
+the domain's existing SPF (`include:_spf.google.com`) and DKIM already cover it.
+
 | Variable | Value |
 |---|---|
-| `RESEND_API_KEY` | [Resend](https://resend.com) → API Keys (`re_...`) |
-| `EMAIL_FROM` | A verified sender on your Resend-verified domain, e.g. `Satterwhite Law Intake <intake@thesatterwhitelawfirm.com>` |
+| `SMTP_USER` | The full mailbox address that authenticates, e.g. `kelly@thesatterwhitelawfirm.com` |
+| `SMTP_PASS` | A Google App Password. Google shows it as four blocks of four characters; spaces are stripped automatically, so paste it either way. |
+| `EMAIL_FROM` | The From header, e.g. `Satterwhite Law Intake <kelly@thesatterwhitelawfirm.com>` |
 | `EMAIL_TO` | Where submissions are sent (defaults to `kelly@thesatterwhitelawfirm.com`) |
 
-> Setup: create a Resend account, verify the domain you send from by adding the
-> DNS records Resend provides, create an API key, then set the three variables.
+Optional, only if moving off Google:
+
+| Variable | Default | Notes |
+|---|---|---|
+| `SMTP_HOST` | `smtp.gmail.com` | Any SMTP server works. |
+| `SMTP_PORT` | `465` | 465 uses implicit TLS; 587 negotiates STARTTLS. |
+
+> **Generating the App Password:** 2-Step Verification must be on for the
+> account first. Then Google Account → Security → 2-Step Verification → App
+> passwords → create one named e.g. "Satterwhite website".
+>
+> **On the From address:** Gmail rewrites the From header to the authenticating
+> account unless the address is a verified "Send mail as" alias. Keep the
+> address in `EMAIL_FROM` the same as `SMTP_USER` unless you have set up an
+> alias deliberately. A mismatch is logged at send time, not treated as an error.
+>
+> **Sending limits:** Workspace accounts are capped at roughly 2,000 recipients
+> per day, far above what intake notifications will use.
 
 ### Stripe
 | Variable | Value |

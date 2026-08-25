@@ -6,7 +6,7 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Phone } from "lucide-react";
 
-const HERO_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/hero_dark_overlay-NGx9p89C3Sti9qRJbZpJj9.webp";
+import { HERO_BG } from "@/assets";
 
 export default function HeroSection() {
   const [visible, setVisible] = useState(false);

@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle, Award, Scale, Music, Briefcase } from "lucide-react";
 
-const CONSULTATION_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/hero_main-LbNqbwr7wmQp2yqwZ8wV7f.webp";
+import { CONSULTATION_IMG } from "@/assets";
 
 const credentials = [
   { icon: Scale, text: "Licensed in Virginia (2016) & Maryland" },

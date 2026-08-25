@@ -3,12 +3,13 @@ import express from "express";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { registerOAuthRoutes } from "./oauth";
+import { registerAdminAuthRoutes } from "./adminAuth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { registerStripeWebhook } from "../stripeWebhook";
 import { registerCalendlyWebhook } from "../calendlyWebhook";
+import { registerIntakePdfRoute } from "../intakePdfRoute";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -47,6 +48,20 @@ function validateEnv() {
     );
   }
 
+  if (!process.env.ADMIN_PASSWORD_HASH) {
+    console.warn(
+      "[Startup] ADMIN_PASSWORD_HASH is not set — admin login is disabled and the " +
+        "/admin pages will be unreachable. Generate one with `node scripts/hash-password.mjs '<password>'`."
+    );
+  }
+
+  if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+    console.warn(
+      "[Startup] RESEND_API_KEY / EMAIL_FROM are not set — intake, contact and booking " +
+        "notifications will not be delivered."
+    );
+  }
+
   if (!process.env.DATABASE_URL) {
     console.warn(
       "[Startup] DATABASE_URL is not set — database features (intake storage, payments, bookings) will not work."
@@ -73,8 +88,11 @@ async function startServer() {
   app.use(express.json({ limit: "2mb" }));
   app.use(express.urlencoded({ limit: "2mb", extended: true }));
 
-  // OAuth callback under /api/oauth/callback
-  registerOAuthRoutes(app);
+  // Owner login/logout under /api/admin/*
+  registerAdminAuthRoutes(app);
+
+  // Admin-only on-demand intake PDF
+  registerIntakePdfRoute(app);
 
   // tRPC API
   app.use(

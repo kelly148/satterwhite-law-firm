@@ -1,3 +1,4 @@
+import { LOGO_URL } from "@/assets";
 import { useEffect } from "react";
 import { Link } from "wouter";
 import { CheckCircle2, Calendar, Phone, Mail } from "lucide-react";
@@ -15,7 +16,7 @@ export default function PaySuccess() {
       <div style={{ background: "#1a2744", padding: "32px 0 28px" }}>
         <div className="max-w-2xl mx-auto px-4 text-center">
           <img
-            src="https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/FullLogo_1c4a4b4a.jpg"
+            src={LOGO_URL}
             alt="The Satterwhite Law Firm"
             style={{ height: 48, borderRadius: 4, marginBottom: 0 }}
           />

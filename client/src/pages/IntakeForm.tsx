@@ -511,7 +511,7 @@ export default function IntakeForm() {
       canonical.setAttribute("rel", "canonical");
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute("href", "https://www.satterwhitelawfirmpllc.com/intake");
+    canonical.setAttribute("href", "https://www.thesatterwhitelawfirm.com/intake");
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) {
       metaDesc.setAttribute("content",
@@ -723,8 +723,20 @@ export default function IntakeForm() {
           formDataJson: JSON.stringify(detail),
         });
 
-        // Use the server-generated PDF URL if available
-        const pdfUrl: string | null = result?.pdfUrl || null;
+        // Build a local blob URL from the PDF bytes the server returned, so the
+        // client can save their own copy without the form ever being published
+        // to a public storage URL.
+        let pdfUrl: string | null = null;
+        if (result?.pdfBase64) {
+          try {
+            const binary = atob(result.pdfBase64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            pdfUrl = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+          } catch (e) {
+            console.error("[Intake Form] Could not build PDF download link:", e);
+          }
+        }
 
         // Show success screen
         const progressBar = document.getElementById("progressBar");
@@ -740,7 +752,6 @@ export default function IntakeForm() {
           if (pdfUrl) {
             const downloadBtn = document.createElement('a');
             downloadBtn.href = pdfUrl;
-            downloadBtn.target = '_blank';
             downloadBtn.rel = 'noopener noreferrer';
             downloadBtn.download = `Trust_Intake_${(detail.clientName || 'Form').replace(/\s+/g, '_')}.pdf`;
             downloadBtn.className = 'btn btn-primary';

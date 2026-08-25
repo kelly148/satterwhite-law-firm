@@ -7,7 +7,7 @@ import { useState, useRef, useEffect } from "react";
 import { ChevronDown, BookOpen, FileText, Scale, Home } from "lucide-react";
 import EstatePlanningChecklist from "./EstatePlanningChecklist";
 
-const DOCS_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/documents_desk-JBfNVDj2HF4nqNoMa7RRXb.webp";
+import { DOCS_IMG } from "@/assets";
 
 const faqs = [
   {

@@ -1,5 +1,19 @@
+/**
+ * notification.ts — owner notifications.
+ *
+ * Historically these were dispatched through the Manus "Forge" notification
+ * service. That platform is no longer in use, so notifications now go out as
+ * plain transactional email via Resend (see server/email.ts).
+ *
+ * The exported signature is unchanged so every existing call site keeps working:
+ * `true` means the message was handed off to Resend, `false` means no email
+ * channel is configured or the send failed. Callers already treat `false` as
+ * "not delivered" and log accordingly. Validation problems still throw, so a
+ * malformed payload surfaces as a TRPC error rather than a silent drop.
+ */
+
 import { TRPCError } from "@trpc/server";
-import { ENV } from "./env";
+import { isEmailConfigured, sendEmail } from "../email";
 
 export type NotificationPayload = {
   title: string;
@@ -12,16 +26,6 @@ const CONTENT_MAX_LENGTH = 20000;
 const trimValue = (value: string): string => value.trim();
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
-
-const buildEndpointUrl = (baseUrl: string): string => {
-  const normalizedBase = baseUrl.endsWith("/")
-    ? baseUrl
-    : `${baseUrl}/`;
-  return new URL(
-    "webdevtoken.v1.WebDevService/SendNotification",
-    normalizedBase
-  ).toString();
-};
 
 const validatePayload = (input: NotificationPayload): NotificationPayload => {
   if (!isNonEmptyString(input.title)) {
@@ -58,57 +62,21 @@ const validatePayload = (input: NotificationPayload): NotificationPayload => {
 };
 
 /**
- * Dispatches a project-owner notification through the Manus Notification Service.
- * Returns `true` if the request was accepted, `false` when the upstream service
- * cannot be reached (callers can fall back to email/slack). Validation errors
- * bubble up as TRPC errors so callers can fix the payload.
+ * Send a notification to the firm owner. Returns true when Resend accepted the
+ * message.
  */
 export async function notifyOwner(
   payload: NotificationPayload
 ): Promise<boolean> {
   const { title, content } = validatePayload(payload);
 
-  if (!ENV.forgeApiUrl) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Notification service URL is not configured.",
-    });
-  }
-
-  if (!ENV.forgeApiKey) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Notification service API key is not configured.",
-    });
-  }
-
-  const endpoint = buildEndpointUrl(ENV.forgeApiUrl);
-
-  try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        authorization: `Bearer ${ENV.forgeApiKey}`,
-        "content-type": "application/json",
-        "connect-protocol-version": "1",
-      },
-      body: JSON.stringify({ title, content }),
-    });
-
-    if (!response.ok) {
-      const detail = await response.text().catch(() => "");
-      console.warn(
-        `[Notification] Failed to notify owner (${response.status} ${response.statusText})${
-          detail ? `: ${detail}` : ""
-        }`
-      );
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.warn("[Notification] Error calling notification service:", error);
+  if (!isEmailConfigured()) {
+    console.warn(
+      "[Notification] No email channel configured — set RESEND_API_KEY and EMAIL_FROM " +
+        `so owner notifications are delivered. Dropped notification: "${title}"`
+    );
     return false;
   }
+
+  return sendEmail({ subject: title, text: content });
 }

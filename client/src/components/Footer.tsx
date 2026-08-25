@@ -4,7 +4,7 @@
  */
 import { Phone, Mail, MapPin } from "lucide-react";
 
-const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/FullLogo_1c4a4b4a.jpg";
+import { LOGO_URL } from "@/assets";
 
 const practiceLinks = [
   { label: "Estate Planning", href: "#estate-planning" },

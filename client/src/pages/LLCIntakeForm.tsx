@@ -27,7 +27,7 @@ export default function LLCIntakeForm() {
       canonical.setAttribute("rel", "canonical");
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute("href", "https://www.satterwhitelawfirmpllc.com/llc-intake");
+    canonical.setAttribute("href", "https://www.thesatterwhitelawfirm.com/llc-intake");
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) {
       metaDesc.setAttribute("content",

@@ -1,81 +1,75 @@
-# Railway Environment Variables Reference
+# Environment Variables Reference
 
-All of these must be added in Railway → your web service → **Variables** tab.
+Set these in Railway → your web service → **Variables** tab.
 
-## Required Variables
+> **Changed in the platform-decoupling pass:** every `VITE_OAUTH_*`,
+> `BUILT_IN_FORGE_*` and `VITE_FRONTEND_FORGE_*` variable is gone. The app no
+> longer talks to any external platform for login, notifications, or file
+> storage. If you are re-deploying an old environment, delete those variables.
+
+## Required
 
 ### Database
 | Variable | Value |
 |---|---|
-| `DATABASE_URL` | Paste the MySQL connection string from Railway's MySQL service (see deployment guide Step 3) |
+| `DATABASE_URL` | MySQL connection string from Railway's MySQL service |
 
-### Authentication
-| Variable | How to Get It |
+### Sessions
+| Variable | How to get it |
 |---|---|
-| `JWT_SECRET` | Run `openssl rand -base64 32` in a terminal and copy the output |
+| `JWT_SECRET` | `openssl rand -base64 32`. Must be at least 32 characters or the server refuses to start in production. |
 
-### Manus OAuth (copy from Manus → Settings → Secrets)
-| Variable | Notes |
+### Admin login
+| Variable | How to get it |
 |---|---|
-| `VITE_APP_ID` | Your Manus app ID |
-| `OAUTH_SERVER_URL` | Manus OAuth backend URL |
-| `VITE_OAUTH_PORTAL_URL` | Manus login portal URL |
-| `OWNER_OPEN_ID` | Your Manus user ID |
-| `OWNER_NAME` | Your name (e.g., Kelly Satterwhite) |
+| `ADMIN_PASSWORD_HASH` | `node scripts/hash-password.mjs '<your password>'` — paste the whole `scrypt:...:...` string. The plaintext password is never stored. |
 
-### Manus Built-in APIs (copy from Manus → Settings → Secrets)
-| Variable | Notes |
-|---|---|
-| `BUILT_IN_FORGE_API_URL` | Used for email notifications and PDF storage |
-| `BUILT_IN_FORGE_API_KEY` | Server-side API key |
-| `VITE_FRONTEND_FORGE_API_URL` | Frontend API URL |
-| `VITE_FRONTEND_FORGE_API_KEY` | Frontend API key |
+Sign in at `/admin/login`. Without `ADMIN_PASSWORD_HASH` the admin pages are
+unreachable (the server logs a warning at startup).
 
-### App Branding
-| Variable | Value |
-|---|---|
-| `VITE_APP_TITLE` | `The Satterwhite Law Firm, PLLC` |
-| `VITE_APP_LOGO` | `https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/FullLogo_1c4a4b4a.jpg` |
-
-### Stripe Payments (from Stripe Dashboard → Developers → API Keys)
-| Variable | Value |
-|---|---|
-| `STRIPE_SECRET_KEY` | `sk_live_...` (live) or `sk_test_...` (testing) |
-| `VITE_STRIPE_PUBLISHABLE_KEY` | `pk_live_...` (live) or `pk_test_...` (testing) |
-| `STRIPE_WEBHOOK_SECRET` | From Stripe Dashboard → Developers → Webhooks → your endpoint → Signing secret |
-
-### Email — intake PDF delivery via Resend (optional but recommended)
-When these are set, completed intake forms are emailed to the firm **with the PDF
-attached**. If they are not set, the app falls back to the platform notification
-(text summary + download link).
+### Email — Resend
+Email is now the **only** notification channel. Without it, intake submissions,
+contact-form messages and Calendly bookings are still written to the database
+but nobody is notified.
 
 | Variable | Value |
 |---|---|
-| `RESEND_API_KEY` | From [Resend](https://resend.com) → API Keys (`re_...`) |
+| `RESEND_API_KEY` | [Resend](https://resend.com) → API Keys (`re_...`) |
 | `EMAIL_FROM` | A verified sender on your Resend-verified domain, e.g. `Satterwhite Law Intake <intake@thesatterwhitelawfirm.com>` |
-| `EMAIL_TO` | Where submissions are sent (defaults to `kelly@thesatterwhitelawfirm.com` if omitted) |
+| `EMAIL_TO` | Where submissions are sent (defaults to `kelly@thesatterwhitelawfirm.com`) |
 
-> Setup: create a Resend account, verify the `thesatterwhitelawfirm.com` domain
-> (add the DNS records Resend provides), create an API key, then add the three
-> variables above in Railway.
+> Setup: create a Resend account, verify the domain you send from by adding the
+> DNS records Resend provides, create an API key, then set the three variables.
 
-### Calendly (optional)
+### Stripe
 | Variable | Value |
 |---|---|
-| `CALENDLY_WEBHOOK_SECRET` | From Calendly → Integrations → Webhooks → your webhook → Signing key |
+| `STRIPE_SECRET_KEY` | `sk_live_...` or `sk_test_...` |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | `pk_live_...` or `pk_test_...` |
+| `STRIPE_WEBHOOK_SECRET` | Stripe → Developers → Webhooks → your endpoint → Signing secret |
 
 ### Server
 | Variable | Value |
 |---|---|
 | `NODE_ENV` | `production` |
 
-> **Note:** Do NOT set `PORT` — Railway sets this automatically.
+> Do **not** set `PORT` — Railway assigns it.
 
----
+## Optional
 
-## After Adding Variables
+| Variable | Default | Notes |
+|---|---|---|
+| `OWNER_NAME` | `Kelly Satterwhite` | Display name on the admin session |
+| `OWNER_EMAIL` | `kelly@thesatterwhitelawfirm.com` | Stored on the owner record |
+| `OWNER_OPEN_ID` | `owner` | Internal id for the single admin account. Changing it after first login creates a second account. |
+| `VITE_APP_ID` | `satterwhite-law` | Session token audience claim. Changing it invalidates existing sessions. |
+| `CALENDLY_WEBHOOK_SECRET` | — | Calendly → Integrations → Webhooks → signing key |
 
-1. Railway will automatically redeploy your app
-2. Run the database migration by connecting to Railway and running: `pnpm db:push`
-3. Update your Stripe webhook URL to point to your Railway domain
-4. Test the site end-to-end
+## After adding variables
+
+1. Railway redeploys automatically.
+2. Run the migration: `pnpm db:push`.
+3. Sign in once at `/admin/login` to create the owner record.
+4. Point the Stripe webhook at `https://<your-domain>/api/stripe/webhook`.
+5. Point the Calendly webhook at `https://<your-domain>/api/calendly/webhook`.
+6. Test end to end.

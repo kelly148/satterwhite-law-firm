@@ -4,7 +4,7 @@
  * Navy (#2c5282) + Steel Blue + Cormorant Garamond + Lato
  * Full single-page layout with all sections assembled
  * SEO: Schema.org LegalService + LocalBusiness JSON-LD
- * Canonical: https://www.satterwhitelawfirmpllc.com/
+ * Canonical: https://www.thesatterwhitelawfirm.com/
  */
 import { useEffect } from "react";
 import Navigation from "@/components/Navigation";
@@ -20,7 +20,7 @@ import Footer from "@/components/Footer";
 import FloatingCTA from "@/components/FloatingCTA";
 import SchedulingSection from "@/components/SchedulingSection";
 
-const CANONICAL_URL = "https://www.satterwhitelawfirmpllc.com";
+const CANONICAL_URL = "https://www.thesatterwhitelawfirm.com";
 
 // Schema.org JSON-LD — LegalService + Attorney + LocalBusiness
 const schemaMarkup = [
@@ -33,11 +33,11 @@ const schemaMarkup = [
     "url": CANONICAL_URL,
     "logo": {
       "@type": "ImageObject",
-      "url": "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/FullLogo_1c4a4b4a.jpg",
+      "url": "https://www.thesatterwhitelawfirm.com/assets/logo.png",
       "width": 600,
       "height": 400
     },
-    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/FullLogo_1c4a4b4a.jpg",
+    "image": "https://www.thesatterwhitelawfirm.com/assets/logo.png",
     "description": "The Satterwhite Law Firm, PLLC provides personalized estate planning, trust administration, wills, revocable trusts, powers of attorney, advance directives, business succession planning, LLC formation, general business transactions, and 1031 exchange qualified intermediary services in Virginia and Maryland.",
     "telephone": "+17038557380",
     "email": "kelly@thesatterwhitelawfirm.com",
@@ -99,7 +99,7 @@ const schemaMarkup = [
     "paymentAccepted": "Cash, Check, Credit Card",
     "currenciesAccepted": "USD",
     "sameAs": [
-      "https://satterwhitelawfirmpllc.com"
+      "https://www.thesatterwhitelawfirm.com"
     ]
   },
   {
@@ -185,7 +185,7 @@ export default function Home() {
       { property: "og:url", content: CANONICAL_URL + "/" },
       { property: "og:site_name", content: "The Satterwhite Law Firm, PLLC" },
       { property: "og:locale", content: "en_US" },
-      { property: "og:image", content: "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/FullLogo_1c4a4b4a.jpg" },
+      { property: "og:image", content: "https://www.thesatterwhitelawfirm.com/assets/logo.png" },
       { property: "og:image:alt", content: "The Satterwhite Law Firm, PLLC — Estate Planning Attorney Alexandria VA" },
     ];
     ogTags.forEach(({ property, content }) => {
@@ -203,7 +203,7 @@ export default function Home() {
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Estate Planning Attorney Alexandria VA | The Satterwhite Law Firm, PLLC" },
       { name: "twitter:description", content: "Wills, trusts, powers of attorney, business succession & 1031 exchange services in Virginia and Maryland. Free consultation." },
-      { name: "twitter:image", content: "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/FullLogo_1c4a4b4a.jpg" },
+      { name: "twitter:image", content: "https://www.thesatterwhitelawfirm.com/assets/logo.png" },
     ];
     twitterTags.forEach(({ name, content }) => {
       let tag = document.querySelector(`meta[name="${name}"]`);

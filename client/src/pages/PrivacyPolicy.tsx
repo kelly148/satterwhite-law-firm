@@ -7,8 +7,7 @@
 import { useEffect } from "react";
 import { Phone, Mail, MapPin } from "lucide-react";
 
-const LOGO_URL =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/FullLogo_1c4a4b4a.jpg";
+import { LOGO_URL } from "@/assets";
 
 const EFFECTIVE_DATE = "February 28, 2026";
 
@@ -431,7 +430,7 @@ export default function PrivacyPolicy() {
       canonical.setAttribute("rel", "canonical");
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute("href", "https://www.satterwhitelawfirmpllc.com/privacy-policy");
+    canonical.setAttribute("href", "https://www.thesatterwhitelawfirm.com/privacy-policy");
 
     // Meta description
     const metaDesc = document.querySelector('meta[name="description"]');

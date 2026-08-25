@@ -7,7 +7,7 @@ import { useState, useRef, useEffect } from "react";
 import { Phone, Mail, MapPin, Clock, Send, CheckCircle, Loader2, AlertCircle } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
-const VA_LANDSCAPE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/virginia_landscape-MVVVXWwaNfsUDa52hrMXCQ.webp";
+import { VA_LANDSCAPE } from "@/assets";
 
 const contactInfo = [
   {

@@ -4,13 +4,7 @@
  * Reads both named fields (by id) and subsection data (dynamically added items).
  */
 
-import { storagePut } from "./storage";
-import { randomBytes } from "crypto";
 import PDFDocument from "pdfkit";
-
-function randomSuffix(): string {
-  return randomBytes(4).toString("hex");
-}
 
 function fv(formData: any, fieldId: string): string {
   const val = formData[fieldId];
@@ -149,31 +143,22 @@ export function renderIntakePdfBuffer(formData: any, clientName: string): Promis
 }
 
 /**
- * Generate the intake PDF, upload it to storage, and return BOTH the public URL
- * (for the email body / DB record) and the raw bytes (for emailing as an
- * attachment). Either may be null if its step fails — the buffer is still
- * returned even when the upload fails, so the attachment can go out regardless.
+ * Generate the intake PDF and return the raw bytes.
+ *
+ * PDFs are no longer uploaded to external object storage. The complete form
+ * data is persisted in the `intakeSubmissions` table, so the document can be
+ * regenerated on demand from `/api/intake/:id/pdf` (admin only). That keeps the
+ * app free of any object-storage dependency and means there is no stale file to
+ * go missing. Returns null only if rendering itself fails.
  */
 export async function generateIntakePdf(
   formData: any,
   clientName: string,
-): Promise<{ url: string | null; buffer: Buffer | null }> {
-  let buffer: Buffer | null = null;
+): Promise<{ buffer: Buffer | null }> {
   try {
-    buffer = await renderIntakePdfBuffer(formData, clientName);
+    return { buffer: await renderIntakePdfBuffer(formData, clientName) };
   } catch (error) {
     console.error("[generateIntakePdf] Error generating PDF:", error);
-    return { url: null, buffer: null };
+    return { buffer: null };
   }
-
-  let url: string | null = null;
-  try {
-    const fileKey = `intake-forms/${clientName.replace(/\s+/g, "-").toLowerCase()}-${randomSuffix()}.pdf`;
-    const result = await storagePut(fileKey, buffer, "application/pdf");
-    url = result.url;
-  } catch (error) {
-    console.error("[generateIntakePdf] Error uploading PDF:", error);
-  }
-
-  return { url, buffer };
 }

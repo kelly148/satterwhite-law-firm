@@ -228,7 +228,7 @@ export default function ConsultationsAdmin() {
             <div style={{ fontSize: 13, color: "#975a16" }}>
               Go to <strong>Calendly → Integrations → Webhooks</strong>, add the endpoint{" "}
               <code style={{ background: "#fef3c7", padding: "1px 6px", borderRadius: 3 }}>
-                https://satterlaw-6bmn3gsb.manus.space/api/calendly/webhook
+                {`${window.location.origin}/api/calendly/webhook`}
               </code>{" "}
               and subscribe to <strong>invitee.created</strong> and <strong>invitee.canceled</strong>.
             </div>

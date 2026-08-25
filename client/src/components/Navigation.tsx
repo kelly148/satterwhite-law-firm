@@ -6,7 +6,7 @@
 import { useState, useEffect } from "react";
 import { Phone, Menu, X, ChevronDown, Calendar } from "lucide-react";
 
-const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/FullLogo_1c4a4b4a.jpg";
+import { LOGO_URL } from "@/assets";
 
 type NavLink = {
   label: string;

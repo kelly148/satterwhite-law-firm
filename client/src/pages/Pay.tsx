@@ -1,3 +1,4 @@
+import { LOGO_URL } from "@/assets";
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -70,7 +71,7 @@ export default function Pay() {
         <div className="max-w-2xl mx-auto px-4 text-center">
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
             <img
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/FullLogo_1c4a4b4a.jpg"
+              src={LOGO_URL}
               alt="The Satterwhite Law Firm"
               style={{ height: 56, borderRadius: 4 }}
             />

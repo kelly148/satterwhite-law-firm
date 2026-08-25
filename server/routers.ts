@@ -6,7 +6,7 @@ import { notifyOwner } from "./_core/notification";
 import { sendEmail, isEmailConfigured } from "./email";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
-import { generateIntakePdf } from "./generateIntakePdf";
+import { generateIntakePdf, renderIntakePdfBuffer } from "./generateIntakePdf";
 import { intakeSubmissions, payments, consultationBookings } from "../drizzle/schema";
 import { desc, eq } from "drizzle-orm";
 import { getDb } from "./db";
@@ -33,7 +33,7 @@ function buildFullEmailBody(
   clientEmail: string,
   clientPhone: string,
   submittedAt: string,
-  pdfUrl: string | null,
+  pdfAttached: boolean,
 ): string {
   const line = '━'.repeat(60);
   const thin = '─'.repeat(60);
@@ -45,10 +45,10 @@ function buildFullEmailBody(
   lines.push(`📧 Email: ${clientEmail || '—'}`);
   lines.push(`📞 Phone: ${clientPhone || '—'}`);
   lines.push(`🕐 Submitted: ${submittedAt} (ET)`);
-  if (pdfUrl) {
-    lines.push(`📥 PDF: ${pdfUrl}`);
+  if (pdfAttached) {
+    lines.push(`📎 The completed intake form is attached to this email as a PDF.`);
   } else {
-    lines.push(`⚠️  PDF generation failed — all data is in this email`);
+    lines.push(`⚠️  PDF generation failed — all data is reproduced in this email`);
   }
   lines.push('');
 
@@ -110,7 +110,7 @@ export const appRouter = router({
           clientEmail: intakeSubmissions.clientEmail,
           clientPhone: intakeSubmissions.clientPhone,
           formType: intakeSubmissions.formType,
-          pdfUrl: intakeSubmissions.pdfUrl,
+          pdfGenerated: intakeSubmissions.pdfGenerated,
           submittedAt: intakeSubmissions.submittedAt,
         })
         .from(intakeSubmissions)
@@ -119,7 +119,11 @@ export const appRouter = router({
     }),
 
     /**
-     * Send the intake PDF to the client via email — admin only
+     * Email the completed intake PDF to the client — admin only.
+     *
+     * The PDF is regenerated from the stored submission and attached directly,
+     * so there is no hosted file to link to and nothing for the attorney to
+     * forward by hand.
      */
     sendPdfToClient: adminProcedure
       .input(z.object({ id: z.number().int() }))
@@ -133,16 +137,32 @@ export const appRouter = router({
           .limit(1);
         const submission = rows[0];
         if (!submission) throw new Error("Submission not found.");
-        if (!submission.pdfUrl) throw new Error("No PDF available for this submission.");
+        if (!submission.clientEmail) {
+          throw new Error("This submission has no client email address on file.");
+        }
 
-        const formType = submission.formType === "llc" ? "LLC Formation" : "Estate Planning Trust";
+        let formData: unknown;
+        try {
+          formData = JSON.parse(submission.formDataJson);
+        } catch {
+          throw new Error("Stored form data for this submission is unreadable.");
+        }
+
+        let pdfBuffer: Buffer;
+        try {
+          pdfBuffer = await renderIntakePdfBuffer(formData, submission.clientName);
+        } catch (e) {
+          console.error("[Intake] Failed to regenerate PDF for client copy:", e);
+          throw new Error("Could not generate the PDF. Please try again.");
+        }
+
+        const formType =
+          submission.formType === "llc" ? "LLC Formation" : "Estate Planning Trust";
         const emailBody = [
           `Dear ${submission.clientName},`,
           "",
           `Thank you for completing your ${formType} intake form with The Satterwhite Law Firm, PLLC.`,
-          "A copy of your completed intake form is available at the link below:",
-          "",
-          submission.pdfUrl,
+          "A copy of your completed intake form is attached to this email.",
           "",
           "Our office will be in touch within one business day to discuss next steps.",
           "If you have any questions in the meantime, please don't hesitate to reach out:",
@@ -156,23 +176,25 @@ export const appRouter = router({
           "1605 Fort Hunt Ct, Alexandria, VA 22307",
         ].join("\n");
 
-        // Notify the owner to forward the PDF to the client
-        // (Direct client email is not available via built-in APIs; owner forwards manually)
-        await notifyOwner({
-          title: `Send PDF to Client — ${submission.clientName}`,
-          content: [
-            `Please forward the intake form PDF to the client:`,
-            ``,
-            `Client: ${submission.clientName}`,
-            `Email: ${submission.clientEmail}`,
-            `Phone: ${submission.clientPhone || "N/A"}`,
-            `Form Type: ${formType}`,
-            ``,
-            `PDF Link: ${submission.pdfUrl}`,
-            ``,
-            emailBody,
-          ].join("\n"),
+        const filename = `Intake_${(submission.clientName || "Form").replace(/\s+/g, "_")}.pdf`;
+
+        if (!isEmailConfigured()) {
+          throw new Error(
+            "Email is not configured on the server, so the PDF cannot be sent. Set RESEND_API_KEY and EMAIL_FROM."
+          );
+        }
+
+        const sent = await sendEmail({
+          subject: `Your completed intake form — The Satterwhite Law Firm, PLLC`,
+          text: emailBody,
+          to: submission.clientEmail,
+          attachments: [{ filename, content: pdfBuffer }],
         });
+
+        if (!sent) {
+          throw new Error("The email provider rejected the message. Please try again.");
+        }
+
         return { success: true };
       }),
 
@@ -220,13 +242,12 @@ export const appRouter = router({
           throw new Error("Submitted form data was invalid. Please try again or call the office.");
         }
 
-        // Generate PDF from the complete form data — returns both the uploaded
-        // URL (for the DB record / email body) and the raw bytes (to attach).
-        let pdfUrl: string | null = null;
+        // Render the PDF from the complete form data. Nothing is uploaded: the
+        // bytes go out as an email attachment, and the document can always be
+        // regenerated later from the stored JSON via /api/intake/:id/pdf.
         let pdfBuffer: Buffer | null = null;
         try {
           const pdf = await generateIntakePdf(formData, input.clientName);
-          pdfUrl = pdf.url;
           pdfBuffer = pdf.buffer;
         } catch (e) {
           console.error('[Intake Form] PDF generation failed:', e);
@@ -239,7 +260,7 @@ export const appRouter = router({
           input.clientEmail,
           input.clientPhone,
           submittedAt,
-          pdfUrl,
+          Boolean(pdfBuffer),
         );
 
         // Store the submission in the database
@@ -251,8 +272,7 @@ export const appRouter = router({
               clientEmail: input.clientEmail,
               clientPhone: input.clientPhone,
               formDataJson: input.formDataJson,
-              pdfUrl: pdfUrl || undefined,
-              pdfGenerated: pdfUrl ? new Date() : undefined,
+              pdfGenerated: pdfBuffer ? new Date() : undefined,
             });
           }
         } catch (e) {
@@ -280,7 +300,13 @@ export const appRouter = router({
 
         console.log(`[Intake Form] Submission from ${input.clientName} <${input.clientEmail}> — delivered: ${delivered}, PDF: ${pdfBuffer ? 'generated' : 'failed'}`);
 
-        return { success: true, pdfUrl };
+        // Hand the rendered PDF back to the browser so the client can save
+        // their own copy. Nothing is published: the bytes travel once, over the
+        // same authenticated-by-nature request that created them.
+        return {
+          success: true,
+          pdfBase64: pdfBuffer ? pdfBuffer.toString("base64") : null,
+        };
       }),
   }),
 

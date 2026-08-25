@@ -9,7 +9,7 @@
  * Setup instructions:
  * 1. Go to https://calendly.com/integrations/webhooks
  * 2. Create a new webhook subscription with URL:
- *    https://satterlaw-6bmn3gsb.manus.space/api/calendly/webhook
+ *    https://<your-domain>/api/calendly/webhook
  * 3. Subscribe to events: invitee.created, invitee.canceled
  * 4. Copy the signing key and add it as CALENDLY_WEBHOOK_SECRET in Settings → Secrets
  *

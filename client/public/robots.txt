@@ -1,12 +1,13 @@
 # robots.txt — The Satterwhite Law Firm, PLLC
-# https://www.satterwhitelawfirmpllc.com/
+# https://www.thesatterwhitelawfirm.com/
 
 User-agent: *
 Allow: /
 
-# Block API and internal routes from indexing
+# Block API, admin and internal routes from indexing
 Disallow: /api/
 Disallow: /api/trpc/
+Disallow: /admin/
 
 # Sitemap location
-Sitemap: https://www.satterwhitelawfirmpllc.com/sitemap.xml
+Sitemap: https://www.thesatterwhitelawfirm.com/sitemap.xml

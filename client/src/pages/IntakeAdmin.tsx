@@ -17,8 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { ArrowLeft, Search, FileText, Users, Building2, ExternalLink } from "lucide-react";
 
-const LOGO_URL =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/FullLogo_1c4a4b4a.jpg";
+import { LOGO_URL } from "@/assets";
 
 function formatDate(date: Date | string): string {
   return new Date(date).toLocaleString("en-US", {
@@ -373,18 +372,14 @@ export default function IntakeAdmin() {
                       </Badge>
                     </td>
                     <td style={{ padding: "14px 16px" }}>
-                      {s.pdfUrl ? (
-                        <a
-                          href={s.pdfUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ display: "flex", alignItems: "center", gap: 4, color: "#2c5282", fontSize: 12, textDecoration: "none", fontWeight: 600 }}
-                        >
-                          <ExternalLink size={13} /> Download PDF
-                        </a>
-                      ) : (
-                        <span style={{ color: "#aaa", fontSize: 12 }}>No PDF</span>
-                      )}
+                      <a
+                        href={`/api/intake/${s.id}/pdf`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ display: "flex", alignItems: "center", gap: 4, color: "#2c5282", fontSize: 12, textDecoration: "none", fontWeight: 600 }}
+                      >
+                        <ExternalLink size={13} /> Download PDF
+                      </a>
                     </td>
                     <td style={{ padding: "14px 16px" }}>
                       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -396,7 +391,6 @@ export default function IntakeAdmin() {
                         >
                           View Form
                         </Button>
-                        {s.pdfUrl && (
                           <Button
                             variant="outline"
                             size="sm"
@@ -411,7 +405,6 @@ export default function IntakeAdmin() {
                           >
                             {sendingId === s.id ? "Sending…" : sentIds.has(s.id) ? "✓ Sent" : "Send to Client"}
                           </Button>
-                        )}
                       </div>
                     </td>
                   </tr>

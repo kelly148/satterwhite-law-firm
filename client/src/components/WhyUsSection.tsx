@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from "react";
 import { UserCheck, MapPin, Clock, Star, Phone, FileCheck } from "lucide-react";
 
-const FAMILY_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/family_legacy-RzEnsDEYqHGiQSgpGwbNEG.webp";
+import { FAMILY_IMG } from "@/assets";
 
 const differentiators = [
   {

@@ -16,6 +16,7 @@ import PaySuccess from "./pages/PaySuccess";
 import PaymentHistory from "./pages/PaymentHistory";
 import IntakeAdmin from "./pages/IntakeAdmin";
 import ConsultationsAdmin from "./pages/ConsultationsAdmin";
+import AdminLogin from "./pages/AdminLogin";
 
 /**
  * Gate admin pages behind an authenticated admin session. The server already
@@ -62,6 +63,7 @@ function Router() {
       <Route path={"/llc-intake"} component={LLCIntakeForm} />
       <Route path={"/pay"} component={Pay} />
       <Route path={"/pay/success"} component={PaySuccess} />
+      <Route path={"/admin/login"} component={AdminLogin} />
       <Route path={"/admin/payments"}>
         <RequireAdmin component={PaymentHistory} />
       </Route>

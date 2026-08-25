@@ -29,8 +29,10 @@ now rejected instead of provisioning an account on the fly.
 ## 2. Notifications
 
 **Was:** the platform's "Forge" notification service.
-**Now:** transactional email through Resend, which the trust-intake path already
-used.
+**Now:** transactional email over SMTP through the firm's existing Google
+Workspace mailbox, authenticated with a Google App Password. No third-party
+email vendor, and no new DNS records: the domain's existing SPF and DKIM
+already authorize Google to send for it.
 
 `notifyOwner()` keeps its exact signature, so every call site is unchanged. It
 returns `false` and logs a warning when no email channel is configured, instead

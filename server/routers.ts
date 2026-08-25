@@ -180,7 +180,7 @@ export const appRouter = router({
 
         if (!isEmailConfigured()) {
           throw new Error(
-            "Email is not configured on the server, so the PDF cannot be sent. Set RESEND_API_KEY and EMAIL_FROM."
+            "Email is not configured on the server, so the PDF cannot be sent. Set SMTP_USER, SMTP_PASS and EMAIL_FROM."
           );
         }
 
@@ -281,7 +281,7 @@ export const appRouter = router({
 
         const subject = `New Trust Intake Form — ${input.clientName || 'New Client'} — Satterwhite Law`;
 
-        // Preferred path: email the completed PDF as a real attachment (Resend).
+        // Preferred path: email the completed PDF as a real attachment (SMTP).
         // Falls back to the platform notification (text + link) if email isn't
         // configured or the send fails.
         let delivered = false;

@@ -3,10 +3,10 @@
  *
  * Historically these were dispatched through the Manus "Forge" notification
  * service. That platform is no longer in use, so notifications now go out as
- * plain transactional email via Resend (see server/email.ts).
+ * plain transactional email over SMTP (see server/email.ts).
  *
  * The exported signature is unchanged so every existing call site keeps working:
- * `true` means the message was handed off to Resend, `false` means no email
+ * `true` means the message was handed off to the mail server, `false` means no email
  * channel is configured or the send failed. Callers already treat `false` as
  * "not delivered" and log accordingly. Validation problems still throw, so a
  * malformed payload surfaces as a TRPC error rather than a silent drop.
@@ -62,7 +62,7 @@ const validatePayload = (input: NotificationPayload): NotificationPayload => {
 };
 
 /**
- * Send a notification to the firm owner. Returns true when Resend accepted the
+ * Send a notification to the firm owner. Returns true when the mail server accepted the
  * message.
  */
 export async function notifyOwner(
@@ -72,7 +72,7 @@ export async function notifyOwner(
 
   if (!isEmailConfigured()) {
     console.warn(
-      "[Notification] No email channel configured — set RESEND_API_KEY and EMAIL_FROM " +
+      "[Notification] No email channel configured — set SMTP_USER, SMTP_PASS and EMAIL_FROM " +
         `so owner notifications are delivered. Dropped notification: "${title}"`
     );
     return false;

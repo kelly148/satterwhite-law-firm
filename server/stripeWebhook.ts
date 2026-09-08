@@ -48,10 +48,14 @@ export function registerStripeWebhook(app: Express): void {
 
       console.log(`[Stripe Webhook] Received event: ${event.type} (${event.id})`);
 
-      // ── Event processing (async — respond immediately) ───────────────────
-      setImmediate(() => processStripeEvent(event).catch(console.error));
-
-      return res.status(200).json({ verified: true });
+      // Acknowledge only after storage succeeds so Stripe retries database failures.
+      try {
+        await processStripeEvent(event);
+        return res.status(200).json({ verified: true });
+      } catch (error) {
+        console.error("[Stripe Webhook] Processing failed:", error);
+        return res.status(500).json({ verified: true, error: "processing failed" });
+      }
     }
   );
 }
@@ -91,8 +95,7 @@ async function processStripeEvent(event: Stripe.Event): Promise<void> {
         // Idempotency check — avoid duplicate inserts
         const db = await getDb();
         if (!db) {
-          console.error("[Stripe] Database not available — cannot save payment record");
-          break;
+          throw new Error("Database unavailable; payment must be retried");
         }
 
         const existing = await db
@@ -124,6 +127,7 @@ async function processStripeEvent(event: Stripe.Event): Promise<void> {
         }
       } catch (err) {
         console.error("[Stripe] Failed to save payment record:", err);
+        throw err;
       }
       break;
     }

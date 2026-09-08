@@ -95,3 +95,17 @@ Optional, only if moving off Google:
 4. Point the Stripe webhook at `https://<your-domain>/api/stripe/webhook`.
 5. Point the Calendly webhook at `https://<your-domain>/api/calendly/webhook`.
 6. Test end to end.
+## Deployment settings verified on 2026-09-08
+
+Railway no longer allows newly created services to opt into legacy Config as Code.
+For this project, set these directly in the service Settings page:
+
+- Builder: Railpack (automatic dependency installation)
+- Build command: `pnpm run build`
+- Pre-deploy command: `pnpm db:migrate`
+- Start command: `node dist/index.js`
+- Source branch: `main`
+- Public domain target port: 8080 (verify against the server startup log)
+
+The legacy `railway.json` remains for existing deployments that still support it;
+it does not configure this newly created service by itself.

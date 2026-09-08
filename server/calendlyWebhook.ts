@@ -62,6 +62,9 @@ export function registerCalendlyWebhook(app: Express): void {
             return res.status(400).json({ received: false, error: "malformed signature" });
           }
           const timestamp = tPart.slice(2);
+          if (!/^\d+$/.test(timestamp) || Math.abs(Date.now() / 1000 - Number(timestamp)) > 180) {
+            return res.status(400).json({ received: false, error: 'expired signature' });
+          }
           const receivedSig = v1Part.slice(3);
           const expectedSig = crypto
             .createHmac("sha256", signingKey)
@@ -89,15 +92,24 @@ export function registerCalendlyWebhook(app: Express): void {
       }
 
       const eventType: string = payload?.event ?? "";
-      const invitee = payload?.payload?.invitee ?? {};
-      const eventDetails = payload?.payload?.event ?? {};
+      const invitee = payload?.payload ?? {};
+      const eventDetails = invitee.scheduled_event ?? {};
 
       console.log(`[Calendly Webhook] Received: ${eventType}`);
 
-      // Respond immediately — process async
-      res.status(200).json({ received: true });
-
-      setImmediate(() => processCalendlyEvent(eventType, invitee, eventDetails, payload).catch(console.error));
+      if (!['invitee.created', 'invitee.canceled'].includes(eventType)) {
+        return res.status(200).json({ received: true });
+      }
+      if (!invitee.uri || !invitee.email) {
+        return res.status(400).json({ received: false, error: 'invalid invitee' });
+      }
+      try {
+        await processCalendlyEvent(eventType, invitee, eventDetails, payload);
+        res.status(200).json({ received: true });
+      } catch (error) {
+        console.error('[Calendly] Could not persist booking:', error);
+        res.status(500).json({ received: false });
+      }
     }
   );
 }
@@ -110,12 +122,12 @@ async function processCalendlyEvent(
 ): Promise<void> {
   const db = await getDb();
   if (!db) {
-    console.error("[Calendly] Database not available");
-    return;
+    throw new Error('Database unavailable; booking must be retried');
   }
 
   // Extract the Calendly event UUID from the URI
-  const eventUri: string = eventDetails?.uri ?? invitee?.event ?? "";
+  // Match individual invitees, so one cancellation cannot cancel a group event.
+  const eventUri: string = invitee.uri;
   const eventId = eventUri.split("/").pop() ?? eventUri;
 
   if (!eventId) {

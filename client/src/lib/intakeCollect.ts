@@ -114,17 +114,22 @@ export function collectIntakeData(root: ParentNode): IntakeData {
 
     // Grouped fields — one group per .subsection (Primary Client, Child 1, Property 1, Trustee, ...)
     const groups: IntakeGroup[] = [];
-    sec.querySelectorAll(".subsection").forEach((sub) => {
+    sec.querySelectorAll(".subsection, .member-card").forEach((sub) => {
       if (isHidden(sub)) return;
-      const ttEl = sub.querySelector(".subsection-title");
+      const ttEl = sub.querySelector(".subsection-title, .member-card-title");
       const gTitle = ttEl && ttEl.textContent ? ttEl.textContent.replace(/\s+/g, " ").trim() : "Details";
       const gFields = collectControls(ctrlsIn(sub), sub);
       if (gFields.length) groups.push({ title: gTitle, fields: gFields });
     });
 
     // Loose fields — controls not inside any subsection
-    const looseCtrls = ctrlsIn(sec).filter((el) => !el.closest(".subsection"));
+    const looseCtrls = ctrlsIn(sec).filter((el) => !el.closest(".subsection, .member-card"));
     const fields = collectControls(looseCtrls, sec);
+    sec.querySelectorAll('.tag-group').forEach(group => {
+      if (isHidden(group)) return;
+      const selected = Array.from(group.querySelectorAll('.tag.selected')).map(tag => tag.textContent?.trim()).filter(Boolean);
+      if (selected.length) fields.push({ label: fieldLabel(group), value: selected.join(', ') });
+    });
 
     if (groups.length || fields.length) {
       data.sections.push({ title, fields, groups });

@@ -87,7 +87,7 @@ export function renderIntakePdfBuffer(formData: any, clientName: string): Promis
     // ── HEADER ──────────────────────────────────────────────────────────────
     doc.rect(50, 50, doc.page.width - 100, 60).fill('#1a2744');
     doc.fillColor('white').fontSize(16).font('Helvetica-Bold')
-      .text('TRUST & ESTATE PLANNING INTAKE FORM', 60, 62, { align: 'center', width: doc.page.width - 120 });
+      .text(formData?.formType === 'llc' ? 'LLC FORMATION INTAKE FORM' : 'TRUST & ESTATE PLANNING INTAKE FORM', 60, 62, { align: 'center', width: doc.page.width - 120 });
     doc.fontSize(10).font('Helvetica')
       .text('The Satterwhite Law Firm, PLLC  ·  1605 Fort Hunt Ct, Alexandria, VA 22307  ·  (703) 855-7380', 60, 84, { align: 'center', width: doc.page.width - 120 });
     doc.fillColor('black');

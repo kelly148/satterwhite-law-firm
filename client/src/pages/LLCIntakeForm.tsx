@@ -1,15 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
+import { collectIntakeData } from "@/lib/intakeCollect";
 
 export default function LLCIntakeForm() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pdfBase64, setPdfBase64] = useState<string | null>(null);
 
   const submitMutation = trpc.llcIntake.submit.useMutation({
-    onSuccess: () => {
+    onSuccess: (result) => {
+      setPdfBase64(result.pdfBase64);
       setSubmitting(false);
       setSubmitted(true);
     },
@@ -222,6 +225,11 @@ export default function LLCIntakeForm() {
         llcAddress: formData.llcAddress ?? '',
         memberCount: formData.memberCount ?? '',
         managerName: formData.managerName ?? '',
+        formDataJson: JSON.stringify({
+          ...collectIntakeData(containerRef.current!),
+          formType: 'llc',
+          submittedAt: new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }),
+        }),
       });
     };
 
@@ -253,6 +261,7 @@ export default function LLCIntakeForm() {
           <div style={{ fontSize: 12, color: "#8a8680", marginBottom: 32 }}>
             The Satterwhite Law Firm, PLLC &nbsp;|&nbsp; 1605 Fort Hunt Ct &nbsp;|&nbsp; Alexandria, VA 22307
           </div>
+          {pdfBase64 && <p style={{ marginBottom: 24 }}><a href={`data:application/pdf;base64,${pdfBase64}`} download="LLC_Intake.pdf">Download your completed intake PDF</a></p>}
           <Link href="/" style={{ display: "inline-block", padding: "12px 32px", background: "transparent", color: "#1a2744", border: "1px solid #1a2744", fontFamily: "'Jost', sans-serif", fontSize: 12, letterSpacing: ".15em", textTransform: "uppercase", textDecoration: "none", borderRadius: 2 }}>
             Return to Website
           </Link>

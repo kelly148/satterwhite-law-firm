@@ -40,7 +40,7 @@ function buildFullEmailBody(
   const thin = '─'.repeat(60);
   const lines: string[] = [];
 
-  lines.push(`📋 NEW TRUST INTAKE FORM SUBMISSION`);
+  lines.push(formData?.formType === 'llc' ? 'NEW LLC FORMATION INTAKE FORM SUBMISSION' : 'NEW TRUST INTAKE FORM SUBMISSION');
   lines.push(line);
   lines.push(`👤 Client: ${clientName || '—'}`);
   lines.push(`📧 Email: ${clientEmail || '—'}`);
@@ -265,19 +265,16 @@ export const appRouter = router({
         );
 
         // Store the submission in the database
-        try {
+        {
           const db = await getDb();
-          if (db) {
-            await db.insert(intakeSubmissions).values({
+          if (!db) throw new TRPCError({ code: 'SERVICE_UNAVAILABLE', message: 'Your intake could not be saved. Please try again or call the office.' });
+          await db.insert(intakeSubmissions).values({
               clientName: input.clientName,
               clientEmail: input.clientEmail,
               clientPhone: input.clientPhone,
               formDataJson: input.formDataJson,
               pdfGenerated: pdfBuffer ? new Date() : undefined,
             });
-          }
-        } catch (e) {
-          console.error('[Intake Form] Failed to store submission in database:', e);
         }
 
         const subject = `New Trust Intake Form — ${input.clientName || 'New Client'} — Satterwhite Law`;
@@ -328,6 +325,7 @@ export const appRouter = router({
         llcAddress: z.string().max(500),
         memberCount: z.string().max(50),
         managerName: z.string().max(200),
+        formDataJson: z.string().max(200000).optional(),
       }))
       .mutation(async ({ input }) => {
         const submittedAt = new Date().toLocaleString("en-US", {
@@ -338,38 +336,39 @@ export const appRouter = router({
 
         const clientName = [input.clientFirst, input.clientLast].filter(Boolean).join(" ") || "—";
 
-        const content = [
-          `🏢 NEW LLC FORMATION INTAKE FORM SUBMISSION`,
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-          ``,
-          `👤 Client Name: ${clientName}`,
-          `📧 Email: ${input.clientEmail || '—'}`,
-          `📞 Phone: ${input.clientPhone || '—'}`,
-          `🏠 Client Address: ${input.clientAddress || '—'}`,
-          ``,
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-          `🏛️  ENTITY DETAILS`,
-          ``,
-          `LLC Name: ${input.llcName || '—'}`,
-          `Entity Type: ${input.llcType || '—'}`,
-          `State of Formation: ${input.llcState || '—'}`,
-          `Principal Address: ${input.llcAddress || '—'}`,
-          `Number of Members: ${input.memberCount || '—'}`,
-          `Primary Manager: ${input.managerName || '—'}`,
-          ``,
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-          `🕐 Submitted: ${submittedAt} (ET)`,
-          `Reply to: ${input.clientEmail}`,
-        ].join("\n");
-
-        const notified = await notifyOwner({
-          title: `New LLC Formation Intake — ${clientName} — Satterwhite Law`,
-          content,
+        let formData: any;
+        try {
+          formData = input.formDataJson ? JSON.parse(input.formDataJson) : {
+            sections: [{ title: 'LLC Formation', fields: Object.entries(input).map(([label, value]) => ({ label, value })) }],
+          };
+          if (!formData || !Array.isArray(formData.sections)) throw new Error('Missing sections');
+          formData.formType = 'llc';
+          formData.submittedAt = submittedAt;
+        } catch {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'The intake data was invalid. Please try again.' });
+        }
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'SERVICE_UNAVAILABLE', message: 'Your intake could not be saved. Please try again or call the office.' });
+        let pdfBuffer: Buffer | null = null;
+        try { pdfBuffer = await renderIntakePdfBuffer(formData, clientName); }
+        catch (error) { console.error('[LLC Intake] PDF generation failed:', error); }
+        await db.insert(intakeSubmissions).values({
+          clientName, clientEmail: input.clientEmail, clientPhone: input.clientPhone,
+          formType: 'llc', formDataJson: JSON.stringify(formData),
+          pdfGenerated: pdfBuffer ? new Date() : undefined,
         });
+        const subject = `New LLC Formation Intake — ${clientName} — Satterwhite Law`;
+        const fullContent = buildFullEmailBody(formData, clientName, input.clientEmail, input.clientPhone, submittedAt, Boolean(pdfBuffer));
+        let notified = false;
+        if (isEmailConfigured()) {
+          notified = await sendEmail({ subject, text: fullContent, replyTo: input.clientEmail || undefined,
+            attachments: pdfBuffer ? [{ filename: 'LLC_Intake.pdf', content: pdfBuffer }] : undefined });
+        }
+        if (!notified) notified = await notifyOwner({ title: subject, content: fullContent });
 
         console.log(`[LLC Intake Form] Submission from ${clientName} <${input.clientEmail}> — notified: ${notified}`);
 
-        return { success: true };
+        return { success: true, pdfBase64: pdfBuffer ? pdfBuffer.toString('base64') : null };
       }),
   }),
 
@@ -517,7 +516,7 @@ export const appRouter = router({
                   name: productName,
                   description: productDescription,
                   images: [
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663391034737/6bmN3gsb6FYxuS2CkK3fi8/FullLogo_1c4a4b4a.jpg",
+                    "https://satterwhite-law-firm-production-1230.up.railway.app/assets/logo.png",
                   ],
                 },
               },

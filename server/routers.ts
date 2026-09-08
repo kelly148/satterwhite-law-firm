@@ -11,6 +11,7 @@ import { intakeSubmissions, payments, consultationBookings } from "../drizzle/sc
 import { desc, eq } from "drizzle-orm";
 import { getDb } from "./db";
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 
 // Contact form input schema
 const contactFormSchema = z.object({
@@ -414,6 +415,13 @@ export const appRouter = router({
         });
 
         console.log(`[Contact Form] Submission from ${name} <${email}> — notified: ${notified}`);
+
+        if (!notified) {
+          throw new TRPCError({
+            code: "SERVICE_UNAVAILABLE",
+            message: "Your message could not be delivered. Please try again or call (703) 855-7380.",
+          });
+        }
 
         return {
           success: true,

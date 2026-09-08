@@ -28,9 +28,10 @@ Sign in at `/admin/login`. Without `ADMIN_PASSWORD_HASH` the admin pages are
 unreachable (the server logs a warning at startup).
 
 ### Email — Google Workspace SMTP
-Email is the **only** notification channel. Without it, intake submissions,
-contact-form messages and Calendly bookings are still written to the database
-but nobody is notified.
+Email is the **only** notification channel. Intake submissions are stored even
+when email fails. Contact messages are email-only, so failed delivery returns an
+error and the visitor must retry. Calendly synchronization requires its webhook
+and signing secret; bookings in Calendly itself are independent of this website.
 
 Mail goes out through the firm's existing Google Workspace mailbox over SMTP,
 authenticated with a Google **App Password** rather than the account password.
@@ -67,7 +68,6 @@ Optional, only if moving off Google:
 | Variable | Value |
 |---|---|
 | `STRIPE_SECRET_KEY` | `sk_live_...` or `sk_test_...` |
-| `VITE_STRIPE_PUBLISHABLE_KEY` | `pk_live_...` or `pk_test_...` |
 | `STRIPE_WEBHOOK_SECRET` | Stripe → Developers → Webhooks → your endpoint → Signing secret |
 
 ### Server
@@ -85,12 +85,12 @@ Optional, only if moving off Google:
 | `OWNER_EMAIL` | `kelly@thesatterwhitelawfirm.com` | Stored on the owner record |
 | `OWNER_OPEN_ID` | `owner` | Internal id for the single admin account. Changing it after first login creates a second account. |
 | `VITE_APP_ID` | `satterwhite-law` | Session token audience claim. Changing it invalidates existing sessions. |
-| `CALENDLY_WEBHOOK_SECRET` | — | Calendly → Integrations → Webhooks → signing key |
+| `CALENDLY_WEBHOOK_SECRET` | — | Required to enable Calendly webhook processing; without it the endpoint returns 503. |
 
 ## After adding variables
 
 1. Railway redeploys automatically.
-2. Run the migration: `pnpm db:push`.
+2. Railway runs committed migrations automatically before deployment with `pnpm db:migrate`. A migration failure blocks deployment. To apply them manually from Windows, use `corepack pnpm db:migrate` with the public MySQL URL; the internal hostname works only inside Railway. Do not generate new migrations during deployment.
 3. Sign in once at `/admin/login` to create the owner record.
 4. Point the Stripe webhook at `https://<your-domain>/api/stripe/webhook`.
 5. Point the Calendly webhook at `https://<your-domain>/api/calendly/webhook`.

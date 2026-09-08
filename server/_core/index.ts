@@ -75,6 +75,15 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
+  // Only redirect the firm's bare domain; Railway preview URLs stay usable.
+  app.use((req, res, next) => {
+    if (req.hostname.toLowerCase() === "thesatterwhitelawfirm.com") {
+      res.redirect(308, `https://www.thesatterwhitelawfirm.com${req.originalUrl}`);
+      return;
+    }
+    next();
+  });
+
   // ⚠️ Stripe webhook MUST be registered BEFORE express.json() so the raw body
   // is preserved for HMAC-SHA256 signature verification.
   registerStripeWebhook(app);
@@ -128,4 +137,7 @@ async function startServer() {
   });
 }
 
-startServer().catch(console.error);
+startServer().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});

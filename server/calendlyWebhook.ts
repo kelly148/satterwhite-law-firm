@@ -14,7 +14,7 @@
  * 4. Copy the signing key and add it as CALENDLY_WEBHOOK_SECRET in Settings → Secrets
  *
  * Signature verification uses HMAC-SHA256 with the signing key.
- * If no signing key is configured, the webhook still processes events (less secure).
+ * Without a signing key, the endpoint is disabled and cannot accept bookings.
  */
 
 import type { Express, Request, Response } from "express";
@@ -43,6 +43,9 @@ export function registerCalendlyWebhook(app: Express): void {
 
       // ── Signature verification ───────────────────────────────────────────
       const signingKey = process.env.CALENDLY_WEBHOOK_SECRET;
+      if (!signingKey) {
+        return res.status(503).json({ received: false, error: "webhook not configured" });
+      }
       if (signingKey) {
         const signature = req.headers["calendly-webhook-signature"] as string | undefined;
         if (!signature) {

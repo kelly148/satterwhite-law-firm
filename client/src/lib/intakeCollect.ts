@@ -57,6 +57,9 @@ function collectControls(ctrls: Ctl[], scope: ParentNode): IntakeField[] {
 
   for (const el of ctrls) {
     if (isHidden(el)) continue;
+    // Helper controls (e.g. a "Not sure" tick box that fills in its text field)
+    // drive the form but are not answers in their own right.
+    if (el.getAttribute("data-collect") === "off") continue;
 
     if (el instanceof HTMLInputElement && el.type === "radio") {
       if (!el.name || doneRadio[el.name]) continue;
@@ -87,7 +90,11 @@ function collectControls(ctrls: Ctl[], scope: ParentNode): IntakeField[] {
       if (!el.checked) continue;
       const tg = el.closest(".toggle-group");
       const tl = tg ? tg.querySelector(".toggle-label") : null;
-      out.push({ label: tl && tl.textContent ? tl.textContent.trim() : fieldLabel(el), value: "Yes" });
+      // A stand-alone tick box ("No middle name", "We have not decided yet")
+      // is its own question, so it is recorded under its own text.
+      const own = tl || el.closest(".check-option");
+      const ownText = own && own.textContent ? own.textContent.replace(/\s+/g, " ").trim() : "";
+      out.push({ label: ownText || fieldLabel(el), value: "Yes" });
       continue;
     }
 
@@ -103,7 +110,16 @@ function ctrlsIn(scope: ParentNode): Ctl[] {
   return Array.from(scope.querySelectorAll<Ctl>("input, select, textarea"));
 }
 
-export function collectIntakeData(root: ParentNode): IntakeData {
+export type CollectOptions = {
+  /**
+   * Keep a section even when nothing in it was answered. The trust form uses
+   * this so its seven sections always keep their numbers, and so "the client
+   * listed no children" is visible instead of the section silently vanishing.
+   */
+  keepEmptySections?: boolean;
+};
+
+export function collectIntakeData(root: ParentNode, options: CollectOptions = {}): IntakeData {
   const data: IntakeData = { sections: [] };
   const sectionEls = Array.from(root.querySelectorAll(".section"));
 
@@ -131,7 +147,7 @@ export function collectIntakeData(root: ParentNode): IntakeData {
       if (selected.length) fields.push({ label: fieldLabel(group), value: selected.join(', ') });
     });
 
-    if (groups.length || fields.length) {
+    if (groups.length || fields.length || options.keepEmptySections) {
       data.sections.push({ title, fields, groups });
     }
   });

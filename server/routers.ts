@@ -1,4 +1,5 @@
 import { COOKIE_NAME } from "@shared/const";
+import { readAttorneyFlags } from "@shared/intake";
 import { SERVICE_PRODUCTS, CUSTOM_MIN_CENTS, CUSTOM_MAX_CENTS } from "./stripeProducts";
 import { getStripe } from "./stripeClient";
 import { getSessionCookieOptions } from "./_core/cookies";
@@ -28,7 +29,7 @@ const contactFormSchema = z.object({
  * Renders generically from the captured `sections` structure so that whatever
  * the client entered is included — no field can be silently omitted.
  */
-function buildFullEmailBody(
+export function buildFullEmailBody(
   formData: any,
   clientName: string,
   clientEmail: string,
@@ -53,6 +54,21 @@ function buildFullEmailBody(
   }
   lines.push('');
 
+  // The answers that change how the plan is drafted, ahead of everything else.
+  // Absent on submissions saved before flags existed.
+  const flags = readAttorneyFlags(formData);
+  if (flags) {
+    lines.push(line);
+    lines.push('ATTORNEY FLAGS');
+    lines.push(thin);
+    if (flags.length === 0) lines.push('None raised by this intake.');
+    flags.forEach((flag) => {
+      lines.push(`${flag.label}:`);
+      flag.items.forEach((item) => lines.push(`    • ${item}`));
+    });
+    lines.push('');
+  }
+
   const sections: any[] = Array.isArray(formData?.sections) ? formData.sections : [];
   if (sections.length === 0) {
     lines.push('(No detailed form data was captured for this submission.)');
@@ -75,6 +91,10 @@ function buildFullEmailBody(
       if (!f || !f.value || String(f.value).trim() === '') return;
       lines.push(`${f.label || 'Field'}: ${f.value}`);
     });
+
+    const answered = [...(sec.fields || []), ...(sec.groups || []).flatMap((g: any) => g.fields || [])]
+      .some((f: any) => f && f.value && String(f.value).trim() !== '');
+    if (!answered) lines.push('(No answers were given in this section.)');
 
     lines.push('');
   });
@@ -151,7 +171,7 @@ export const appRouter = router({
 
         let pdfBuffer: Buffer;
         try {
-          pdfBuffer = await renderIntakePdfBuffer(formData, submission.clientName);
+          pdfBuffer = await renderIntakePdfBuffer(formData, submission.clientName, { audience: "client" });
         } catch (e) {
           console.error("[Intake] Failed to regenerate PDF for client copy:", e);
           throw new Error("Could not generate the PDF. Please try again.");
@@ -298,12 +318,17 @@ export const appRouter = router({
 
         console.log(`[Intake Form] Submission from ${input.clientName} <${input.clientEmail}> — delivered: ${delivered}, PDF: ${pdfBuffer ? 'generated' : 'failed'}`);
 
-        // Hand the rendered PDF back to the browser so the client can save
-        // their own copy. Nothing is published: the bytes travel once, over the
-        // same authenticated-by-nature request that created them.
+        // Hand a rendered PDF back to the browser so the client can save their
+        // own copy. Nothing is published: the bytes travel once, over the same
+        // authenticated-by-nature request that created them. The client's copy
+        // is rendered without the attorney flags box.
+        let clientPdf = pdfBuffer;
+        if (pdfBuffer && readAttorneyFlags(formData)) {
+          clientPdf = (await generateIntakePdf(formData, input.clientName, { audience: "client" })).buffer;
+        }
         return {
           success: true,
-          pdfBase64: pdfBuffer ? pdfBuffer.toString("base64") : null,
+          pdfBase64: clientPdf ? clientPdf.toString("base64") : null,
         };
       }),
   }),

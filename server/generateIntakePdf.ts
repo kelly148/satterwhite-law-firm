@@ -5,6 +5,17 @@
  */
 
 import PDFDocument from "pdfkit";
+import { formatPhone, readAttorneyFlags, type AttorneyFlag } from "@shared/intake";
+
+/**
+ * Who the document is for. The attorney's copy opens with the "Attorney flags"
+ * box; the copy handed back to the client leaves it out, since it pulls the
+ * most sensitive answers (a child left out of the plan, for one) to the top of
+ * page 1 of a document that may be read by the whole household.
+ */
+export type IntakePdfOptions = { audience?: "attorney" | "client" };
+
+const NO_ANSWERS = 'No answers were given in this section.';
 
 function fv(formData: any, fieldId: string): string {
   const val = formData[fieldId];
@@ -46,8 +57,14 @@ function groupHeader(doc: PDFKit.PDFDocument, title: string) {
   doc.fillColor('black').moveDown(0.2);
 }
 
+// Phone numbers are stored as typed; print them in one consistent format.
+function displayValue(label: string, value: string): string {
+  return /phone/i.test(label) ? formatPhone(value) : value;
+}
+
 // Draw a two-column label/value row
-function row(doc: PDFKit.PDFDocument, label: string, value: string) {
+function row(doc: PDFKit.PDFDocument, label: string, rawValue: string) {
+  const value = displayValue(label, rawValue);
   ensureSpace(doc, 30);
   const colW = (doc.page.width - 100) / 2;
   const x = 50;
@@ -66,6 +83,56 @@ function block(doc: PDFKit.PDFDocument, label: string, value: string) {
   doc.moveDown(0.3);
 }
 
+/**
+ * The "Attorney flags" box: the answers that change how the plan is drafted,
+ * lifted to page 1. Measured before it is drawn so the tinted background can go
+ * down first.
+ */
+function flagsBox(doc: PDFKit.PDFDocument, flags: AttorneyFlag[]) {
+  const x = 50;
+  const w = doc.page.width - 100;
+  const pad = 10;
+  const textX = x + pad + 4;
+  const textW = w - pad * 2 - 4;
+
+  type Line = { text: string; font: string; size: number; color: string; indent: number; gap: number };
+  const lines: Line[] = [
+    { text: 'ATTORNEY FLAGS', font: 'Helvetica-Bold', size: 10, color: '#1a2744', indent: 0, gap: 5 },
+  ];
+  if (flags.length === 0) {
+    lines.push({ text: 'None raised by this intake.', font: 'Helvetica', size: 10, color: '#1a1a1a', indent: 0, gap: 0 });
+  }
+  for (const flag of flags) {
+    lines.push({ text: flag.label.toUpperCase(), font: 'Helvetica-Bold', size: 8, color: '#555555', indent: 0, gap: 1 });
+    flag.items.forEach((item, i) => {
+      const last = i === flag.items.length - 1;
+      lines.push({ text: `•  ${item}`, font: 'Helvetica', size: 10, color: '#1a1a1a', indent: 6, gap: last ? 5 : 1 });
+    });
+  }
+
+  const heights = lines.map((l) => {
+    doc.font(l.font).fontSize(l.size);
+    return doc.heightOfString(l.text, { width: textW - l.indent });
+  });
+  const total = pad * 2 + heights.reduce((sum, h, i) => sum + h + lines[i].gap, 0);
+
+  ensureSpace(doc, total + 10);
+  const top = doc.y;
+  doc.rect(x, top, w, total).fill('#fbf6ea');
+  doc.rect(x, top, 4, total).fill('#b8913f');
+  doc.rect(x, top, w, total).lineWidth(0.5).stroke('#b8913f');
+
+  let y = top + pad;
+  lines.forEach((l, i) => {
+    doc.font(l.font).fontSize(l.size).fillColor(l.color)
+      .text(l.text, textX + l.indent, y, { width: textW - l.indent });
+    y += heights[i] + l.gap;
+  });
+  doc.fillColor('black');
+  doc.x = 50;
+  doc.y = top + total + 6;
+}
+
 // Section/group shape produced by the intake form's collector.
 type IntakeField = { label?: string; value?: string };
 type IntakeGroup = { title?: string; fields?: IntakeField[] };
@@ -76,7 +143,11 @@ function getSections(formData: any): IntakeSection[] {
 }
 
 /** Render the intake PDF and return its raw bytes (no upload). */
-export function renderIntakePdfBuffer(formData: any, clientName: string): Promise<Buffer> {
+export function renderIntakePdfBuffer(
+  formData: any,
+  clientName: string,
+  options: IntakePdfOptions = {},
+): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'Letter', margin: 50, bufferPages: true });
     const chunks: Buffer[] = [];
@@ -97,6 +168,11 @@ export function renderIntakePdfBuffer(formData: any, clientName: string): Promis
     doc.fillColor('black');
     doc.moveDown(0.5);
 
+    // ── ATTORNEY FLAGS (attorney's copy only) ───────────────────────────────
+    // Absent on submissions saved before flags existed, which print as before.
+    const flags = readAttorneyFlags(formData);
+    if (flags && options.audience !== 'client') flagsBox(doc, flags);
+
     // ── ALL SECTIONS (rendered generically from the captured structure) ──────
     // Whatever the client entered is printed here — nothing is hardcoded, so no
     // field can be silently dropped.
@@ -111,21 +187,35 @@ export function renderIntakePdfBuffer(formData: any, clientName: string): Promis
       sectionHeader(doc, `Section ${idx + 1} — ${sec.title || 'Details'}`);
 
       // Sub-groups first (Primary Client, Child 1, Property 1, Trustee, etc.)
+      let printedGroup = false;
       (sec.groups || []).forEach((g) => {
         const fields = (g.fields || []).filter((f) => f && f.value && String(f.value).trim() !== '');
         if (fields.length === 0) return;
         groupHeader(doc, g.title || 'Details');
         fields.forEach((f) => row(doc, f.label || 'Field', String(f.value)));
+        printedGroup = true;
       });
 
-      // Then any loose section-level fields
-      (sec.fields || []).forEach((f) => {
-        if (!f || !f.value || String(f.value).trim() === '') return;
+      // Then any loose section-level fields. They get a heading of their own
+      // when they follow a group, so an answer that belongs to the whole
+      // section is never read as part of the group above it (which may be one
+      // spouse's).
+      const loose = (sec.fields || []).filter((f) => f && f.value && String(f.value).trim() !== '');
+      if (printedGroup && loose.length > 0) groupHeader(doc, 'Other Answers in This Section');
+      loose.forEach((f) => {
         const val = String(f.value);
         // Long answers (notes) read better as a full-width block
         if (val.length > 80) block(doc, f.label || 'Field', val);
         else row(doc, f.label || 'Field', val);
       });
+
+      // Say so when a section was left empty, rather than leaving a bare heading.
+      if (!printedGroup && loose.length === 0) {
+        ensureSpace(doc, 30);
+        doc.fontSize(10).font('Helvetica-Oblique').fillColor('#555555')
+          .text(NO_ANSWERS, 50, doc.y, { width: doc.page.width - 100 });
+        doc.fillColor('black').moveDown(0.3);
+      }
     });
 
     // ── FOOTER ───────────────────────────────────────────────────────────────
@@ -154,9 +244,10 @@ export function renderIntakePdfBuffer(formData: any, clientName: string): Promis
 export async function generateIntakePdf(
   formData: any,
   clientName: string,
+  options: IntakePdfOptions = {},
 ): Promise<{ buffer: Buffer | null }> {
   try {
-    return { buffer: await renderIntakePdfBuffer(formData, clientName) };
+    return { buffer: await renderIntakePdfBuffer(formData, clientName, options) };
   } catch (error) {
     console.error("[generateIntakePdf] Error generating PDF:", error);
     return { buffer: null };

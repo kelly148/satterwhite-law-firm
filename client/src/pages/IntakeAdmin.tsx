@@ -18,6 +18,7 @@ import {
 import { ArrowLeft, Search, FileText, Users, Building2, ExternalLink } from "lucide-react";
 
 import { LOGO_URL } from "@/assets";
+import { formatPhone, readAttorneyFlags } from "@shared/intake";
 
 function formatDate(date: Date | string): string {
   return new Date(date).toLocaleString("en-US", {
@@ -38,7 +39,7 @@ function parseFormData(json: string): Record<string, any> {
   }
 }
 
-function FormDataViewer({ formDataJson, formType }: { formDataJson: string; formType: string }) {
+export function FormDataViewer({ formDataJson, formType }: { formDataJson: string; formType: string }) {
   const data = parseFormData(formDataJson);
   const subsections: any[] = Array.isArray(data.subsections) ? data.subsections : [];
 
@@ -87,18 +88,42 @@ function FormDataViewer({ formDataJson, formType }: { formDataJson: string; form
     padding: "8px 14px",
   };
 
+  // Phone numbers are stored as typed; show them in one consistent format.
+  const display = (label: string, value: any) => {
+    const text = value && String(value).trim() !== "" ? String(value) : "—";
+    return /phone/i.test(label) ? formatPhone(text) : text;
+  };
+
   const fieldRow = (label: string, value: any, key: React.Key) => (
     <div key={key} style={fieldStyle}>
       <span style={labelStyle}>{label}</span>
-      <span style={valueStyle}>{value && String(value).trim() !== "" ? String(value) : "—"}</span>
+      <span style={valueStyle}>{display(label, value)}</span>
     </div>
   );
 
   // ── New format: { sections: [{ title, fields, groups:[{title,fields}] }] } ──
   const sections: any[] = Array.isArray(data.sections) ? data.sections : [];
   if (sections.length > 0) {
+    // Absent on submissions saved before flags existed.
+    const flags = readAttorneyFlags(data);
     return (
       <div>
+        {flags && (
+          <div style={{ ...sectionStyle, background: "#fbf6ea", border: "1px solid #b8913f", borderLeft: "4px solid #b8913f" }}>
+            <div style={{ ...sectionHeaderStyle, background: "transparent", color: "#1a2744" }}>Attorney flags</div>
+            <div style={sectionBodyStyle}>
+              {flags.length === 0 && <div style={{ fontSize: 13, color: "#1a2744" }}>None raised by this intake.</div>}
+              {flags.map((flag, fi) => (
+                <div key={fi} style={{ marginBottom: 8 }}>
+                  <div style={labelStyle}>{flag.label}</div>
+                  <ul style={{ margin: "2px 0 0", paddingLeft: 18, fontSize: 13, color: "#1a2744", listStyle: "disc" }}>
+                    {flag.items.map((item, ii) => <li key={ii}>{item}</li>)}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {sections.map((section: any, i: number) => (
           <div key={i} style={sectionStyle}>
             <div style={sectionHeaderStyle}>{`Section ${i + 1} — ${section.title || "Details"}`}</div>
@@ -118,6 +143,9 @@ function FormDataViewer({ formDataJson, formType }: { formDataJson: string; form
               {(section.fields || [])
                 .filter((f: any) => f && f.value && String(f.value).trim() !== "")
                 .map((f: any, j: number) => fieldRow(f.label || `Field ${j + 1}`, f.value, `loose-${j}`))}
+              {![...(section.fields || []), ...(section.groups || []).flatMap((g: any) => g.fields || [])].some(
+                (f: any) => f && f.value && String(f.value).trim() !== ""
+              ) && <div style={{ color: "#888", fontSize: 13, fontStyle: "italic", padding: "4px 0" }}>No answers were given in this section.</div>}
             </div>
           </div>
         ))}

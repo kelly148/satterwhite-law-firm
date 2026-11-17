@@ -94,7 +94,7 @@ describe("Intake collector UAT — real form HTML", () => {
   it("captures the ALTERNATE trustee, not just the primary (previously dropped)", () => {
     const root = document.getElementById("intake-wrapper")!;
     (root.querySelector("#trustee1") as HTMLInputElement).value = "Sam Sample";
-    setInputUnderLabel(root, "Alternate Successor Trustee (1st)", "Pat Proxy");
+    setInputUnderLabel(root, "Successor Trustee — First Backup", "Pat Proxy");
 
     const data = collectIntakeData(root);
     const fid = findData(data, /Fiduciaries/i)!;
